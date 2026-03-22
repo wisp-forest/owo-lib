@@ -20,7 +20,7 @@ public class ToastManagerMixin {
     @Final
     private List<ToastManager.ToastInstance<?>> visibleToasts;
 
-    @Inject(method = "method_61991", at = @At(value = "INVOKE", target = "Ljava/util/BitSet;clear(II)V"))
+    @Inject(method = "lambda$update$0", at = @At(value = "INVOKE", target = "Ljava/util/BitSet;clear(II)V"))
     private void disposeBraidToasts(MutableBoolean mutableBoolean, ToastManager.ToastInstance<?> entry, CallbackInfoReturnable<Boolean> cir) {
         if (entry.getToast() instanceof BraidToast toast) {
             toast.dispose();

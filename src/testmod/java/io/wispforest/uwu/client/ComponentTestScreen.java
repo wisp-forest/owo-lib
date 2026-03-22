@@ -2,29 +2,30 @@ package io.wispforest.uwu.client;
 
 import com.mojang.authlib.GameProfile;
 import io.wispforest.owo.ui.component.*;
-import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.ScrollContainer;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.*;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.FurnaceBlock;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.item.component.BundleContents;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.util.CommonColors;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.BundleContents;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FurnaceBlock;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -57,7 +58,7 @@ public class ComponentTestScreen extends Screen {
                         .child(UIComponents.button(Component.nullToEmpty("Dark Background"), button -> rootComponent.surface(Surface.flat(0x77000000))).horizontalSizing(Sizing.fixed(95)))
                         .child(UIComponents.button(Component.nullToEmpty("No Background"), button -> rootComponent.surface(Surface.BLANK)).margins(Insets.vertical(5)).horizontalSizing(Sizing.fixed(95)))
                         .child(UIComponents.button(Component.nullToEmpty("Dirt Background"), button -> rootComponent.surface(Surface.optionsBackground())).horizontalSizing(Sizing.fixed(95)))
-                        .child(UIComponents.checkbox(Component.nullToEmpty("bruh")).onChanged(aBoolean -> this.minecraft.player.displayClientMessage(Component.nullToEmpty("bruh: " + aBoolean), false)).margins(Insets.top(5)))
+                        .child(UIComponents.checkbox(Component.nullToEmpty("bruh")).onChanged(aBoolean -> this.minecraft.player.sendSystemMessage(Component.nullToEmpty("bruh: " + aBoolean))).margins(Insets.top(5)))
                         .padding(Insets.of(10))
                         .surface(Surface.vanillaPanorama(true))
                         .positioning(Positioning.relative(1, 1))
@@ -67,7 +68,7 @@ public class ComponentTestScreen extends Screen {
         var verticalAnimation = innerLayout.verticalSizing().animate(350, Easing.SINE, Sizing.content(50));
 
         verticalAnimation.finished().subscribe((direction, looping) -> {
-            minecraft.gui.getChat().addMessage(Component.literal("vertical animation finished in direction " + direction.name()));
+            minecraft.gui.getChat().addClientSystemMessage(Component.literal("vertical animation finished in direction " + direction.name()));
         });
 
         final var bruh = UIComponents.box(Sizing.fixed(150), Sizing.fixed(20));
@@ -122,7 +123,7 @@ public class ComponentTestScreen extends Screen {
                 .child(UIComponents.label(Component.literal("A profound vertical Flow Layout, as well as a leally long text to demonstrate wrapping").withStyle(style -> style.withFont(new FontDescription.Resource(Minecraft.UNIFORM_FONT)))
                                 .withStyle(style -> {
                                     return style.withClickEvent(new ClickEvent.CopyToClipboard("yes"))
-                                            .withHoverEvent(new HoverEvent.ShowItem(Items.SCULK_SHRIEKER.getDefaultInstance()));
+                                            .withHoverEvent(new HoverEvent.ShowItem(new ItemStackTemplate(Items.SCULK_SHRIEKER)));
                                 }))
                         .shadow(true)
                         .lineHeight(7)
@@ -133,7 +134,7 @@ public class ComponentTestScreen extends Screen {
 
         final var buttonPanel = UIContainers.horizontalFlow(Sizing.content(), Sizing.content())
                 .child(UIComponents.label(Component.literal("AAAAAAAAAAAAAAAAAAA").append(Component.literal("Layout")
-                                .withStyle(style -> style.withHoverEvent(new HoverEvent.ShowItem(Items.SCULK_SHRIEKER.getDefaultInstance()))))
+                                .withStyle(style -> style.withHoverEvent(new HoverEvent.ShowItem(new ItemStackTemplate(Items.SCULK_SHRIEKER)))))
                         .append(Component.literal("\nAAAAAAAAAAAAAAA"))).margins(Insets.of(5)))
                 .child(UIComponents.button(Component.nullToEmpty("⇄"), button -> this.rebuildWidgets()).sizing(Sizing.fixed(20)))
                 .child(UIComponents.button(Component.nullToEmpty("X"), button -> this.onClose()).sizing(Sizing.fixed(20)))
@@ -169,7 +170,7 @@ public class ComponentTestScreen extends Screen {
                                 .message(value -> Component.translatable("text.ui.test_slider", value))
                                 .onChanged().subscribe(value -> {
                                     slider.parent().surface(Surface.blur(3, (float) (value * 3)));
-                                    this.minecraft.player.displayClientMessage(Component.nullToEmpty("sliding towards " + value), false);
+                                    this.minecraft.player.sendSystemMessage(Component.nullToEmpty("sliding towards " + value));
                                 })
                 ))
                 .gap(10)
@@ -292,8 +293,8 @@ public class ComponentTestScreen extends Screen {
         );
 
         var bundle = Items.BUNDLE.getDefaultInstance();
-        var itemList = new ArrayList<ItemStack>();
-        itemList.add(new ItemStack(Items.EMERALD, 16));
+        var itemList = new ArrayList<ItemStackTemplate>();
+        itemList.add(new ItemStackTemplate(Items.EMERALD, 16));
 
         bundle.set(DataComponents.BUNDLE_CONTENTS, new BundleContents(itemList));
 
@@ -391,16 +392,7 @@ public class ComponentTestScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {}
-
-    @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-//        this.fadeSlot.update(RenderEffectWrapper.RenderEffect.color(new Color(
-//                1f, 1f, 1f,
-//                (float) (Math.sin(System.currentTimeMillis() / 1000d) * .5 + .5)
-//        )));
-    }
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {}
 
     @Override
     public boolean keyPressed(KeyEvent input) {

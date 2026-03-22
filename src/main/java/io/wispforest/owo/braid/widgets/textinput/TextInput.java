@@ -162,7 +162,7 @@ public class TextInput extends LeafInstanceWidget {
             var font = this.host().client().font;
 
             for (int lineIdx = 0; lineIdx < this.renderLines.size(); lineIdx++) {
-                graphics.drawString(
+                graphics.text(
                     font,
                     this.renderLines.get(lineIdx),
                     0,
@@ -205,7 +205,7 @@ public class TextInput extends LeafInstanceWidget {
             if (this.widget.showCursor) {
                 var cursorPos = this.coordinatesAtCharIdx(this.value.selection().end());
 
-                graphics.vLine(
+                graphics.verticalLine(
                     (int) cursorPos.x,
                     (int) (cursorPos.y - font.lineHeight - 2),
                     (int) (cursorPos.y),

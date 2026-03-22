@@ -48,7 +48,7 @@ public class SmallCheckboxComponent extends BaseUIComponent {
     @Override
     public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
         if (this.label.get() != null) {
-            graphics.drawString(Minecraft.getInstance().font, this.label.get(), this.x + 13 + 2, this.y + 3, Color.WHITE.argb(), this.labelShadow);
+            graphics.text(Minecraft.getInstance().font, this.label.get(), this.x + 13 + 2, this.y + 3, Color.WHITE.argb(), this.labelShadow);
         }
 
         graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, this.x, this.y, 0, 0, 13, 13, 13, 13, 32, 16);

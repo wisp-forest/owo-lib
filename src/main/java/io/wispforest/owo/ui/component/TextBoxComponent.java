@@ -16,7 +16,9 @@ import net.minecraft.network.chat.Component;
 import org.w3c.dom.Element;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class TextBoxComponent extends EditBox {
 
@@ -24,6 +26,8 @@ public class TextBoxComponent extends EditBox {
 
     protected final Observable<String> textValue = Observable.of("");
     protected final EventStream<OnChanged> changedEvents = OnChanged.newStream();
+
+    protected Predicate<String> filter = Objects::nonNull;
 
     protected TextBoxComponent(Sizing horizontalSizing) {
         super(Minecraft.getInstance().font, 0, 0, 0, 0, Component.empty());
@@ -86,6 +90,23 @@ public class TextBoxComponent extends EditBox {
         this.setValue(text);
         this.moveCursorToStart(false);
         return this;
+    }
+
+    public void setFilter(Predicate<String> predicate) {
+        this.filter = predicate;
+    }
+
+    public Predicate<String> getFilter() {
+        return this.filter;
+    }
+
+    @Override
+    public void setValue(String value) {
+        if (!this.filter.test(value)) {
+            return;
+        }
+
+        super.setValue(value);
     }
 
     @Override

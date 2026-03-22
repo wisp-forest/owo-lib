@@ -154,7 +154,7 @@ public class OwoUIWidgetWrapper extends LeafInstanceWidget {
         }
 
         public boolean onChar(int charCode, KeyModifiers modifiers) {
-            return this.widget.rootComponent.onCharTyped(new CharacterEvent(charCode, modifiers.bitMask()));
+            return this.widget.rootComponent.onCharTyped(new CharacterEvent(charCode));
         }
 
         @Override

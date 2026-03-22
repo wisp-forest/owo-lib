@@ -4,7 +4,7 @@ import io.wispforest.owo.Owo;
 import io.wispforest.owo.renderdoc.RenderDoc;
 import io.wispforest.owo.ui.util.CursorAdapter;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -28,9 +28,9 @@ import java.util.function.BiFunction;
  * you can always simply add it as a widget and get most of the functionality
  * working out of the box
  * <p>
- * To draw the UI tree managed by this adapter, call {@link OwoUIAdapter#render(GuiGraphics, int, int, float)}.
+ * To draw the UI tree managed by this adapter, call {@link OwoUIAdapter#extractRenderState(GuiGraphicsExtractor, int, int, float)}.
  * Note that this does not draw the current tooltip of the UI - this must be done separately
- * by invoking {@link #drawTooltip(GuiGraphics, int, int, float)}. If in a scenario with multiple adapters
+ * by invoking {@link #drawTooltip(GuiGraphicsExtractor, int, int, float)}. If in a scenario with multiple adapters
  * or other sources rendering UI elements to the screen, it is generally desirable to delay tooltip
  * drawing until after all UI is drawn to avoid layering issues.
  *
@@ -164,7 +164,7 @@ public class OwoUIAdapter<R extends ParentUIComponent> implements GuiEventListen
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         if (!(graphics instanceof OwoUIGraphics)) graphics = OwoUIGraphics.of(graphics);
         var owoGraphics = (OwoUIGraphics) graphics;
 
@@ -179,7 +179,7 @@ public class OwoUIAdapter<R extends ParentUIComponent> implements GuiEventListen
             this.rootComponent.update(delta, mouseX, mouseY);
 
             graphics.enableScissor(0, 0, window.getWidth(), window.getHeight());
-            this.rootComponent.draw(owoGraphics, mouseX, mouseY, partialTicks, delta);
+            this.rootComponent.draw(owoGraphics, mouseX, mouseY, a, delta);
             graphics.disableScissor();
 
             final var hovered = this.rootComponent.childAt(mouseX, mouseY);
@@ -204,14 +204,14 @@ public class OwoUIAdapter<R extends ParentUIComponent> implements GuiEventListen
      *
      * @since 0.12.19
      */
-    public void drawTooltip(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    public void drawTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
         if (!(graphics instanceof OwoUIGraphics)) graphics = OwoUIGraphics.of(graphics);
         var owoContext = (OwoUIGraphics) graphics;
 
         final var delta = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaTicks();
 
         this.rootComponent.drawTooltip(owoContext, mouseX, mouseY, partialTicks, delta);
-        graphics.renderDeferredElements();
+        graphics.extractDeferredElements(mouseX, mouseY, partialTicks);
     }
 
     @Override

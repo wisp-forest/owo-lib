@@ -100,7 +100,7 @@ public abstract class ResultSlotMixin {
                         var item = input.getItem(i).getItem();
                         if (!owoRemainders.containsKey(item)) continue;
 
-                        remainders.set(i, owoRemainders.get(item).copy());
+                        remainders.set(i, owoRemainders.get(item).create());
                     }
                 }
 

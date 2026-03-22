@@ -5,7 +5,7 @@ import io.wispforest.owo.ui.core.ParentUIComponent;
 import io.wispforest.owo.ui.core.Size;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastManager;
 import org.jetbrains.annotations.ApiStatus;
@@ -57,7 +57,7 @@ public abstract class BaseOwoToast<R extends ParentUIComponent> implements Toast
     }
 
     @Override
-    public void render(GuiGraphics context, Font textRenderer, long startTime) {
+    public void extractRenderState(GuiGraphicsExtractor context, Font textRenderer, long startTime) {
         var tickCounter = Minecraft.getInstance().getDeltaTracker();
 
         this.rootComponent.draw(OwoUIGraphics.of(context), -1000, -1000, tickCounter.getGameTimeDeltaPartialTick(false), tickCounter.getGameTimeDeltaTicks());

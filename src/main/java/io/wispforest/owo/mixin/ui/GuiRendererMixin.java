@@ -12,7 +12,7 @@ import io.wispforest.owo.ui.renderstate.BlurQuadElementRenderState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.gui.render.TextureSetup;
-import net.minecraft.client.gui.render.state.GuiElementRenderState;
+import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 import org.spongepowered.asm.mixin.Mixin;
@@ -58,7 +58,7 @@ public class GuiRendererMixin {
 
         var encoder = RenderSystem.getDevice().createCommandEncoder();
 
-        ((GlCommandEncoderAccessor)encoder).owo$setInRenderPass(false);
+        ((GlCommandEncoderAccessor) ((CommandEncoderAccessor) encoder).owo$getBackend()).owo$setInRenderPass(false);
         encoder.copyTextureToTexture(
             Minecraft.getInstance().getMainRenderTarget().getColorTexture(),
             BlurQuadElementRenderState.input.getColorTexture(),
@@ -66,7 +66,7 @@ public class GuiRendererMixin {
         );
 
         var uniforms = BlurQuadElementRenderState.uniforms.write(inputSize, blurSetup.directions(), blurSetup.quality(), blurSetup.size());
-        ((GlCommandEncoderAccessor)encoder).owo$setInRenderPass(true);
+        ((GlCommandEncoderAccessor) ((CommandEncoderAccessor) encoder).owo$getBackend()).owo$setInRenderPass(true);
 
         pass.setUniform("BlurSettings", uniforms);
         pass.bindTexture("InputSampler", BlurQuadElementRenderState.inputView, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST));

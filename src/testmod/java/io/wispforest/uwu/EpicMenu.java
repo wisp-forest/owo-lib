@@ -7,11 +7,11 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.inventory.ClickType;
 import net.minecraft.network.chat.Component;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -58,11 +58,11 @@ public class EpicMenu extends AbstractContainerMenu {
     }
 
     @Override
-    public void clicked(int slotIndex, int button, ClickType actionType, Player player) {
+    public void clicked(int slotIndex, int buttonNum, ContainerInput containerInput, Player player) {
         if (!player.level().isClientSide())
             this.sendMessage(new MaldMessage(slotIndex));
 
-        super.clicked(slotIndex, button, actionType, player);
+        super.clicked(slotIndex, buttonNum, containerInput, player);
     }
 
     // made originally by det hoonter tm

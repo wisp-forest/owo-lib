@@ -1,6 +1,7 @@
 package io.wispforest.owo.ui.core;
 
 import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -9,13 +10,15 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.Optional;
+
 public final class OwoUIPipelines {
 
     public static final RenderPipeline.Snippet HSV_SNIPPET = RenderPipeline.builder(RenderPipelines.MATRICES_PROJECTION_SNIPPET)
         .withVertexShader(Identifier.withDefaultNamespace("core/gui"))
         .withFragmentShader(Identifier.fromNamespaceAndPath("owo", "core/spectrum"))
         .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS)
-        .withBlend(BlendFunction.TRANSLUCENT)
+        .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .buildSnippet();
 
     public static final RenderPipeline GUI_HSV = RenderPipeline.builder(HSV_SNIPPET)
@@ -43,7 +46,7 @@ public final class OwoUIPipelines {
 
     public static final RenderPipeline GUI_TEXTURED_NO_BLEND = RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
         .withLocation(Identifier.fromNamespaceAndPath("owo", "pipeline/gui_textured"))
-        .withoutBlend()
+        .withColorTargetState(ColorTargetState.DEFAULT)
         .build();
 
     @ApiStatus.Internal

@@ -13,7 +13,6 @@ import io.wispforest.owo.braid.framework.proxy.WidgetProxy;
 import io.wispforest.owo.braid.framework.widget.InheritedWidget;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.braid.widgets.basic.Tooltip;
 import io.wispforest.owo.braid.widgets.basic.VisitorWidget;
 import io.wispforest.owo.braid.widgets.eventstream.BraidEventStream;
 import io.wispforest.owo.braid.widgets.focus.FocusClickArea;
@@ -22,7 +21,7 @@ import io.wispforest.owo.braid.widgets.inspector.BraidInspector;
 import io.wispforest.owo.braid.widgets.inspector.InstancePicker;
 import io.wispforest.owo.util.EventSource;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Style;
 import org.jetbrains.annotations.NotNull;
@@ -146,7 +145,7 @@ public class AppState implements InstanceHost, ProxyHost {
 
     private @Nullable TooltipState activeTooltip;
 
-    public void draw(GuiGraphics graphics) {
+    public void draw(GuiGraphicsExtractor graphics) {
         this.surface.beginRendering();
 
         graphics.push();
@@ -159,8 +158,12 @@ public class AppState implements InstanceHost, ProxyHost {
         GlStateManager._disableScissorTest();
 
         if (this.activeTooltip != null) {
-            if (this.activeTooltip.components() != null) braidContext.drawTooltip(this.client.font, this.activeTooltip.x(), this.activeTooltip.y(), this.activeTooltip.components());
-            if (this.activeTooltip.style() != null) graphics.renderComponentHoverEffect(this.client.font, this.activeTooltip.style(), this.activeTooltip.x(), this.activeTooltip.y());
+            if (this.activeTooltip.components() != null) {
+                braidContext.drawTooltip(this.client.font, this.activeTooltip.x(), this.activeTooltip.y(), this.activeTooltip.components());
+            }
+            if (this.activeTooltip.style() != null) {
+                graphics.componentHoverEffect(this.client.font, this.activeTooltip.style(), this.activeTooltip.x(), this.activeTooltip.y());
+            }
         }
 
         graphics.pop();
@@ -179,7 +182,9 @@ public class AppState implements InstanceHost, ProxyHost {
             var components = tooltip.getTooltipComponentsAt(tooltipSupplier.x(), tooltipSupplier.y());
             var style = tooltip.getStyleAt(tooltipSupplier.x(), tooltipSupplier.y());
 
-            if (components != null || style != null) this.activeTooltip = new TooltipState(components, style, (int) this.cursorPosition.x, (int) this.cursorPosition.y);
+            if (components != null || style != null) {
+                this.activeTooltip = new TooltipState(components, style, (int) this.cursorPosition.x, (int) this.cursorPosition.y);
+            }
         } else {
             this.activeTooltip = null;
         }
@@ -358,7 +363,7 @@ public class AppState implements InstanceHost, ProxyHost {
                 case MouseScrollEvent(double xOffset, double yOffset) -> {
                     var now = Instant.now();
                     var grace = this.cursorPosition.distance(this.scrollPos) > SCROLL_MOVEMENT_THRESHOLD ? MIN_GRACE_PERIOD : MAX_GRACE_PERIOD;
-                    if (this.scrollHit == null || now.minus(grace).isAfter(this.lastScrollTime) ) this.scrollHit = this.hitTest();
+                    if (this.scrollHit == null || now.minus(grace).isAfter(this.lastScrollTime)) this.scrollHit = this.hitTest();
                     this.lastScrollTime = now;
                     this.scrollPos = new Vector2d(this.cursorPosition);
                     var scrolled = this.scrollHit.firstWhere(

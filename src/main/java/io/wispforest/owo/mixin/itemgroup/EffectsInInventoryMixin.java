@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Mixin(EffectsInInventory.class)
 public class EffectsInInventoryMixin {
 
-    @ModifyVariable(method = "renderEffects",
+    @ModifyVariable(method = "extractEffects",
         at = @At("HEAD"),
         ordinal = 0, argsOnly = true)
     private int shiftStatusEffects(int x) {

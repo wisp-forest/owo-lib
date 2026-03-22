@@ -84,16 +84,15 @@ public final class Layers {
                 }
             });
 
-            ScreenEvents.beforeRender(screeen).register((screen, context, mouseX, mouseY, tickDelta) -> {
+            ScreenEvents.beforeExtract(screeen).register((screen, context, mouseX, mouseY, tickDelta) -> {
                 for (var instance : getInstances(screen)) {
                     if (instance.aggressivePositioning) instance.dispatchLayoutUpdates();
                 }
             });
 
-            ScreenEvents.afterRender(screeen).register((screen, context, mouseX, mouseY, tickDelta) -> {
-//                context.draw();
+            ScreenEvents.afterExtract(screeen).register((screen, context, mouseX, mouseY, tickDelta) -> {
                 for (var instance : getInstances(screen)) {
-                    instance.adapter.render(context, mouseX, mouseY, tickDelta);
+                    instance.adapter.extractRenderState(context, mouseX, mouseY, tickDelta);
                 }
 
                 for (var instance : getInstances(screen)) {

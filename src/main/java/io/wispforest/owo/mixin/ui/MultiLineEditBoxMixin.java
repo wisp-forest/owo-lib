@@ -10,8 +10,8 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(MultiLineEditBox.class)
 public abstract class MultiLineEditBoxMixin extends AbstractScrollArea implements GreedyInputUIComponent {
 
-    public MultiLineEditBoxMixin(int i, int j, int k, int l, Component text) {
-        super(i, j, k, l, text);
+    public MultiLineEditBoxMixin(int x, int y, int width, int height, Component message, ScrollbarSettings scrollbarSettings) {
+        super(x, y, width, height, message, scrollbarSettings);
     }
 
     @Override

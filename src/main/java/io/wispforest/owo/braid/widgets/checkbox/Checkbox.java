@@ -10,7 +10,8 @@ import io.wispforest.owo.braid.widgets.checkbox.TogglingClickable.CheckboxCallba
 import io.wispforest.owo.braid.widgets.focus.Focusable;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
-import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.sprite.Material;
+import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
@@ -66,22 +67,22 @@ public class Checkbox extends StatelessWidget {
 
     // ---
 
-    public static final Material SELECTED_HIGHLIGHTED_TEXTURE = new Material(
+    public static final SpriteId SELECTED_HIGHLIGHTED_TEXTURE = new SpriteId(
         SpriteWidget.GUI_ATLAS_ID,
         Identifier.withDefaultNamespace("widget/checkbox_selected_highlighted")
     );
 
-    public static final Material SELECTED_TEXTURE = new Material(
+    public static final SpriteId SELECTED_TEXTURE = new SpriteId(
         SpriteWidget.GUI_ATLAS_ID,
         Identifier.withDefaultNamespace("widget/checkbox_selected")
     );
 
-    public static final Material HIGHLIGHTED_TEXTURE = new Material(
+    public static final SpriteId HIGHLIGHTED_TEXTURE = new SpriteId(
         SpriteWidget.GUI_ATLAS_ID,
         Identifier.withDefaultNamespace("widget/checkbox_highlighted")
     );
 
-    public static final Material TEXTURE = new Material(
+    public static final SpriteId TEXTURE = new SpriteId(
         SpriteWidget.GUI_ATLAS_ID,
         Identifier.withDefaultNamespace("widget/checkbox")
     );

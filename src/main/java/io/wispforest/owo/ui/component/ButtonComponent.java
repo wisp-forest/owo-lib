@@ -12,7 +12,7 @@ import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.NinePatchTexture;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -39,21 +39,22 @@ public class ButtonComponent extends Button {
     }
 
     @Override
-    public void renderContents(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        this.renderer.draw((OwoUIGraphics) context, this, delta);
+    protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        this.renderer.draw((OwoUIGraphics) graphics, this, a);
 
         var textRenderer = Minecraft.getInstance().font;
         int color = this.active ? 0xffffffff : 0xffa0a0a0;
 
         if (this.textShadow) {
-            context.drawCenteredString(textRenderer, this.getMessage(), this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2, color);
+            graphics.centeredText(textRenderer, this.getMessage(), this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2, color);
         } else {
-            context.drawString(textRenderer, this.getMessage(), (int) (this.getX() + this.width / 2f - textRenderer.width(this.getMessage()) / 2f), (int) (this.getY() + (this.height - 8) / 2f), color, false);
+            graphics.text(textRenderer, this.getMessage(), (int) (this.getX() + this.width / 2f - textRenderer.width(this.getMessage()) / 2f), (int) (this.getY() + (this.height - 8) / 2f), color, false);
         }
 
         var tooltip = ((AbstractWidgetAccessor) this).owo$getTooltip();
-        if (this.isHovered && tooltip.get() != null)
-            context.setTooltipForNextFrame(textRenderer, tooltip.get().toCharSequence(Minecraft.getInstance()), DefaultTooltipPositioner.INSTANCE, mouseX, mouseY, false);
+        if (this.isHovered && tooltip.get() != null) {
+            graphics.setTooltipForNextFrame(textRenderer, tooltip.get().toCharSequence(Minecraft.getInstance()), DefaultTooltipPositioner.INSTANCE, mouseX, mouseY, false);
+        }
     }
 
     public ButtonComponent onPress(Consumer<ButtonComponent> onPress) {
@@ -104,8 +105,8 @@ public class ButtonComponent extends Button {
     public interface Renderer {
         Renderer VANILLA = (matrices, button, delta) -> {
             var texture = button.active
-                    ? button.isHovered ? HOVERED_TEXTURE : ACTIVE_TEXTURE
-                    : DISABLED_TEXTURE;
+                ? button.isHovered ? HOVERED_TEXTURE : ACTIVE_TEXTURE
+                : DISABLED_TEXTURE;
             NinePatchTexture.draw(texture, matrices, button.getX(), button.getY(), button.width, button.height);
         };
 
@@ -140,8 +141,7 @@ public class ButtonComponent extends Button {
 
         static Renderer parse(Element element) {
             var children = UIParsing.<Element>allChildrenOfType(element, Node.ELEMENT_NODE);
-            if (children.size() > 1)
-                throw new UIModelParsingException("'renderer' declaration may only contain a single child");
+            if (children.size() > 1) {throw new UIModelParsingException("'renderer' declaration may only contain a single child");}
 
             var rendererElement = children.get(0);
             return switch (rendererElement.getNodeName()) {
@@ -149,23 +149,22 @@ public class ButtonComponent extends Button {
                 case "flat" -> {
                     UIParsing.expectAttributes(rendererElement, "color", "hovered-color", "disabled-color");
                     yield flat(
-                            Color.parseAndPack(rendererElement.getAttributeNode("color")),
-                            Color.parseAndPack(rendererElement.getAttributeNode("hovered-color")),
-                            Color.parseAndPack(rendererElement.getAttributeNode("disabled-color"))
+                        Color.parseAndPack(rendererElement.getAttributeNode("color")),
+                        Color.parseAndPack(rendererElement.getAttributeNode("hovered-color")),
+                        Color.parseAndPack(rendererElement.getAttributeNode("disabled-color"))
                     );
                 }
                 case "texture" -> {
                     UIParsing.expectAttributes(rendererElement, "texture", "u", "v", "texture-width", "texture-height");
                     yield texture(
-                            UIParsing.parseIdentifier(rendererElement.getAttributeNode("texture")),
-                            UIParsing.parseUnsignedInt(rendererElement.getAttributeNode("u")),
-                            UIParsing.parseUnsignedInt(rendererElement.getAttributeNode("v")),
-                            UIParsing.parseUnsignedInt(rendererElement.getAttributeNode("texture-width")),
-                            UIParsing.parseUnsignedInt(rendererElement.getAttributeNode("texture-height"))
+                        UIParsing.parseIdentifier(rendererElement.getAttributeNode("texture")),
+                        UIParsing.parseUnsignedInt(rendererElement.getAttributeNode("u")),
+                        UIParsing.parseUnsignedInt(rendererElement.getAttributeNode("v")),
+                        UIParsing.parseUnsignedInt(rendererElement.getAttributeNode("texture-width")),
+                        UIParsing.parseUnsignedInt(rendererElement.getAttributeNode("texture-height"))
                     );
                 }
-                default ->
-                        throw new UIModelParsingException("Unknown button renderer '" + rendererElement.getNodeName() + "'");
+                default -> throw new UIModelParsingException("Unknown button renderer '" + rendererElement.getNodeName() + "'");
             };
         }
     }

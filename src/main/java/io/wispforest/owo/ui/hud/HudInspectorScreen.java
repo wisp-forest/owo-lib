@@ -1,7 +1,7 @@
 package io.wispforest.owo.ui.hud;
 
 import io.wispforest.owo.ui.util.CommandOpenedScreen;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -16,11 +16,11 @@ public class HudInspectorScreen extends Screen implements CommandOpenedScreen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        super.render(graphics, mouseX, mouseY, delta);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        super.extractRenderState(graphics, mouseX, mouseY, delta);
 
         if (Hud.adapter == null) return;
-        Hud.adapter.render(graphics, mouseX, mouseY, delta);
+        Hud.adapter.extractRenderState(graphics, mouseX, mouseY, delta);
     }
 
     @Override

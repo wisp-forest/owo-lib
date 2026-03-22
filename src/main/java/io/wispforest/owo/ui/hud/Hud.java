@@ -5,7 +5,6 @@ import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.UIComponent;
 import io.wispforest.owo.ui.event.ClientRenderCallback;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
@@ -20,7 +19,7 @@ import java.util.function.Supplier;
 
 /**
  * A utility for displaying owo-ui components on the
- * in-game HUD - rendered during {@link HudRenderCallback}
+ * in-game HUD
  */
 public class Hud {
 
@@ -109,7 +108,7 @@ public class Hud {
 
         HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("owo", "owo_ui_hud"), (context, tickCounter) -> {
             if (adapter == null || suppress || Minecraft.getInstance().options.hideGui) return;
-            adapter.render(context, -69, -69, tickCounter.getGameTimeDeltaPartialTick(false));
+            adapter.extractRenderState(context, -69, -69, tickCounter.getGameTimeDeltaPartialTick(false));
         });
     }
 }

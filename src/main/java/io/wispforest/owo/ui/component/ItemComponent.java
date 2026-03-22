@@ -10,7 +10,7 @@ import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.renderstate.OwoItemElementRenderState;
-import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.ClientTooltipComponentCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -70,12 +70,12 @@ public class ItemComponent extends BaseUIComponent {
         var client = Minecraft.getInstance();
 
         if (this.width <= 16 && this.height <= 16) {
-            graphics.renderItem(this.stack, 0, 0);
+            graphics.item(this.stack, 0, 0);
         } else {
             var state = new ItemStackRenderState();
             this.itemModelManager.appendItemLayers(state, this.stack, ItemDisplayContext.GUI, Minecraft.getInstance().level, Minecraft.getInstance().player, 0);
 
-            graphics.guiRenderState.submitPicturesInPictureState(new OwoItemElementRenderState(
+            graphics.guiRenderState.addPicturesInPictureState(new OwoItemElementRenderState(
                 state,
                 new ScreenRectangle(this.x, this.y, this.width, this.height),
                 graphics.scissorStack.peek()
@@ -86,7 +86,7 @@ public class ItemComponent extends BaseUIComponent {
         matrices.popMatrix();
 
         if (this.showOverlay) {
-            graphics.renderItemDecorations(client.font, this.stack, this.x, this.y);
+            graphics.itemDecorations(client.font, this.stack, this.x, this.y);
         }
     }
 
@@ -156,7 +156,7 @@ public class ItemComponent extends BaseUIComponent {
 
         stack.getTooltipImage().ifPresent(data -> {
             tooltip.add(1, Objects.requireNonNullElseGet(
-                TooltipComponentCallback.EVENT.invoker().getComponent(data),
+                ClientTooltipComponentCallback.EVENT.invoker().getClientComponent(data),
                 () -> ClientTooltipComponent.create(data)
             ));
         });

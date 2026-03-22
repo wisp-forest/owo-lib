@@ -7,13 +7,14 @@ import io.wispforest.owo.braid.display.BraidDisplayBinding;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(Gui.class)
 public class GuiMixin {
 
-    @ModifyExpressionValue(method = "renderCrosshair", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/Gui;CROSSHAIR_SPRITE:Lnet/minecraft/resources/Identifier;"))
+    @ModifyExpressionValue(method = "extractCrosshair", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/Gui;CROSSHAIR_SPRITE:Lnet/minecraft/resources/Identifier;", opcode = Opcodes.GETSTATIC))
     private Identifier injectDisplayCrosshair(Identifier original) {
         if (BraidDisplayBinding.targetDisplay == null) return original;
 

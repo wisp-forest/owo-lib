@@ -182,7 +182,7 @@ public class LabelComponent extends BaseUIComponent {
             .translate(0, 1f / Minecraft.getInstance().getWindow().getGuiScale());
 
         this.drawText((renderX, renderY, text, shadow, color) -> {
-            graphics.drawString(
+            graphics.text(
                 Minecraft.getInstance().font,
                 text,
                 renderX,
@@ -233,7 +233,7 @@ public class LabelComponent extends BaseUIComponent {
     @Override
     public void drawTooltip(OwoUIGraphics context, int mouseX, int mouseY, float partialTicks, float delta) {
         super.drawTooltip(context, mouseX, mouseY, partialTicks, delta);
-        context.renderComponentHoverEffect(this.textRenderer, this.styleAt(mouseX - this.x, mouseY - this.y), mouseX, mouseY);
+        context.componentHoverEffect(this.textRenderer, this.styleAt(mouseX - this.x, mouseY - this.y), mouseX, mouseY);
     }
 
     @Override

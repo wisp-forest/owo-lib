@@ -8,10 +8,10 @@ import io.wispforest.owo.mixin.braid.GameRendererAccessor;
 import io.wispforest.owo.mixin.braid.GuiRendererAccessor;
 import io.wispforest.owo.util.pond.BraidGuiRendererExtension;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.render.GuiRenderer;
-import net.minecraft.client.gui.render.state.GuiRenderState;
 import net.minecraft.client.renderer.fog.FogRenderer;
+import net.minecraft.client.renderer.state.gui.GuiRenderState;
 
 import java.util.ArrayList;
 
@@ -30,9 +30,9 @@ public class BraidGuiRenderer extends GuiRenderer {
         this.client = client;
     }
 
-    public GuiGraphics newGraphics(double mouseX, double mouseY) {
+    public GuiGraphicsExtractor newGraphics(double mouseX, double mouseY) {
         this.trySetFabricState();
-        return new GuiGraphics(
+        return new GuiGraphicsExtractor(
             this.client,
             ((GuiRendererAccessor) this).owo$getRenderState(),
             (int) mouseX, (int) mouseY
@@ -50,9 +50,9 @@ public class BraidGuiRenderer extends GuiRenderer {
             initField.setAccessible(true);
             initField.set(this, true);
 
-            var commandQueueField = GuiRenderer.class.getDeclaredField("orderedRenderCommandQueue");
-            commandQueueField.setAccessible(true);
-            commandQueueField.set(this, this.client.gameRenderer.getSubmitNodeStorage());
+            var nodeStorageField = GuiRenderer.class.getDeclaredField("submitNodeStorage");
+            nodeStorageField.setAccessible(true);
+            nodeStorageField.set(this, this.client.gameRenderer.getSubmitNodeStorage());
         } catch (IllegalAccessException | NoSuchFieldException e) {
             Owo.LOGGER.warn("Failed to apply braid's Fabric API GuiRendererMixin workaround, there might be crashes with texture and window surfaces");
         } finally {

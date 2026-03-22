@@ -6,7 +6,7 @@ import io.wispforest.endec.SerializationAttributes;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.serialization.CodecUtils;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.FriendlyByteBufs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -35,7 +35,7 @@ public final class MinecraftEndecs {
 
     public static final Endec<FriendlyByteBuf> FRIENDLY_BYTE_BUF = Endec.BYTES
             .xmap(bytes -> {
-                var buffer = PacketByteBufs.create();
+                var buffer = FriendlyByteBufs.create();
                 buffer.writeBytes(bytes);
 
                 return buffer;
@@ -75,10 +75,10 @@ public final class MinecraftEndecs {
                         }
                     }).xmap(
                             ints -> new ChunkPos(ints.get(0), ints.get(1)),
-                            chunkPos -> List.of(chunkPos.x, chunkPos.z)
+                            chunkPos -> List.of(chunkPos.x(), chunkPos.z())
                     )
             )
-            .orElse(Endec.LONG.xmap(ChunkPos::new, ChunkPos::toLong));
+            .orElse(Endec.LONG.xmap(ChunkPos::unpack, ChunkPos::pack));
 
     public static final Endec<BlockHitResult> BLOCK_HIT_RESULT = StructEndecBuilder.of(
             VEC3.fieldOf("pos", BlockHitResult::getLocation),

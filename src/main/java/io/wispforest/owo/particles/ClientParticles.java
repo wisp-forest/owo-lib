@@ -108,7 +108,7 @@ public final class ClientParticles {
             if (randomizationAxis == null) {
                 velocity = VectorRandomUtils.getRandomOffset(world, Vec3.ZERO, randomVelocityScalar);
             } else {
-                final var stopIt_getSomeHelp = (world.random.nextDouble() * 2 - 1) * randomVelocityScalar;
+                final var stopIt_getSomeHelp = (world.getRandom().nextDouble() * 2 - 1) * randomVelocityScalar;
                 velocity = switch (randomizationAxis) {
                     case X -> new Vec3(stopIt_getSomeHelp, 0, 0);
                     case Y -> new Vec3(0, stopIt_getSomeHelp, 0);

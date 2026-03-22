@@ -9,7 +9,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.sprite.Material;
+import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.resources.Identifier;
 
 import java.util.OptionalDouble;
@@ -18,14 +19,14 @@ public class SpriteWidget extends LeafInstanceWidget {
 
     public static final Identifier GUI_ATLAS_ID = Identifier.withDefaultNamespace("textures/atlas/gui.png");
 
-    public final Material spriteIdentifier;
+    public final SpriteId spriteIdentifier;
 
-    public SpriteWidget(Material spriteIdentifier) {
+    public SpriteWidget(SpriteId spriteIdentifier) {
         this.spriteIdentifier = spriteIdentifier;
     }
 
     public SpriteWidget(Identifier spriteIdentifier) {
-        this.spriteIdentifier = new Material(GUI_ATLAS_ID, spriteIdentifier);
+        this.spriteIdentifier = new SpriteId(GUI_ATLAS_ID, spriteIdentifier);
     }
 
     @Override
@@ -53,7 +54,7 @@ public class SpriteWidget extends LeafInstanceWidget {
             try {
                 this.sprite = Minecraft.getInstance().getAtlasManager().get(this.widget.spriteIdentifier);
             } catch (IllegalArgumentException ignored) {
-                this.sprite = Minecraft.getInstance().getAtlasManager().get(new Material(GUI_ATLAS_ID, TextureManager.INTENTIONAL_MISSING_TEXTURE));
+                this.sprite = Minecraft.getInstance().getAtlasManager().get(new SpriteId(GUI_ATLAS_ID, TextureManager.INTENTIONAL_MISSING_TEXTURE));
             }
 
             return this.sprite;

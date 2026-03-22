@@ -1,9 +1,11 @@
 package io.wispforest.owo.mixin.ext;
 
 import io.wispforest.owo.ext.DerivedComponentMap;
+import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.PatchedDataComponentMap;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import org.spongepowered.asm.mixin.Final;
@@ -21,8 +23,8 @@ public class ItemStackMixin {
 
     @Unique private DerivedComponentMap derivedMap;
 
-    @Inject(method = "<init>(Lnet/minecraft/world/level/ItemLike;ILnet/minecraft/core/component/PatchedDataComponentMap;)V", at = @At("TAIL"))
-    private void injectDerivedComponentMap(ItemLike item, int count, PatchedDataComponentMap components, CallbackInfo ci) {
+    @Inject(method = "<init>(Lnet/minecraft/core/Holder;ILnet/minecraft/core/component/PatchedDataComponentMap;)V", at = @At("TAIL"))
+    private void injectDerivedComponentMap(Holder<Item> item, int count, PatchedDataComponentMap components, CallbackInfo ci) {
         var base = ((PatchedDataComponentMapAccessor)(Object) this.components).owo$getPrototype();
 
         if (base instanceof DerivedComponentMap derived) {

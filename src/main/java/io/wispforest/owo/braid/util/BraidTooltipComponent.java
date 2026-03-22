@@ -9,7 +9,7 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.Align;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import org.apache.commons.lang3.mutable.MutableObject;
 
@@ -44,10 +44,10 @@ public class BraidTooltipComponent implements ClientTooltipComponent {
     }
 
     @Override
-    public void renderImage(Font font, int x, int y, int width, int height, GuiGraphics context) {
-        context.push().translate(x, y);
-        this.app.draw(context);
-        context.pop();
+    public void extractImage(Font font, int x, int y, int w, int h, GuiGraphicsExtractor graphics) {
+        graphics.push().translate(x, y);
+        this.app.draw(graphics);
+        graphics.pop();
     }
 
     @Override

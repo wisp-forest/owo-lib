@@ -4,7 +4,7 @@ import io.wispforest.owo.network.OwoNetChannel;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
@@ -24,7 +24,7 @@ public class UwuOptionalNetExample {
             var serverChannel = OwoNetChannel.createOptional(Identifier.fromNamespaceAndPath("uwu", "optional_server"));
 
             serverChannel.registerClientbound(StringPacket.class, (message, access) -> {
-                access.player().displayClientMessage(Component.nullToEmpty(message.value()), false);
+                access.player().sendSystemMessage(Component.nullToEmpty(message.value()));
             });
 
             CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
@@ -60,13 +60,13 @@ public class UwuOptionalNetExample {
                 System.out.println(message.key());
             });
 
-            KeyBindingHelper.registerKeyBinding(NETWORK_TEST);
+            KeyMappingHelper.registerKeyMapping(NETWORK_TEST);
             ClientTickEvents.END_CLIENT_TICK.register(client -> {
                 while (NETWORK_TEST.consumeClick()) {
                     if (clientChannel.canSendToServer()) {
-                        clientChannel.clientHandle().send(new KeycodePacket(KeyBindingHelper.getBoundKeyOf(NETWORK_TEST).getValue()));
+                        clientChannel.clientHandle().send(new KeycodePacket(KeyMappingHelper.getBoundKeyOf(NETWORK_TEST).getValue()));
                     } else {
-                        client.player.displayClientMessage(Component.nullToEmpty("channel unavailable"), false);
+                        client.player.sendSystemMessage(Component.nullToEmpty("channel unavailable"));
                     }
                 }
             });

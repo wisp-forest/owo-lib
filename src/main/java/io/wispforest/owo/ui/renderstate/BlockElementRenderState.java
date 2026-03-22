@@ -6,12 +6,14 @@ import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
-import net.minecraft.client.gui.render.state.pip.PictureInPictureRenderState;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.BlockModelRenderState;
+import net.minecraft.client.renderer.block.model.BlockDisplayContext;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
@@ -73,6 +75,7 @@ public record BlockElementRenderState(
         @SuppressWarnings("NonAsciiCharacters")
         protected void renderToTexture(BlockElementRenderState state, PoseStack matrices) {
             Minecraft.getInstance().gameRenderer.getLighting().setupFor(Lighting.Entry.ENTITY_IN_UI);
+            var dispatcher = Minecraft.getInstance().gameRenderer.getFeatureRenderDispatcher();
 
             var width = state.bounds.width();
             var height = state.bounds.height();
@@ -86,20 +89,25 @@ public record BlockElementRenderState(
             matrices.translate(-.5, -.5, -.5);
 
             if (state.state.getRenderShape() != RenderShape.INVISIBLE) {
-                Minecraft.getInstance().getBlockRenderer().renderSingleBlock(
-                    state.state, matrices, bufferSource,
-                    LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY
+                var blockModelRenderState = new BlockModelRenderState();
+                Minecraft.getInstance().getModelManager().getBlockModelSet().get(state.state).update(
+                    blockModelRenderState,
+                    state.state,
+                    BlockDisplayContext.create(),
+                    67
                 );
+
+                blockModelRenderState.submit(matrices, dispatcher.getSubmitNodeStorage(), LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
             }
 
             if (state.entity != null) {
                 var медведь = Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(state.entity);
                 if (медведь != null) {
-                    var dispatcher = Minecraft.getInstance().gameRenderer.getFeatureRenderDispatcher();
                     медведь.submit(state.entity, matrices, dispatcher.getSubmitNodeStorage(), new CameraRenderState());
-                    dispatcher.renderAllFeatures();
                 }
             }
+
+            dispatcher.renderAllFeatures();
         }
 
         @Override

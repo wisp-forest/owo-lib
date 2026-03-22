@@ -21,11 +21,11 @@ public class SmolComponentTestScreen extends BaseUIModelScreen<FlowLayout> {
         rootComponent.childById(SlimSliderComponent.class, "precise-slider").tooltipSupplier(SlimSliderComponent.valueTooltipSupplier(2));
 
         rootComponent.childById(SlimSliderComponent.class, "tiny-steppy-man").tooltipSupplier(SlimSliderComponent.VALUE_TOOLTIP_SUPPLIER).onChanged().subscribe(value -> {
-            this.minecraft.player.displayClientMessage(Component.literal("tiny steppy man: " + value), false);
+            this.minecraft.player.sendSystemMessage(Component.literal("tiny steppy man: " + value));
         });
 
         rootComponent.childById(SlimSliderComponent.class, "big-steppy-man").tooltipSupplier(value -> Component.literal("big steppy man: " + value)).onChanged().subscribe(value -> {
-            this.minecraft.player.displayClientMessage(Component.literal("big steppy man: " + value), false);
+            this.minecraft.player.sendSystemMessage(Component.literal("big steppy man: " + value));
         });
 
         rootComponent.childById(SlimSliderComponent.class, "inset-slider").<SlimSliderComponent>configure(slider -> {

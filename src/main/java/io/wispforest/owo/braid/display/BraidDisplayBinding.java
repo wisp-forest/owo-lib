@@ -2,9 +2,9 @@ package io.wispforest.owo.braid.display;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.wispforest.owo.braid.core.events.MouseMoveEvent;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -72,7 +72,7 @@ public class BraidDisplayBinding {
             matrices.pushPose();
             matrices.translate(display.quad.pos.subtract(camera.pos));
 
-            display.render(matrices, nodeCollector, LightTexture.FULL_BRIGHT);
+            display.render(matrices, nodeCollector, LightCoordsUtil.FULL_BRIGHT);
 
             matrices.popPose();
         }

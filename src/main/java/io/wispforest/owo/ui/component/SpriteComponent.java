@@ -9,7 +9,7 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.SpriteUtilInvoker;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.sprite.SpriteId;
 import org.w3c.dom.Element;
 
 import java.util.Map;
@@ -60,6 +60,6 @@ public class SpriteComponent extends BaseUIComponent {
         var atlas = UIParsing.parseIdentifier(element.getAttributeNode("atlas"));
         var sprite = UIParsing.parseIdentifier(element.getAttributeNode("sprite"));
 
-        return UIComponents.sprite(new Material(atlas, sprite));
+        return UIComponents.sprite(new SpriteId(atlas, sprite));
     }
 }

@@ -75,7 +75,7 @@ public class VanillaWidgetWrapper<T extends Renderable & GuiEventListener> exten
 
         @Override
         public void draw(BraidGraphics graphics) {
-            widget.wrapped.render(graphics, (int) x, (int) y, host().client().getDeltaTracker().getGameTimeDeltaPartialTick(false));
+            widget.wrapped.extractRenderState(graphics, (int) x, (int) y, host().client().getDeltaTracker().getGameTimeDeltaPartialTick(false));
 
             GlStateManager._enableScissorTest();
         }
@@ -89,7 +89,7 @@ public class VanillaWidgetWrapper<T extends Renderable & GuiEventListener> exten
         }
 
         public boolean onChar(int charCode, KeyModifiers modifiers) {
-            return widget.wrapped.charTyped(new CharacterEvent(charCode, modifiers.bitMask()));
+            return widget.wrapped.charTyped(new CharacterEvent(charCode));
         }
 
         public void onFocusGained() {

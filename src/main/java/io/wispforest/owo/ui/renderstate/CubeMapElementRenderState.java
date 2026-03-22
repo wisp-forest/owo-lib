@@ -4,17 +4,18 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
-import net.minecraft.client.gui.render.state.GuiRenderState;
-import net.minecraft.client.gui.render.state.pip.PictureInPictureRenderState;
+import net.minecraft.client.renderer.CubeMap;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.PanoramaRenderer;
+import net.minecraft.client.renderer.state.gui.GuiRenderState;
+import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 public record CubeMapElementRenderState(
-    PanoramaRenderer cubeMap,
+    CubeMap cubeMap,
     boolean rotate,
     ScreenRectangle bounds,
     ScreenRectangle scissorArea
@@ -59,7 +60,8 @@ public record CubeMapElementRenderState(
 
     public static class Renderer extends PictureInPictureRenderer<CubeMapElementRenderState> {
 
-        private static GuiGraphics dummyContext;
+        private static GuiGraphicsExtractor dummyContext;
+        private float spin;
 
         protected Renderer(MultiBufferSource.BufferSource vertexConsumers) {
             super(vertexConsumers);
@@ -73,7 +75,7 @@ public record CubeMapElementRenderState(
         @Override
         protected void renderToTexture(CubeMapElementRenderState state, PoseStack matrices) {
             if (dummyContext == null) {
-                dummyContext = new GuiGraphics(Minecraft.getInstance(), new GuiRenderState(), 0, 0);
+                dummyContext = new GuiGraphicsExtractor(Minecraft.getInstance(), new GuiRenderState(), 0, 0);
             }
 
             dummyContext.guiRenderState.reset();
@@ -85,7 +87,17 @@ public record CubeMapElementRenderState(
                     0xFF000000
                 );
 
-                state.cubeMap.render(dummyContext, state.bounds.width(), state.bounds.height(), state.rotate());
+                // TODO: we should probably investigate syncing this to the actual panorama
+                //  rotation at some point
+
+                Minecraft minecraft = Minecraft.getInstance();
+                if (state.rotate()) {
+                    float a = minecraft.getDeltaTracker().getRealtimeDeltaTicks();
+                    float delta = (float) (a * minecraft.gameRenderer.getGameRenderState().optionsRenderState.panoramaSpeed);
+                    this.spin = Mth.wrapDegrees(this.spin + delta * 0.1F);
+                }
+
+                state.cubeMap.render(10.0F, this.spin);
             } finally {
                 CubeMapElementRenderState.outputOverride = null;
             }

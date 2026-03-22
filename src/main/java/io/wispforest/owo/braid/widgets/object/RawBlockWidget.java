@@ -93,7 +93,7 @@ public class RawBlockWidget extends LeafInstanceWidget {
                 }
             }
 
-            graphics.guiRenderState.submitPicturesInPictureState(new BraidBlockElement(
+            graphics.guiRenderState.addPicturesInPictureState(new BraidBlockElement(
                 this.widget.blockState,
                 entity,
                 drawTransform,

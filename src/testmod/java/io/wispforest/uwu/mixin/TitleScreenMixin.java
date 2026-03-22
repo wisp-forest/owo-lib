@@ -21,7 +21,7 @@ public abstract class TitleScreenMixin extends Screen {
         super(title);
     }
 
-    @Inject(method = "method_41198", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "lambda$init$4", at = @At("HEAD"), cancellable = true)
     private void injectUwuConfigScreen(Button button, CallbackInfo ci) {
         var alt = InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), GLFW.GLFW_KEY_LEFT_ALT)
             || InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), GLFW.GLFW_KEY_RIGHT_ALT);

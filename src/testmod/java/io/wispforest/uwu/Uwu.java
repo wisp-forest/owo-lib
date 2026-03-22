@@ -40,8 +40,8 @@ import io.wispforest.uwu.text.BasedTextContent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
+import net.fabricmc.fabric.api.networking.v1.FriendlyByteBufs;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.world.item.*;
@@ -134,7 +134,7 @@ public class Uwu implements ModInitializer {
             group.addTab(Icon.of(Items.QUARTZ), "tab_6", null, false);
 
             group.addButton(new ItemGroupButton(group, Icon.of(OWO_ICON_TEXTURE, 0, 0, 16, 16), Owo.MOD_ID, () -> {
-                Minecraft.getInstance().player.displayClientMessage(Component.nullToEmpty("oωo button pressed!"), false);
+                Minecraft.getInstance().player.sendSystemMessage(Component.nullToEmpty("oωo button pressed!"));
             }));
         })
         .build();
@@ -144,7 +144,7 @@ public class Uwu implements ModInitializer {
         .initializer(group -> group.addTab(Icon.of(Items.SPONGE), "tab_1", null, true))
         .build();
 
-    public static final CreativeModeTab VANILLA_GROUP = Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, Identifier.fromNamespaceAndPath("uwu", "vanilla_group"), FabricItemGroup.builder()
+    public static final CreativeModeTab VANILLA_GROUP = Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, Identifier.fromNamespaceAndPath("uwu", "vanilla_group"), FabricCreativeModeTab.builder()
         .title(Component.literal("who did this"))
         .icon(Items.ACACIA_BOAT::getDefaultInstance)
         .displayItems((context, entries) -> entries.accept(Items.MANGROVE_CHEST_BOAT))
@@ -180,25 +180,25 @@ public class Uwu implements ModInitializer {
     @Override
     public void onInitialize() {
 
-        var stackEndec = CodecUtils.toEndec(ItemStack.CODEC);
-        var stackData = """
-                    {
-                        "id": "minecraft:shroomlight",
-                        "Count": 42,
-                        "tag": {
-                            "Enchantments": [{"id": "unbreaking", "lvl": 3}]
-                        }
-                    }
-            """;
-
-        var stacknite = stackEndec.decode(SerializationContext.empty(), GsonDeserializer.of(new Gson().fromJson(stackData, JsonObject.class)));
-        System.out.println(stacknite);
-
-        var serializer = ByteBufSerializer.of(PacketByteBufs.create());
-        stackEndec.encode(SerializationContext.empty(), serializer, stacknite);
-
-        System.out.println(serializer.result().read(SerializationContext.empty(), stackEndec));
-        System.out.println(CodecUtils.toCodec(MinecraftEndecs.BLOCK_POS).encodeStart(NbtOps.INSTANCE, new BlockPos(34, 35, 69)).result().get());
+//        var stackEndec = CodecUtils.toEndec(ItemStack.CODEC);
+//        var stackData = """
+//                    {
+//                        "id": "minecraft:shroomlight",
+//                        "Count": 42,
+//                        "tag": {
+//                            "Enchantments": [{"id": "unbreaking", "lvl": 3}]
+//                        }
+//                    }
+//            """;
+//
+//        var stacknite = stackEndec.decode(SerializationContext.empty(), GsonDeserializer.of(new Gson().fromJson(stackData, JsonObject.class)));
+//        System.out.println(stacknite);
+//
+//        var serializer = ByteBufSerializer.of(FriendlyByteBufs.create());
+//        stackEndec.encode(SerializationContext.empty(), serializer, stacknite);
+//
+//        System.out.println(serializer.result().read(SerializationContext.empty(), stackEndec));
+//        System.out.println(CodecUtils.toCodec(MinecraftEndecs.BLOCK_POS).encodeStart(NbtOps.INSTANCE, new BlockPos(34, 35, 69)).result().get());
 
         UwuItems.init();
 
@@ -210,14 +210,14 @@ public class Uwu implements ModInitializer {
         SINGLE_TAB_GROUP.initialize();
 
         CHANNEL.registerClientbound(TestMessage.class, (message, access) -> {
-            access.player().displayClientMessage(Component.nullToEmpty(message.string), false);
+            access.player().sendSystemMessage(Component.nullToEmpty(message.string));
         });
 
         CHANNEL.registerClientboundDeferred(OtherTestMessage.class);
 
         CHANNEL.registerServerbound(TestMessage.class, (message, access) -> {
-            access.player().displayClientMessage(Component.nullToEmpty(String.valueOf(message.bite)), false);
-            access.player().displayClientMessage(Component.nullToEmpty(String.valueOf(message)), false);
+            access.player().sendSystemMessage(Component.nullToEmpty(String.valueOf(message.bite)));
+            access.player().sendSystemMessage(Component.nullToEmpty(String.valueOf(message)));
         });
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER && WE_TESTEN_HANDSHAKE) {
@@ -251,7 +251,7 @@ public class Uwu implements ModInitializer {
 
             dispatcher.register(literal("kodeck_test")
                 .executes(context -> {
-                    var rand = context.getSource().getLevel().random;
+                    var rand = context.getSource().getLevel().getRandom();
                     var source = context.getSource();
 
                     //--

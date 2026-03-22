@@ -19,6 +19,7 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.CommonListenerCookie;
 import net.minecraft.client.multiplayer.LevelLoadTracker;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.multiplayer.chat.ChatAbilities;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -123,7 +124,7 @@ public class EntityComponent<E extends Entity> extends BaseUIComponent {
             entityState.nameTagAttachment = null;
         }
 
-        graphics.guiRenderState.submitPicturesInPictureState(new EntityElementRenderState(
+        graphics.guiRenderState.addPicturesInPictureState(new EntityElementRenderState(
             entityState,
             matrix,
             new ScreenRectangle(this.x, this.y, this.width, this.height),
@@ -250,7 +251,8 @@ public class EntityComponent<E extends Entity> extends BaseUIComponent {
         protected PlayerSkin skinTextures;
 
         protected RenderablePlayerEntity(GameProfile profile) {
-            super(Minecraft.getInstance(),
+            super(
+                Minecraft.getInstance(),
                 Minecraft.getInstance().level,
                 new ClientPacketListener(Minecraft.getInstance(),
                     new net.minecraft.network.Connection(PacketFlow.CLIENTBOUND),
@@ -262,7 +264,11 @@ public class EntityComponent<E extends Entity> extends BaseUIComponent {
                         "Wisp Forest Enterprises", null, null, Map.of(), null, Map.of(), ServerLinks.EMPTY, Map.of(),
                         true
                     )),
-                null, null, Input.EMPTY, false
+                null,
+                null,
+                Input.EMPTY,
+                false,
+                ChatAbilities.NO_RESTRICTIONS
             );
 
             this.skinTextures = DefaultPlayerSkin.get(profile);

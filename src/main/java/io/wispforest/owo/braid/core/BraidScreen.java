@@ -6,7 +6,7 @@ import io.wispforest.owo.braid.framework.widget.InheritedWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.BraidApp;
 import io.wispforest.owo.ui.util.DisposableScreen;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
@@ -54,8 +54,8 @@ public class BraidScreen extends Screen implements DisposableScreen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        super.render(graphics, mouseX, mouseY, delta);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        super.extractRenderState(graphics, mouseX, mouseY, delta);
 
         this.eventBinding.add(new MouseMoveEvent(mouseX, mouseY));
         this.state.processEvents(
@@ -107,7 +107,8 @@ public class BraidScreen extends Screen implements DisposableScreen {
 
     @Override
     public boolean charTyped(CharacterEvent input) {
-        this.eventBinding.add(new CharInputEvent((char) input.codepoint(), input.modifiers()));
+        // TODO: @chyz fix modifiers for char events
+        this.eventBinding.add(new CharInputEvent((char) input.codepoint(), KeyModifiers.NONE));
         return true;
     }
 

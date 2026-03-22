@@ -117,7 +117,7 @@ public class ItemStackWidget extends LeafInstanceWidget {
             if (this.transform.width() <= 16 && this.transform.height() <= 16 && this.widget.displayContext == ItemDisplayContext.GUI && this.widget.transform == null) {
                 // scale according to widget size, since items assume a 16x16 window
                 graphics.push().scale((float) (this.transform.width() / 16f), (float) (this.transform.height() / 16f));
-                graphics.renderItem(this.widget.stack, 0, 0);
+                graphics.item(this.widget.stack, 0, 0);
                 graphics.pop();
             } else {
                 var state = new ItemStackRenderState();
@@ -128,7 +128,7 @@ public class ItemStackWidget extends LeafInstanceWidget {
                     this.widget.transform.accept(transformThisFrame);
                 }
 
-                graphics.guiRenderState.submitPicturesInPictureState(new BraidItemElement(
+                graphics.guiRenderState.addPicturesInPictureState(new BraidItemElement(
                     state,
                     this.transform.width(),
                     this.transform.height(),
@@ -147,7 +147,7 @@ public class ItemStackWidget extends LeafInstanceWidget {
                     graphics.scale((float) (this.transform.width() / 16), (float) (this.transform.height() / 16));
                 }
 
-                graphics.renderItemDecorations(this.host().client().font, this.widget.stack, 0, 0);
+                graphics.itemDecorations(this.host().client().font, this.widget.stack, 0, 0);
 
                 if (popTransform) {
                     graphics.pop();

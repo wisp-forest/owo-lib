@@ -96,7 +96,7 @@ public class UwuTestStickItem extends Item {
             Uwu.CHANNEL.clientHandle().send(Uwu.MESSAGE);
 
             Uwu.CUBE.spawn(world, user.getEyePosition().add(user.getViewVector(0).scale(3)).subtract(.5, .5, .5), null);
-            user.displayClientMessage(Component.translatable("uwu.a", "bruh"), false);
+            user.sendSystemMessage(Component.translatable("uwu.a", "bruh"));
         }
 
         return InteractionResult.SUCCESS;
@@ -112,18 +112,18 @@ public class UwuTestStickItem extends Item {
                 var data = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag()
                         .get(SerializationContext.attributes(RegistriesAttribute.of(context.getLevel().registryAccess())), KYED);
 
-                context.getPlayer().displayClientMessage(Component.literal("current: " + data), false);
+                context.getPlayer().sendSystemMessage(Component.literal("current: " + data));
 
                 stack.update(DataComponents.CUSTOM_DATA, CustomData.EMPTY, nbt -> {
                     return nbt.update(nbtCompound -> nbtCompound.put(
                             SerializationContext.attributes(RegistriesAttribute.of(context.getLevel().registryAccess())),
                             KYED,
-                            String.valueOf(context.getLevel().random.nextInt(10000))
+                            String.valueOf(context.getLevel().getRandom().nextInt(10000))
                     ));
                 });
-                context.getPlayer().displayClientMessage(Component.literal("modified"), false);
+                context.getPlayer().sendSystemMessage(Component.literal("modified"));
             } catch (Exception bruh) {
-                context.getPlayer().displayClientMessage(Component.literal("bruh: " + bruh.getMessage()), false);
+                context.getPlayer().sendSystemMessage(Component.literal("bruh: " + bruh.getMessage()));
             }
 
             return InteractionResult.SUCCESS;
@@ -140,12 +140,12 @@ public class UwuTestStickItem extends Item {
         final var stickStack = context.getItemInHand();
 
         if (!stickStack.has(TEXT_COMPONENT)) {
-            stickStack.set(TEXT_COMPONENT, Component.nullToEmpty(String.valueOf(context.getLevel().random.nextInt(1000000))));
+            stickStack.set(TEXT_COMPONENT, Component.nullToEmpty(String.valueOf(context.getLevel().getRandom().nextInt(1000000))));
         }
 
         stickStack.set(TEXT_COMPONENT, MutableComponent.create(new BasedTextContent("basednite, ")).append(stickStack.get(TEXT_COMPONENT)));
 
-        context.getPlayer().displayClientMessage(stickStack.get(TEXT_COMPONENT), false);
+        context.getPlayer().sendSystemMessage(stickStack.get(TEXT_COMPONENT));
 
         Uwu.BREAK_BLOCK_PARTICLES.spawn(context.getLevel(), Vec3.atLowerCornerOf(context.getClickedPos()), null);
 

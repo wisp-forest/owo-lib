@@ -3,6 +3,7 @@ package io.wispforest.uwu.client;
 import io.wispforest.owo.ui.base.BaseUIModelContainerScreen;
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
+import io.wispforest.owo.ui.component.TextBoxComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.uwu.EpicMenu;
 import net.minecraft.client.gui.components.EditBox;
@@ -17,7 +18,7 @@ public class EpicContainerModelScreen extends BaseUIModelContainerScreen<FlowLay
 
     @Override
     protected void build(FlowLayout rootComponent) {
-        var indexField = rootComponent.childById(EditBox.class, "index-field");
+        var indexField = rootComponent.childById(TextBoxComponent.class, "index-field");
         indexField.setFilter(s -> s.matches("\\d*"));
 
         rootComponent.childById(ButtonComponent.class, "enable-button").onPress(button -> this.enableSlot(Integer.parseInt(indexField.getValue())));

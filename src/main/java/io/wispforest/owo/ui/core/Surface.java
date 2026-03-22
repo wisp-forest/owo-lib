@@ -1,5 +1,7 @@
 package io.wispforest.owo.ui.core;
 
+import io.wispforest.owo.mixin.braid.GameRendererAccessor;
+import io.wispforest.owo.mixin.braid.GuiRendererAccessor;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.renderstate.BlurQuadElementRenderState;
@@ -8,7 +10,7 @@ import io.wispforest.owo.ui.util.NinePatchTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
-import net.minecraft.client.renderer.PanoramaRenderer;
+import net.minecraft.client.renderer.CubeMap;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
@@ -43,13 +45,13 @@ public interface Surface {
 
     static Surface tooltip(@Nullable Identifier texture) {
         return (context, component) -> {
-            TooltipRenderUtil.renderTooltipBackground(context, component.x() + 4, component.y() + 4, component.width() - 8, component.height() - 8, texture);
+            TooltipRenderUtil.extractTooltipBackground(context, component.x() + 4, component.y() + 4, component.width() - 8, component.height() - 8, texture);
         };
     }
 
     static Surface blur(float quality, float size) {
         return (context, component) -> {
-            context.guiRenderState.submitGuiElement(new BlurQuadElementRenderState(
+            context.guiRenderState.addGuiElement(new BlurQuadElementRenderState(
                 new Matrix3x2f(context.pose()),
                 new ScreenRectangle(component.x(), component.y(), component.width(), component.height()),
                 context.scissorStack.peek(),
@@ -63,13 +65,13 @@ public interface Surface {
     }
 
     static Surface vanillaPanorama(boolean alwaysVisible) {
-        return panorama(Minecraft.getInstance().gameRenderer.getPanorama(), alwaysVisible);
+        return panorama(((GuiRendererAccessor) ((GameRendererAccessor) Minecraft.getInstance().gameRenderer).owo$getGuiRenderer()).owo$getCubeMap(), alwaysVisible);
     }
 
-    static Surface panorama(PanoramaRenderer renderer, boolean alwaysVisible) {
+    static Surface panorama(CubeMap renderer, boolean alwaysVisible) {
         return (context, component) -> {
             if (!alwaysVisible && Minecraft.getInstance().level != null) return;
-            context.guiRenderState.submitPicturesInPictureState(new CubeMapElementRenderState(
+            context.guiRenderState.addPicturesInPictureState(new CubeMapElementRenderState(
                 renderer, true,
                 new ScreenRectangle(component.x(), component.y(), component.width(), component.height()),
                 context.scissorStack.peek()

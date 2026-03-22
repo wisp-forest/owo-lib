@@ -46,7 +46,7 @@ public class BlockComponent extends BaseUIComponent {
             }
         }
 
-        graphics.guiRenderState.submitPicturesInPictureState(new BlockElementRenderState(
+        graphics.guiRenderState.addPicturesInPictureState(new BlockElementRenderState(
             this.state,
             entity,
             new ScreenRectangle(this.x, this.y, this.width, this.height),

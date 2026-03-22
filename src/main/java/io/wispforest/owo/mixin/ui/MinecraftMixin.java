@@ -11,6 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.main.GameConfig;
 import org.jetbrains.annotations.Nullable;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,7 +37,7 @@ public class MinecraftMixin {
     @Nullable
     public Screen screen;
 
-    @Inject(method = "resizeDisplay", at = @At("TAIL"))
+    @Inject(method = "resizeGui", at = @At("TAIL"))
     private void captureResize(CallbackInfo ci) {
         WindowResizeCallback.EVENT.invoker().onResized((Minecraft) (Object) this, this.window);
     }
@@ -46,12 +47,12 @@ public class MinecraftMixin {
         ClientRenderCallback.BEFORE.invoker().onRender((Minecraft) (Object) this);
     }
 
-    @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;updateDisplay(Lcom/mojang/blaze3d/TracyFrameCapture;)V", shift = At.Shift.AFTER))
+    @Inject(method = "renderFrame", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;flipFrame(Lcom/mojang/blaze3d/TracyFrameCapture;)V", shift = At.Shift.AFTER))
     private void afterRender(boolean tick, CallbackInfo ci) {
         ClientRenderCallback.AFTER.invoker().onRender((Minecraft) (Object) this);
     }
 
-    @Inject(method = "runTick", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;frameTimeNs:J"))
+    @Inject(method = "renderFrame", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;frameTimeNs:J", opcode = Opcodes.PUTFIELD))
     private void beforeSwap(boolean tick, CallbackInfo ci) {
         ClientRenderCallback.BEFORE_SWAP.invoker().onRender((Minecraft) (Object) this);
     }
@@ -83,7 +84,7 @@ public class MinecraftMixin {
         }
     }
 
-    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;initRenderer(JIZLcom/mojang/blaze3d/shaders/ShaderSource;Z)V", shift = At.Shift.AFTER))
+    @Inject(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;window:Lcom/mojang/blaze3d/platform/Window;", opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER))
     private void initBlurRenderer(GameConfig args, CallbackInfo ci) {
         BlurQuadElementRenderState.initialize((Minecraft) (Object) this);
     }

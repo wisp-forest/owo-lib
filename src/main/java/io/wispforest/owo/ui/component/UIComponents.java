@@ -1,13 +1,13 @@
 package io.wispforest.owo.ui.component;
 
-import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.core.UIComponent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-// TODO paginated and tabbed containers
 
 /**
  * Utility methods for creating UI components
@@ -114,7 +112,7 @@ public final class UIComponents {
         return new DiscreteSliderComponent(horizontalSizing, min, max);
     }
 
-    public static SpriteComponent sprite(Material spriteId) {
+    public static SpriteComponent sprite(SpriteId spriteId) {
         return new SpriteComponent(Minecraft.getInstance().getAtlasManager().get(spriteId));
     }
 

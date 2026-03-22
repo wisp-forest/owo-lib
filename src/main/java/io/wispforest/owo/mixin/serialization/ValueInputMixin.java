@@ -5,7 +5,7 @@ import io.wispforest.endec.SerializationContext;
 import io.wispforest.endec.impl.KeyedEndec;
 import io.wispforest.endec.util.MapCarrierDecodable;
 import io.wispforest.owo.serialization.CodecUtils;
-import net.fabricmc.fabric.api.serialization.v1.view.FabricReadView;
+import net.fabricmc.fabric.api.serialization.v1.value.FabricValueInput;
 import net.minecraft.world.level.storage.ValueInput;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.Optional;
 
 @Mixin(ValueInput.class)
-public interface ValueInputMixin extends MapCarrierDecodable, FabricReadView {
+public interface ValueInputMixin extends MapCarrierDecodable, FabricValueInput {
     @Shadow
     <T> Optional<T> read(String key, Codec<T> codec);
 

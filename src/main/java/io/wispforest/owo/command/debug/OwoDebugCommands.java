@@ -15,8 +15,8 @@ import io.wispforest.owo.ui.parsing.ConfigureHotReloadScreen;
 import io.wispforest.owo.ui.parsing.UIModelLoader;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
@@ -76,7 +76,7 @@ public class OwoDebugCommands {
                     var entries = ((ServerLevel) player.level()).getPoiManager().getInRange(type -> type.value() == poiType,
                         player.blockPosition(), IntegerArgumentType.getInteger(context, "radius"), PoiManager.Occupancy.ANY).toList();
 
-                    player.displayClientMessage(TextOps.concat(Owo.PREFIX, TextOps.withColor("Found §" + entries.size() + " §entr" + (entries.size() == 1 ? "y" : "ies"),
+                    player.sendSystemMessage(TextOps.concat(Owo.PREFIX, TextOps.withColor("Found §" + entries.size() + " §entr" + (entries.size() == 1 ? "y" : "ies"),
                         TextOps.color(ChatFormatting.GRAY), GENERAL_PURPLE, TextOps.color(ChatFormatting.GRAY))), false);
 
                     for (var entry : entries) {
@@ -92,7 +92,7 @@ public class OwoDebugCommands {
                                 "/tp " + entryPos.getX() + " " + entryPos.getY() + " " + entryPos.getZ()))
                             .withHoverEvent(new HoverEvent.ShowText(Component.nullToEmpty("Click to teleport"))));
 
-                        player.displayClientMessage(message, false);
+                        player.sendSystemMessage(message, false);
                     }
 
                     return entries.size();
@@ -154,14 +154,14 @@ public class OwoDebugCommands {
 
         public static void register() {
             ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-                dispatcher.register(ClientCommandManager.literal("owo-hud-inspect")
+                dispatcher.register(ClientCommands.literal("owo-hud-inspect")
                     .executes(context -> {
                         Minecraft.getInstance().setScreen(new HudInspectorScreen());
                         return 0;
                     }));
 
-                dispatcher.register(ClientCommandManager.literal("owo-ui-set-reload-path")
-                    .then(ClientCommandManager.argument("model-id", IdentifierArgument.id()).suggests(LOADED_UI_MODELS).executes(context -> {
+                dispatcher.register(ClientCommands.literal("owo-ui-set-reload-path")
+                    .then(ClientCommands.argument("model-id", IdentifierArgument.id()).suggests(LOADED_UI_MODELS).executes(context -> {
                         var modelId = context.getArgument("model-id", Identifier.class);
                         if (UIModelLoader.getPreloaded(modelId) == null) throw NO_SUCH_UI_MODEL.create();
 
@@ -170,12 +170,12 @@ public class OwoDebugCommands {
                     })));
 
                 if (RenderDoc.isAvailable()) {
-                    dispatcher.register(ClientCommandManager.literal("renderdoc").executes(context -> {
+                    dispatcher.register(ClientCommands.literal("renderdoc").executes(context -> {
                         Minecraft.getInstance().setScreen(new RenderdocScreen());
                         return 1;
-                    }).then(ClientCommandManager.literal("comment")
-                        .then(ClientCommandManager.argument("capture_index", IntegerArgumentType.integer(0))
-                            .then(ClientCommandManager.argument("comment", StringArgumentType.greedyString())
+                    }).then(ClientCommands.literal("comment")
+                        .then(ClientCommands.argument("capture_index", IntegerArgumentType.integer(0))
+                            .then(ClientCommands.argument("comment", StringArgumentType.greedyString())
                                 .executes(context -> {
                                     var capture = RenderDoc.getCapture(IntegerArgumentType.getInteger(context, "capture_index"));
                                     if (capture == null) {

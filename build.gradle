@@ -1,12 +1,12 @@
 //file:noinspection GradlePackageVersionRange
 plugins {
-    id 'net.fabricmc.fabric-loom-remap' version '1.15-SNAPSHOT'
+    id 'net.fabricmc.fabric-loom' version '1.15-SNAPSHOT'
     id 'maven-publish'
 }
 
 allprojects {
     apply plugin: "java"
-    apply plugin: "fabric-loom"
+    apply plugin: "net.fabricmc.fabric-loom"
     apply plugin: "maven-publish"
 
     def ENV = System.getenv()
@@ -20,10 +20,9 @@ allprojects {
 
     dependencies {
         minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-        mappings loom.officialMojangMappings()
-        modImplementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
+        implementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
 
-        modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+        implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     }
 
     processResources {
@@ -35,7 +34,7 @@ allprojects {
         }
     }
 
-    def targetJavaVersion = 21
+    def targetJavaVersion = 25
     tasks.withType(JavaCompile).configureEach {
         // ensure that the encoding is set to UTF-8, no matter what the system default is
         // this fixes some edge cases with special characters not displaying correctly
@@ -127,19 +126,19 @@ loom {
 
 dependencies {
 //    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${project.rei_version}") {
-        exclude "group": "net.fabricmc.fabric-api"
-    }
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}") {
-        exclude "group": "net.fabricmc.fabric-api"
-    }
+//    compileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${project.rei_version}") {
+//        exclude "group": "net.fabricmc.fabric-api"
+//    }
+//    compileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}") {
+//        exclude "group": "net.fabricmc.fabric-api"
+//    }
 
-    modCompileOnly("dev.emi:emi-fabric:${project.emi_version}") {
+    compileOnly("dev.emi:emi-fabric:${project.emi_version}") {
         exclude "group": "net.fabricmc.fabric-api"
     }
 //    modLocalRuntime("dev.emi:emi-fabric:${project.emi_version}")
 
-    modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
+    compileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
 //    modLocalRuntime("com.terraformersmc:modmenu:${project.modmenu_version}")
 
     include api("io.wispforest:endec:0.1.12")
@@ -150,7 +149,7 @@ dependencies {
     include api("blue.endless:jankson:${project.jankson_version}")
     include api("com.github.kdl-org:kdl4j:${project.kdl_version}")
 
-    modCompileOnly("xyz.nucleoid:server-translations-api:${project.stapi_version}")
+    compileOnly("xyz.nucleoid:server-translations-api:${project.stapi_version}")
 
     testmodImplementation sourceSets.main.output
     testmodAnnotationProcessor sourceSets.main.output

@@ -89,7 +89,7 @@ public final class LootOps {
     public static void registerListener() {
         LootTableEvents.MODIFY.register((key, tableBuilder, source, provider) -> {
             ADDITIONS.forEach((identifiers, lootPoolEntrySupplier) -> {
-                if (anyMatch(key.identifier(), identifiers)) tableBuilder.withPool(LootPool.lootPool().with(lootPoolEntrySupplier.get()));
+                if (anyMatch(key.identifier(), identifiers)) tableBuilder.withPool(LootPool.lootPool().add(lootPoolEntrySupplier.get()));
             });
         });
     }

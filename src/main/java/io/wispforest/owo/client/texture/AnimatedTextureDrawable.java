@@ -1,6 +1,6 @@
 package io.wispforest.owo.client.texture;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
@@ -68,15 +68,15 @@ public class AnimatedTextureDrawable implements Renderable {
      * Renders this drawable at the given position. The position
      * of this drawable is mutated non-temporarily
      */
-    public void render(int x, int y, GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void render(int x, int y, GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         this.x = x;
         this.y = y;
-        this.render(context, mouseX, mouseY, delta);
+        this.extractRenderState(context, mouseX, mouseY, delta);
     }
 
     @SuppressWarnings("IntegerDivisionInFloatingPointContext")
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         if (startTime == -1L) startTime = Util.getMillis();
 
         long currentTime = Util.getMillis();
@@ -87,6 +87,6 @@ public class AnimatedTextureDrawable implements Renderable {
             frame = 0;
         }
 
-        context.blit(RenderPipelines.GUI_TEXTURED, this.texture, x, y, (frame / rows) * metadata.frameWidth(), (frame % rows) * metadata.frameHeight(), width, height, metadata.width(), metadata.height());
+        graphics.blit(RenderPipelines.GUI_TEXTURED, this.texture, x, y, (frame / rows) * metadata.frameWidth(), (frame % rows) * metadata.frameHeight(), width, height, metadata.width(), metadata.height());
     }
 }

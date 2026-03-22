@@ -40,7 +40,7 @@ public class LayersTestWidget extends StatelessWidget {
                     new Tooltip(
                         Component.literal("a"),
                         Interactable.primary(
-                            () -> Minecraft.getInstance().gui.getChat().addMessage(Component.literal("braid layer supremacy")),
+                            () -> Minecraft.getInstance().gui.getChat().addClientSystemMessage(Component.literal("braid layer supremacy")),
                             new Box(Color.RED)
                         )
                     )

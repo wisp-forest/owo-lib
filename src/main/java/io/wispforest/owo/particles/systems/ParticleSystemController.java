@@ -91,7 +91,7 @@ public class ParticleSystemController {
             (pos, instance) -> new ParticleSystemPayload(payloadId, pos, instance)
         );
 
-        PayloadTypeRegistry.playS2C().register(payloadId, CodecUtils.toPacketCodec(endec));
+        PayloadTypeRegistry.clientboundPlay().register(payloadId, CodecUtils.toPacketCodec(endec));
 
         OwoHandshake.enable();
         OwoHandshake.requireHandshake();

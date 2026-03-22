@@ -25,9 +25,9 @@ public class MenuNetworkingInternals {
     public static void init() {
         var localPacketCodec = CodecUtils.toPacketCodec(LocalPacket.ENDEC);
 
-        PayloadTypeRegistry.playS2C().register(LocalPacket.ID, localPacketCodec);
-        PayloadTypeRegistry.playC2S().register(LocalPacket.ID, localPacketCodec);
-        PayloadTypeRegistry.playS2C().register(SyncPropertiesPacket.ID, CodecUtils.toPacketCodec(SyncPropertiesPacket.ENDEC));
+        PayloadTypeRegistry.clientboundPlay().register(LocalPacket.ID, localPacketCodec);
+        PayloadTypeRegistry.serverboundPlay().register(LocalPacket.ID, localPacketCodec);
+        PayloadTypeRegistry.clientboundPlay().register(SyncPropertiesPacket.ID, CodecUtils.toPacketCodec(SyncPropertiesPacket.ENDEC));
 
         ServerPlayNetworking.registerGlobalReceiver(LocalPacket.ID, (payload, context) -> {
             var menu = context.player().containerMenu;

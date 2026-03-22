@@ -268,8 +268,6 @@ public class ConfigAP extends AbstractProcessor {
             var nestClassName = capitalize(nestName);
             if (nestClassName.equals(typeName)) nestClassName += "_";
 
-            // TODO replace type interface with class and instantiate instead of one class per field
-
             accessors.beginLine("public final ").write(nestClassName).write(" ").write(nestName).write(" = new ").write(nestClassName).endLine("();");
             accessors.beginLine("public class ").write(nestClassName).write(" implements ").write(typeName).endLine(" {");
             accessors.beginBlock();

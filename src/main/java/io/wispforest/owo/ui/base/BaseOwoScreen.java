@@ -9,7 +9,7 @@ import io.wispforest.owo.ui.inject.GreedyInputUIComponent;
 import io.wispforest.owo.ui.util.DisposableScreen;
 import io.wispforest.owo.ui.util.UIErrorToast;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
@@ -100,17 +100,17 @@ public abstract class BaseOwoScreen<R extends ParentUIComponent> extends Screen 
             }
         }
 
-        ScreenEvents.afterRender(this).register((screen, drawContext, mouseX, mouseY, tickDelta) -> {
+        ScreenEvents.afterExtract(this).register((screen, drawContext, mouseX, mouseY, tickDelta) -> {
             this.drawComponentTooltip(drawContext, mouseX, mouseY, tickDelta);
         });
     }
 
     /**
      * Draw the tooltip of this screen's component tree, invoked
-     * by {@link ScreenEvents#afterRender(Screen)} so that tooltips are
+     * by {@link ScreenEvents#afterExtract(Screen)} (Screen)} so that tooltips are
      * properly rendered above content
      */
-    protected void drawComponentTooltip(GuiGraphics drawContext, int mouseX, int mouseY, float tickDelta) {
+    protected void drawComponentTooltip(GuiGraphicsExtractor drawContext, int mouseX, int mouseY, float tickDelta) {
         if (this.uiAdapter != null) this.uiAdapter.drawTooltip(drawContext, mouseX, mouseY, tickDelta);
     }
 
@@ -123,12 +123,12 @@ public abstract class BaseOwoScreen<R extends ParentUIComponent> extends Screen 
     }
 
     @Override
-    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {}
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {}
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         if (!this.invalid) {
-            super.render(context, mouseX, mouseY, delta);
+            super.extractRenderState(graphics, mouseX, mouseY, a);
         } else {
             this.onClose();
         }

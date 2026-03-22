@@ -29,7 +29,7 @@ public class WrapperGroup extends OwoItemGroup {
 
     @SuppressWarnings("unchecked")
     public WrapperGroup(CreativeModeTab parent, Identifier parentId, List<ItemGroupTab> tabs, List<ItemGroupButton> buttons) {
-        super(parentId, owoItemGroup -> {}, () -> Icon.of(parent.getIconItem()), 4, 4, null, null, null, true, false, false);
+        super(parentId, owoItemGroup -> {}, () -> Icon.of(parent::getIconItem), 4, 4, null, null, null, true, false, false);
 
         int parentRawId = BuiltInRegistries.CREATIVE_MODE_TAB.getId(parent);
 
@@ -62,7 +62,7 @@ public class WrapperGroup extends OwoItemGroup {
         }
 
         this.tabs.add(0, new ItemGroupTab(
-                Icon.of(this.parent.getIconItem()),
+                Icon.of(this.parent::getIconItem),
                 this.parent.getDisplayName(),
                 ((CreativeModeTabAccessor) this.parent).owo$getDisplayItemsGenerator()::accept,
                 ItemGroupTab.DEFAULT_TEXTURE,

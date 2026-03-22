@@ -13,7 +13,7 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.FriendlyByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -82,7 +82,7 @@ public class ConfigSynchronizer {
             config.allOptions().forEach((key, option) -> {
                 if (option.syncMode().ordinal() < targetMode.ordinal()) return;
 
-                FriendlyByteBuf optionBuf = PacketByteBufs.create();
+                FriendlyByteBuf optionBuf = FriendlyByteBufs.create();
                 option.write(optionBuf);
 
                 entry.options().put(key.asString(), optionBuf);
@@ -195,8 +195,8 @@ public class ConfigSynchronizer {
     static {
         var packetCodec = CodecUtils.toPacketCodec(ConfigSyncPacket.ENDEC);
 
-        PayloadTypeRegistry.playS2C().register(ConfigSyncPacket.ID, packetCodec);
-        PayloadTypeRegistry.playC2S().register(ConfigSyncPacket.ID, packetCodec);
+        PayloadTypeRegistry.clientboundPlay().register(ConfigSyncPacket.ID, packetCodec);
+        PayloadTypeRegistry.serverboundPlay().register(ConfigSyncPacket.ID, packetCodec);
 
         var earlyPhase = Owo.id("early");
         ServerPlayConnectionEvents.JOIN.addPhaseOrdering(earlyPhase, Event.DEFAULT_PHASE);

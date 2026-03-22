@@ -7,7 +7,7 @@ import io.wispforest.owo.ui.parsing.UIModelLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastManager;
 import net.minecraft.network.chat.Component;
@@ -84,17 +84,17 @@ public class UIErrorToast implements Toast {
     }
 
     @Override
-    public void render(GuiGraphics context, Font textRenderer, long startTime) {
-        var owoContext = OwoUIGraphics.of(context);
+    public void extractRenderState(GuiGraphicsExtractor graphics, Font font, long fullyVisibleForMs) {
+        var owoGraphics = OwoUIGraphics.of(graphics);
 
-        owoContext.fill(0, 0, this.width(), this.height(), 0x77000000);
-        owoContext.drawRectOutline(0, 0, this.width(), this.height(), 0xA7FF0000);
+        owoGraphics.fill(0, 0, this.width(), this.height(), 0x77000000);
+        owoGraphics.drawRectOutline(0, 0, this.width(), this.height(), 0xA7FF0000);
 
         int xOffset = this.width() / 2 - this.textRenderer.width(this.errorMessage.get(0)) / 2;
-        owoContext.drawString(this.textRenderer, this.errorMessage.get(0), 4 + xOffset, 4, 0xFFFFFFFF);
+        owoGraphics.text(this.textRenderer, this.errorMessage.get(0), 4 + xOffset, 4, 0xFFFFFFFF);
 
         for (int i = 1; i < this.errorMessage.size(); i++) {
-            owoContext.drawString(this.textRenderer, this.errorMessage.get(i), 4, 4 + i * 11, 0xFFFFFFFF, false);
+            owoGraphics.text(this.textRenderer, this.errorMessage.get(i), 4, 4 + i * 11, 0xFFFFFFFF, false);
         }
     }
 

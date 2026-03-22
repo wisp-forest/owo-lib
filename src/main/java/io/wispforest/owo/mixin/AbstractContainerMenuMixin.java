@@ -14,7 +14,7 @@ import io.wispforest.owo.util.pond.OwoAbstractContainerMenuExtension;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.FriendlyByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
@@ -109,7 +109,7 @@ public abstract class AbstractContainerMenuMixin implements OwoAbstractContainer
         }
 
         var ctx = SerializationContext.attributes(RegistriesAttribute.of(this.player.registryAccess()));
-        var buf = PacketByteBufs.create();
+        var buf = FriendlyByteBufs.create();
         buf.write(ctx, messageData.endec(), message);
 
         var packet = new MenuNetworkingInternals.LocalPacket(messageData.id(), buf);
@@ -186,7 +186,7 @@ public abstract class AbstractContainerMenuMixin implements OwoAbstractContainer
 
         if (count == 0) return;
 
-        var buf = PacketByteBufs.create();
+        var buf = FriendlyByteBufs.create();
         buf.writeVarInt(count);
 
         for (var prop : properties) {

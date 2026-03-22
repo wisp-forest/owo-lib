@@ -55,7 +55,7 @@ public class UIModelLoader implements ResourceManagerReloadListener, Identifiabl
             try (var stream = Files.newInputStream(HOT_RELOAD_LOCATIONS.get(id))) {
                 return UIModel.load(stream);
             } catch (ParserConfigurationException | IOException | SAXException e) {
-                Minecraft.getInstance().player.displayClientMessage(TextOps.concat(Owo.PREFIX, TextOps.withFormatting("hot ui model reload failed, check the log for details", ChatFormatting.RED)), false);
+                Minecraft.getInstance().player.sendSystemMessage(TextOps.concat(Owo.PREFIX, TextOps.withFormatting("hot ui model reload failed, check the log for details", ChatFormatting.RED)));
                 Owo.LOGGER.error("Hot UI model reload failed", e);
             }
         }

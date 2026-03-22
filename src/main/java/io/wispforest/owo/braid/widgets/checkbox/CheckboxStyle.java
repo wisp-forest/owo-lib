@@ -6,7 +6,7 @@ import io.wispforest.owo.braid.widgets.SpriteWidget;
 import io.wispforest.owo.braid.widgets.basic.Builder;
 import io.wispforest.owo.braid.widgets.basic.Center;
 import io.wispforest.owo.braid.widgets.focus.Focusable;
-import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.sounds.SoundEvent;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,17 +32,17 @@ public record CheckboxStyle(
 
     // ---
 
-    public static final Material BRAID_BACKGROUND_TEXTURE = new Material(
+    public static final SpriteId BRAID_BACKGROUND_TEXTURE = new SpriteId(
         SpriteWidget.GUI_ATLAS_ID,
         Owo.id("braid_checkbox")
     );
 
-    public static final Material BRAID_BACKGROUND_FOCUSED_TEXTURE = new Material(
+    public static final SpriteId BRAID_BACKGROUND_FOCUSED_TEXTURE = new SpriteId(
         SpriteWidget.GUI_ATLAS_ID,
         Owo.id("braid_checkbox_focused")
     );
 
-    public static final Material BRAID_CHECKMARK_TEXTURE = new Material(
+    public static final SpriteId BRAID_CHECKMARK_TEXTURE = new SpriteId(
         SpriteWidget.GUI_ATLAS_ID,
         Owo.id("braid_checkmark")
     );

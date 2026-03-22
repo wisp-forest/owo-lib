@@ -150,8 +150,8 @@ public class OwoNetChannel {
             )
             .xmap(x -> new MessagePayload(this.packetId, x), x -> x.message);
 
-        PayloadTypeRegistry.playC2S().register(this.packetId, CodecUtils.toPacketCodec(serverEndec));
-        PayloadTypeRegistry.playS2C().register(this.packetId, CodecUtils.toPacketCodec(clientEndec));
+        PayloadTypeRegistry.serverboundPlay().register(this.packetId, CodecUtils.toPacketCodec(serverEndec));
+        PayloadTypeRegistry.clientboundPlay().register(this.packetId, CodecUtils.toPacketCodec(clientEndec));
 
         ServerPlayNetworking.registerGlobalReceiver(this.packetId, (payload, context) -> {
             serverHandlers.get(endecsByClass.get(payload.message().getClass()).serverHandlerIndex).handle(payload.message, new ServerAccess(context.player()));

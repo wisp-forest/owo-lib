@@ -5,7 +5,7 @@ import io.wispforest.owo.ui.core.ParentUIComponent;
 import io.wispforest.owo.ui.core.Size;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -25,11 +25,11 @@ public abstract class BaseOwoTooltipComponent<R extends ParentUIComponent> imple
     }
 
     @Override
-    public void renderImage(Font textRenderer, int x, int y, int width, int height, GuiGraphics context) {
+    public void extractImage(Font font, int x, int y, int w, int h, GuiGraphicsExtractor graphics) {
         var tickCounter = Minecraft.getInstance().getDeltaTracker();
 
         this.rootComponent.moveTo(x, y);
-        this.rootComponent.draw(OwoUIGraphics.of(context), -1000, -1000, tickCounter.getGameTimeDeltaPartialTick(false), tickCounter.getGameTimeDeltaTicks());
+        this.rootComponent.draw(OwoUIGraphics.of(graphics), -1000, -1000, tickCounter.getGameTimeDeltaPartialTick(false), tickCounter.getGameTimeDeltaTicks());
     }
 
     @Override

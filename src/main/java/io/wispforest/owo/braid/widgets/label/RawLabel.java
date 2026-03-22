@@ -150,7 +150,7 @@ public class RawLabel extends LeafInstanceWidget {
             var yOffset = this.widget.style.textAlignment().alignVertical(this.transform.height(), this.renderTextHeight);
 
             for (int lineIdx = 0; lineIdx < this.renderText.size(); lineIdx++) {
-                graphics.drawString(
+                graphics.text(
                     font,
                     this.renderText.get(lineIdx),
                     (int) this.widget.style.textAlignment().alignHorizontal(this.transform.width(), this.renderTextWidths.getDouble(lineIdx)),

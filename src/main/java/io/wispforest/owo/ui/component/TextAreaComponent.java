@@ -13,7 +13,7 @@ import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import io.wispforest.owo.util.Observable;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.MultiLineEditBox;
 import net.minecraft.client.gui.components.MultilineTextField;
 import net.minecraft.client.gui.components.Whence;
@@ -59,11 +59,11 @@ public class TextAreaComponent extends MultiLineEditBox {
     @Override
     public void update(float delta, int mouseX, int mouseY) {
         super.update(delta, mouseX, mouseY);
-        this.cursorStyle(this.scrollbarVisible() && mouseX >= this.getX() + this.width - 9 ? CursorStyle.NONE : CursorStyle.TEXT);
+        this.cursorStyle(this.scrollable() && mouseX >= this.getX() + this.width - 9 ? CursorStyle.NONE : CursorStyle.TEXT);
     }
 
     @Override
-    protected void renderDecorations(GuiGraphics context) {
+    protected void extractDecorations(GuiGraphicsExtractor context) {
         this.height -= 1;
 
         var matrices = context.pose();
@@ -73,7 +73,7 @@ public class TextAreaComponent extends MultiLineEditBox {
         int previousMaxLength = this.editBox.characterLimit();
         this.editBox.setCharacterLimit(Integer.MAX_VALUE);
 
-        super.renderDecorations(context);
+        super.extractDecorations(context);
 
         this.editBox.setCharacterLimit(previousMaxLength);
 
@@ -82,11 +82,11 @@ public class TextAreaComponent extends MultiLineEditBox {
 
         if (this.displayCharCount.get()) {
             var text = this.editBox.hasCharacterLimit()
-                    ? Component.translatable("gui.multiLineEditBox.character_limit", this.editBox.value().length(), this.editBox.characterLimit())
-                    : Component.literal(String.valueOf(this.editBox.value().length()));
+                ? Component.translatable("gui.multiLineEditBox.character_limit", this.editBox.value().length(), this.editBox.characterLimit())
+                : Component.literal(String.valueOf(this.editBox.value().length()));
 
             var textRenderer = Minecraft.getInstance().font;
-            context.drawString(textRenderer, text, this.getX() + this.width - textRenderer.width(text), this.getY() + this.height + 3, 0xa0a0a0);
+            context.text(textRenderer, text, this.getX() + this.width - textRenderer.width(text), this.getY() + this.height + 3, 0xa0a0a0);
         }
     }
 

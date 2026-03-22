@@ -2,6 +2,7 @@ package io.wispforest.owo.ui.component;
 
 import io.wispforest.owo.braid.core.AppState;
 import io.wispforest.owo.braid.core.EventBinding;
+import io.wispforest.owo.braid.core.KeyModifiers;
 import io.wispforest.owo.braid.core.Surface;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.core.cursor.SystemCursorStyle;
@@ -117,7 +118,8 @@ public class BraidComponent extends BaseUIComponent {
 
     @Override
     public boolean onCharTyped(CharacterEvent input) {
-        this.eventBinding.add(new CharInputEvent((char) input.codepoint(), input.modifiers()));
+        // TODO: @chyz fix modifiers for char events
+        this.eventBinding.add(new CharInputEvent((char) input.codepoint(), KeyModifiers.NONE));
         return true;
     }
 

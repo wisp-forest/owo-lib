@@ -1,7 +1,7 @@
 package io.wispforest.owo.mixin.ui.access;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.resources.Identifier;
@@ -14,11 +14,11 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.util.List;
 
-@Mixin(GuiGraphics.class)
-public interface GuiGraphicsAccessor {
+@Mixin(GuiGraphicsExtractor.class)
+public interface GuiGraphicsExtractorAccessor {
 
-    @Invoker("renderTooltip")
-    void owo$drawTooltipImmediately(Font textRenderer, List<ClientTooltipComponent> components, int x, int y, ClientTooltipPositioner positioner, @Nullable Identifier texture);
+    @Invoker("tooltip")
+    void owo$tooltip(Font textRenderer, List<ClientTooltipComponent> components, int x, int y, ClientTooltipPositioner positioner, @Nullable Identifier texture);
 
     @Accessor("pose")
     Matrix3x2fStack owo$getPose();
@@ -28,11 +28,11 @@ public interface GuiGraphicsAccessor {
     void owo$setPose(Matrix3x2fStack matrices);
 
     @Accessor("scissorStack")
-    GuiGraphics.ScissorStack owo$getScissorStack();
+    GuiGraphicsExtractor.ScissorStack owo$getScissorStack();
 
     @Mutable
     @Accessor("scissorStack")
-    void owo$setScissorStack(GuiGraphics.ScissorStack scissorStack);
+    void owo$setScissorStack(GuiGraphicsExtractor.ScissorStack scissorStack);
 
     @Accessor("deferredTooltip")
     void owo$setDeferredTooltip(Runnable drawer);

@@ -29,14 +29,14 @@ public interface ViewerStack {
 
         @Override
         public DataComponentPatch componentChanges() {
-            return item.getComponents();
+            return item.getComponentsPatch();
         }
     }
 
     record OfFluid(FluidVariant fluid, long count) implements ViewerStack {
         @Override
         public DataComponentPatch componentChanges() {
-            return fluid.getComponents();
+            return fluid.getComponentsPatch();
         }
     }
 }

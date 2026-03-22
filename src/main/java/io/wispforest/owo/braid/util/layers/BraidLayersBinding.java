@@ -19,7 +19,7 @@ import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.fabricmc.fabric.api.event.Event;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Unit;
@@ -53,7 +53,7 @@ public class BraidLayersBinding {
     }
 
     @ApiStatus.Internal
-    public static void renderLayers(Screen screen, GuiGraphics graphics, double mouseX, double mouseY) {
+    public static void renderLayers(Screen screen, GuiGraphicsExtractor graphics, double mouseX, double mouseY) {
         var state = ((OwoScreenExtension) screen).owo$getBraidLayersState();
         if (state == null) {
             return;

@@ -2,7 +2,7 @@ package io.wispforest.owo.ui.core;
 
 import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import io.wispforest.owo.mixin.ui.access.GuiGraphicsAccessor;
+import io.wispforest.owo.mixin.ui.access.GuiGraphicsExtractorAccessor;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import io.wispforest.owo.ui.renderstate.CircleElementRenderState;
 import io.wispforest.owo.ui.renderstate.GradientQuadElementRenderState;
@@ -11,15 +11,15 @@ import io.wispforest.owo.ui.renderstate.RingElementRenderState;
 import io.wispforest.owo.ui.util.NinePatchTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenPosition;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.minecraft.client.gui.render.state.GuiRenderState;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class OwoUIGraphics extends GuiGraphics {
+public class OwoUIGraphics extends GuiGraphicsExtractor {
 
     public static final Identifier PANEL_NINE_PATCH_TEXTURE = Identifier.fromNamespaceAndPath("owo", "panel/default");
     public static final Identifier DARK_PANEL_NINE_PATCH_TEXTURE = Identifier.fromNamespaceAndPath("owo", "panel/dark");
@@ -43,17 +43,17 @@ public class OwoUIGraphics extends GuiGraphics {
         this.setTooltipDrawer = setTooltipDrawer;
     }
 
-    public static OwoUIGraphics of(GuiGraphics graphics) {
+    public static OwoUIGraphics of(GuiGraphicsExtractor graphics) {
         var owoContext = new OwoUIGraphics(
             Minecraft.getInstance(),
             graphics.guiRenderState,
-            ((GuiGraphicsAccessor) graphics).owo$getMouseY(),
-            ((GuiGraphicsAccessor) graphics).owo$getMouseX(),
-            ((GuiGraphicsAccessor) graphics)::owo$setDeferredTooltip
+            ((GuiGraphicsExtractorAccessor) graphics).owo$getMouseY(),
+            ((GuiGraphicsExtractorAccessor) graphics).owo$getMouseX(),
+            ((GuiGraphicsExtractorAccessor) graphics)::owo$setDeferredTooltip
         );
 
-        ((GuiGraphicsAccessor) owoContext).owo$setScissorStack(((GuiGraphicsAccessor) graphics).owo$getScissorStack());
-        ((GuiGraphicsAccessor) owoContext).owo$setPose(((GuiGraphicsAccessor) graphics).owo$getPose());
+        ((GuiGraphicsExtractorAccessor) owoContext).owo$setScissorStack(((GuiGraphicsExtractorAccessor) graphics).owo$getScissorStack());
+        ((GuiGraphicsExtractorAccessor) owoContext).owo$setPose(((GuiGraphicsExtractorAccessor) graphics).owo$getPose());
 
         return owoContext;
     }
@@ -115,7 +115,7 @@ public class OwoUIGraphics extends GuiGraphics {
      * @param bottomLeftColor  The color at the rectangle's bottom left corner
      */
     public void drawGradientRect(RenderPipeline pipeline, int x, int y, int width, int height, int topLeftColor, int topRightColor, int bottomRightColor, int bottomLeftColor) {
-        this.guiRenderState.submitGuiElement(new GradientQuadElementRenderState(
+        this.guiRenderState.addGuiElement(new GradientQuadElementRenderState(
             pipeline,
             new Matrix3x2f(this.pose()),
             new ScreenRectangle(new ScreenPosition(x, y), width, height),
@@ -142,7 +142,7 @@ public class OwoUIGraphics extends GuiGraphics {
     }
 
     public void drawSpectrum(int x, int y, int width, int height, boolean vertical) {
-        this.guiRenderState.submitGuiElement(new GradientQuadElementRenderState(
+        this.guiRenderState.addGuiElement(new GradientQuadElementRenderState(
             OwoUIPipelines.GUI_HSV,
             new Matrix3x2f(this.pose()),
             new ScreenRectangle(new ScreenPosition(x, y), width, height),
@@ -174,7 +174,7 @@ public class OwoUIGraphics extends GuiGraphics {
         }
 
 
-        this.drawString(textRenderer, text, (int) (x * (1 / scale)), (int) (y * (1 / scale)), color, false);
+        this.text(textRenderer, text, (int) (x * (1 / scale)), (int) (y * (1 / scale)), color, false);
         this.pose().popMatrix();
     }
 
@@ -187,7 +187,7 @@ public class OwoUIGraphics extends GuiGraphics {
     }
 
     public void drawLine(RenderPipeline pipeline, int x1, int y1, int x2, int y2, double thiccness, Color color) {
-        this.guiRenderState.submitGuiElement(new LineElementRenderState(
+        this.guiRenderState.addGuiElement(new LineElementRenderState(
             pipeline,
             new Matrix3x2f(this.pose()),
             this.scissorStack.peek(),
@@ -212,7 +212,7 @@ public class OwoUIGraphics extends GuiGraphics {
     public void drawCircle(RenderPipeline pipeline, int centerX, int centerY, double angleFrom, double angleTo, int segments, double radius, Color color) {
         Preconditions.checkArgument(angleFrom < angleTo, "angleFrom must be less than angleTo");
 
-        this.guiRenderState.submitGuiElement(new CircleElementRenderState(
+        this.guiRenderState.addGuiElement(new CircleElementRenderState(
             pipeline,
             new Matrix3x2f(this.pose()),
             this.scissorStack.peek(),
@@ -236,7 +236,7 @@ public class OwoUIGraphics extends GuiGraphics {
         Preconditions.checkArgument(angleFrom < angleTo, "angleFrom must be less than angleTo");
         Preconditions.checkArgument(innerRadius < outerRadius, "innerRadius must be less than outerRadius");
 
-        this.guiRenderState.submitGuiElement(new RingElementRenderState(
+        this.guiRenderState.addGuiElement(new RingElementRenderState(
             pipeline,
             new Matrix3x2f(this.pose()),
             this.scissorStack.peek(),
@@ -249,13 +249,13 @@ public class OwoUIGraphics extends GuiGraphics {
     }
 
     public void drawTooltip(Font textRenderer, int x, int y, List<ClientTooltipComponent> components, @Nullable Identifier texture) {
-        ((GuiGraphicsAccessor) this).owo$drawTooltipImmediately(textRenderer, components, x, y, DefaultTooltipPositioner.INSTANCE, texture);
+        ((GuiGraphicsExtractorAccessor) this).owo$tooltip(textRenderer, components, x, y, DefaultTooltipPositioner.INSTANCE, texture);
     }
 
     @Override
-    protected void setTooltipForNextFrameInternal(Font textRenderer, List<ClientTooltipComponent> components, int x, int y, ClientTooltipPositioner positioner, @Nullable Identifier texture, boolean focused) {
-        super.setTooltipForNextFrameInternal(textRenderer, components, x, y, positioner, texture, focused);
-        this.setTooltipDrawer.accept(((GuiGraphicsAccessor) this).owo$getDeferredTooltip());
+    protected void setTooltipForNextFrameInternal(Font textRenderer, List<ClientTooltipComponent> components, int x, int y, ClientTooltipPositioner positioner, @Nullable Identifier texture, boolean replaceExisting) {
+        super.setTooltipForNextFrameInternal(textRenderer, components, x, y, positioner, texture, replaceExisting);
+        this.setTooltipDrawer.accept(((GuiGraphicsExtractorAccessor) this).owo$getDeferredTooltip());
     }
 
     // --- debug rendering ---
@@ -344,7 +344,7 @@ public class OwoUIGraphics extends GuiGraphics {
                 self.fill(pipeline, inspectorX, inspectorY, inspectorX + inspectorWidth + 3, inspectorY + inspectorHeight, 0xA7000000);
                 self.drawRectOutline(pipeline, inspectorX, inspectorY, inspectorWidth + 3, inspectorHeight, 0xA7000000);
 
-                self.drawWordWrap(textRenderer, message, inspectorX + 2, inspectorY + 2, inspectorWidth, 0xFFFFFFFF, false);
+                self.textWithWordWrap(textRenderer, message, inspectorX + 2, inspectorY + 2, inspectorWidth, 0xFFFFFFFF, false);
             }
         }
     }

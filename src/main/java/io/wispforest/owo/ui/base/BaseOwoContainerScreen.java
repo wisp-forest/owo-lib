@@ -8,7 +8,7 @@ import io.wispforest.owo.ui.util.DisposableScreen;
 import io.wispforest.owo.ui.util.UIErrorToast;
 import io.wispforest.owo.util.pond.OwoSlotExtension;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -92,17 +92,17 @@ public abstract class BaseOwoContainerScreen<R extends ParentUIComponent, S exte
             }
         }
 
-        ScreenEvents.afterRender(this).register((screen, drawContext, mouseX, mouseY, tickDelta) -> {
+        ScreenEvents.afterExtract(this).register((screen, drawContext, mouseX, mouseY, tickDelta) -> {
             this.drawComponentTooltip(drawContext, mouseX, mouseY, tickDelta);
         });
     }
 
     /**
      * Draw the tooltip of this screen's component tree, invoked
-     * by {@link ScreenEvents#afterRender(Screen)} so that tooltips are
+     * by {@link ScreenEvents#afterExtract(Screen)} so that tooltips are
      * properly rendered above content
      */
-    protected void drawComponentTooltip(GuiGraphics graphics, int mouseX, int mouseY, float tickDelta) {
+    protected void drawComponentTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float tickDelta) {
         if (this.uiAdapter != null) this.uiAdapter.drawTooltip(graphics, mouseX, mouseY, tickDelta);
     }
 
@@ -200,13 +200,13 @@ public abstract class BaseOwoContainerScreen<R extends ParentUIComponent, S exte
     }
 
     @Override
-    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {}
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {}
 
     @Override
-    public void render(GuiGraphics vanillaContext, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor vanillaContext, int mouseX, int mouseY, float a) {
         var context = OwoUIGraphics.of(vanillaContext);
         if (!this.invalid) {
-            super.render(context, mouseX, mouseY, delta);
+            super.extractRenderState(context, mouseX, mouseY, a);
 
             if (this.uiAdapter.enableInspector) {
                 for (int i = 0; i < this.menu.slots.size(); i++) {
@@ -224,7 +224,7 @@ public abstract class BaseOwoContainerScreen<R extends ParentUIComponent, S exte
                 }
             }
 
-            this.renderTooltip(context, mouseX, mouseY);
+            this.extractTooltip(context, mouseX, mouseY);
         } else {
             this.onClose();
         }
@@ -279,9 +279,6 @@ public abstract class BaseOwoContainerScreen<R extends ParentUIComponent, S exte
     public void dispose() {
         if (this.uiAdapter != null) this.uiAdapter.dispose();
     }
-
-    @Override
-    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {}
 
     public class SlotComponent extends BaseUIComponent {
 

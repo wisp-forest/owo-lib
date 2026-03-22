@@ -31,8 +31,8 @@ import io.wispforest.uwu.network.UwuNetworkExample;
 import io.wispforest.uwu.network.UwuOptionalNetExample;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.fabricmc.fabric.api.client.rendering.v1.ClientTooltipComponentCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.PauseScreen;
@@ -69,10 +69,10 @@ public class UwuClient implements ClientModInitializer {
 //        HandledScreens.register(EPIC_SCREEN_HANDLER_TYPE, EpicHandledModelScreen::new);
 
         final var binding = new KeyMapping("key.uwu.hud_test", GLFW.GLFW_KEY_J, KeyMapping.Category.MISC);
-        KeyBindingHelper.registerKeyBinding(binding);
+        KeyMappingHelper.registerKeyMapping(binding);
 
         final var bindingButCooler = new KeyMapping("key.uwu.hud_test_two", GLFW.GLFW_KEY_K, KeyMapping.Category.MISC);
-        KeyBindingHelper.registerKeyBinding(bindingButCooler);
+        KeyMappingHelper.registerKeyMapping(bindingButCooler);
 
         final var hudComponentId = Identifier.fromNamespaceAndPath("uwu", "test_element");
         final Supplier<UIComponent> hudComponent = () ->
@@ -90,7 +90,7 @@ public class UwuClient implements ClientModInitializer {
         final Supplier<UIComponent> coolerComponent = () -> UIModel.load(Path.of("../src/testmod/resources/assets/uwu/owo_ui/test_element_two.xml")).expandTemplate(FlowLayout.class, "hud-element", Map.of());
         Hud.add(coolerComponentId, coolerComponent);
 
-        TooltipComponentCallback.EVENT.register(data -> {
+        ClientTooltipComponentCallback.EVENT.register(data -> {
             if (data instanceof UwuBraidItem.Tooltip tooltip) {
                 var random = new Random(System.currentTimeMillis() / 450);
                 return new BraidTooltipComponent(new Sized(
@@ -143,7 +143,7 @@ public class UwuClient implements ClientModInitializer {
         });
 
         Uwu.CHANNEL.registerClientbound(Uwu.OtherTestMessage.class, (message, access) -> {
-            access.player().displayClientMessage(Component.nullToEmpty("Message '" + message.message() + "' from " + message.pos()), false);
+            access.player().sendSystemMessage(Component.nullToEmpty("Message '" + message.message() + "' from " + message.pos()));
         });
 
         if (Uwu.WE_TESTEN_HANDSHAKE) {
@@ -195,7 +195,7 @@ public class UwuClient implements ClientModInitializer {
             ButtonComponent button;
             instance.adapter.rootComponent.child(
                 (button = UIComponents.button(Component.literal(":)"), buttonComponent -> {
-                    Minecraft.getInstance().player.displayClientMessage(Component.literal("handled screen moment"), false);
+                    Minecraft.getInstance().player.sendSystemMessage(Component.literal("handled screen moment"));
                 })).verticalSizing(Sizing.fixed(12))
             );
 
