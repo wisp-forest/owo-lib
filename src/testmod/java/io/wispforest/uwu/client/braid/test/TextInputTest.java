@@ -29,8 +29,7 @@ import io.wispforest.owo.braid.widgets.textinput.PatternFormatter;
 import io.wispforest.owo.braid.widgets.textinput.TextBox;
 import io.wispforest.owo.braid.widgets.textinput.TextEditingController;
 import io.wispforest.owo.ui.component.EntityComponent;
-import io.wispforest.uwu.client.braid.TestSelector;
-import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
@@ -180,7 +179,7 @@ public class TextInputTest extends StatefulWidget {
                             new Checkbox(
                                 new CheckboxStyle(
                                     null,
-                                    new Center(new SpriteWidget(new Material(SpriteWidget.GUI_ATLAS_ID, Identifier.fromNamespaceAndPath("uwu", "czechbox")))),
+                                    new Center(new SpriteWidget(new SpriteId(SpriteWidget.GUI_ATLAS_ID, Identifier.fromNamespaceAndPath("uwu", "czechbox")))),
                                     null
                                 ), this.checked,
                                 this::onUpdate

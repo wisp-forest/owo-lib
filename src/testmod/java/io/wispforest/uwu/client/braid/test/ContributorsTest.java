@@ -30,10 +30,9 @@ import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.ui.component.EntityComponent;
-import io.wispforest.uwu.client.braid.TestSelector;
 import io.wispforest.uwu.items.UwuItems;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -317,14 +316,14 @@ public class ContributorsTest extends StatefulWidget {
                             .enterCallback(() -> setState(() -> this.hoverStarCount = idx + 1)),
                         new Stack(
                             new SpriteWidget(
-                                new Material(
+                                new SpriteId(
                                     Identifier.parse("textures/atlas/gui.png"),
                                     Identifier.fromNamespaceAndPath("uwu", (idx + 1) <= this.selectedStarCount ? "favorite_icon_selected" : "favorite_icon")
                                 )
                             ),
                             (idx + 1) <= this.hoverStarCount
                                 ? new SpriteWidget(
-                                new Material(
+                                new SpriteId(
                                     Identifier.parse("textures/atlas/gui.png"),
                                     Identifier.fromNamespaceAndPath("uwu", "favorite_icon_hover")
                                 )

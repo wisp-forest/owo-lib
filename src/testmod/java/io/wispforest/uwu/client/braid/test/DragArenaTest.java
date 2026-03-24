@@ -22,6 +22,7 @@ import io.wispforest.uwu.client.braid.FunnyDragText;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.RandomSource;
 
@@ -68,7 +69,7 @@ public class DragArenaTest extends StatefulWidget {
                         new Align(
                             Alignment.TOP_LEFT,
                             new Column(
-                                new Label(Component.literal("a").setStyle(Style.EMPTY.withClickEvent(new ClickEvent.OpenUrl(URI.create("https://chyz.xyz/box"))))),
+                                new Label(Component.literal("a").setStyle(Style.EMPTY.withHoverEvent(new HoverEvent.ShowText(Component.literal("woah"))).withClickEvent(new ClickEvent.OpenUrl(URI.create("https://chyz.xyz/box"))))),
                                 new MessageButton(Component.literal("window button :o"), () -> setState(() -> controller.toggleCollapsed()))
                             )
                         ),

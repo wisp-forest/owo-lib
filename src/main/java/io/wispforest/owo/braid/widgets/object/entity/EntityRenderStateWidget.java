@@ -227,7 +227,7 @@ public class EntityRenderStateWidget extends LeafInstanceWidget {
                 state.nameTag = null;
             }
 
-            graphics.guiRenderState.submitPicturesInPictureState(new BraidEntityElement(
+            graphics.guiRenderState.addPicturesInPictureState(new BraidEntityElement(
                 state,
                 new Matrix4f().mul(entitySpaceToWidgetSpace).mul(entityTransform),
                 new Matrix3x2f(graphics.pose()),
