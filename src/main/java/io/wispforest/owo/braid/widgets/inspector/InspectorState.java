@@ -5,5 +5,5 @@ import org.jetbrains.annotations.Nullable;
 
 public class InspectorState extends ShareableState {
     public @Nullable Object selectedElement;
-    public @Nullable RevealInstanceEvent lastRevealEvent;
+    public @Nullable RevealEvent<?> lastRevealEvent;
 }

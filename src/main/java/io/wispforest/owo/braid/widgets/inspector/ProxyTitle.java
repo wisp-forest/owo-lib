@@ -7,6 +7,7 @@ import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import io.wispforest.owo.braid.widgets.basic.Padding;
+import io.wispforest.owo.braid.widgets.basic.VisitorWidget;
 import io.wispforest.owo.braid.widgets.label.Label;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -36,6 +37,7 @@ public class ProxyTitle extends StatefulWidget {
 
             record ProxyTag(String shortForm, String fullName, ChatFormatting color) {}
             var tag = switch (proxy) {
+                case VisitorWidget.Proxy<?> ignored -> new ProxyTag("V", "Visitor", ChatFormatting.DARK_AQUA);
                 case StatefulProxy ignored -> new ProxyTag("SF", "Stateful", ChatFormatting.AQUA);
                 case StatelessProxy ignored -> new ProxyTag("SL", "Stateless", ChatFormatting.GREEN);
                 case InheritedProxy ignored -> new ProxyTag("IH", "Inherited", ChatFormatting.GOLD);

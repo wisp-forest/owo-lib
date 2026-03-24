@@ -34,6 +34,7 @@ import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.Style;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class InspectorWidget extends StatefulWidget {
@@ -68,7 +69,7 @@ public class InspectorWidget extends StatefulWidget {
             this.streamListen(
                 widget -> widget.inspector.onReveal(),
                 event -> this.inspectorState.setState(() -> {
-                    this.inspectorState.selectedElement = event.instance;
+                    this.inspectorState.selectedElement = event.target();
                     this.inspectorState.lastRevealEvent = event;
                 })
             );
@@ -100,7 +101,19 @@ public class InspectorWidget extends StatefulWidget {
                                             (axis, controller) -> new FlatScrollbar(axis, controller, Color.rgb(0xabb0bf), Color.rgb(0xabb0bf)),
                                             new Align(
                                                 Alignment.TOP_LEFT,
-                                                new ProxyTreeView(this.widget().rootProxy)
+                                                new TreeView<>(
+                                                    this.widget().rootProxy,
+                                                    proxy -> {
+                                                        var children = new ArrayList<WidgetProxy>();
+                                                        proxy.visitChildren(children::add);
+                                                        return children;
+                                                    },
+                                                    ProxyTitle::new,
+                                                    null,
+                                                    null,
+                                                    0,
+                                                    0
+                                                )
                                             )
                                         )
                                     ),
@@ -114,7 +127,19 @@ public class InspectorWidget extends StatefulWidget {
                                                 (axis, controller) -> new FlatScrollbar(axis, controller, Color.rgb(0xabb0bf), Color.rgb(0xabb0bf)),
                                                 new Align(
                                                     Alignment.TOP_LEFT,
-                                                    new InstanceTreeView(this.widget().inspector.onReveal(), this.widget().rootInstance)
+                                                    new TreeView<WidgetInstance<?>>(
+                                                        this.widget().rootInstance,
+                                                        instance -> {
+                                                            var c = new ArrayList<WidgetInstance<?>>();
+                                                            instance.visitChildren(c::add);
+                                                            return c;
+                                                        },
+                                                        InstanceTitle::new,
+                                                        this.widget().inspector.onReveal(),
+                                                        null,
+                                                        0,
+                                                        0
+                                                    )
                                                 )
                                             ),
                                             new Align(
