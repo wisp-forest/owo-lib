@@ -45,7 +45,7 @@
   "depends": {
     "fabricloader": ">=0.15.0",
     "fabric-api": ">=0.100",
-    "minecraft": ">=1.21.6"
+    "minecraft": ">=26.1"
   },
   "custom": {
     "modmenu": {
@@ -81,10 +81,10 @@
       "net/minecraft/client/gui/GuiGraphicsExtractor": [
         "io/wispforest/owo/ui/util/MatrixStackTransformer"
       ],
-      "net/minecraft/core/component/DataComponentType$Builder": [
+      "net/minecraft/core/component/DataComponentType\u0024Builder": [
         "io/wispforest/owo/serialization/OwoDataComponentTypeBuilder<TT;>"
       ],
-      "net/minecraft/world/item/Item$Properties": [
+      "net/minecraft/world/item/Item\u0024Properties": [
         "io/wispforest/owo/itemgroup/OwoItemSettingsExtension"
       ],
       "net/minecraft/world/item/Item": [
