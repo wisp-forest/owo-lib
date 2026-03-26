@@ -74,17 +74,18 @@ public class RawSplitPane extends StatefulWidget {
 
     public static class State extends WidgetState<RawSplitPane> {
 
-        private SplitController controller;
-        private final Runnable controllerListener = () -> setState(() -> {});
+        protected SplitController controller;
+        protected final Runnable controllerListener = () -> setState(() -> {});
 
-        private int draggingIndex = -1;
-        private double contentSpace = 0;
-        private double prevContentSpace = -1;
-        private double dragRatio = 0;
-        private boolean ratiosInitialized = false;
-        private boolean firstDrag = false;
-        private double[] paneSizes;
-        private SplitPaneStyle resolvedStyle = SplitPaneStyle.DEFAULT.fillDefaults();
+        protected int draggingIndex = -1;
+        protected double contentSpace = 0;
+        protected double prevContentSpace = -1;
+        protected double dragRatio = 0;
+        protected boolean ratiosInitialized = false;
+        protected boolean firstDrag = false;
+        protected double[] paneSizes;
+        protected SplitPaneStyle resolvedStyle;
+        protected CursorStyle draggingCursorStyle = null;
 
         @Override
         public void init() {
@@ -132,121 +133,27 @@ public class RawSplitPane extends StatefulWidget {
         }
 
         @Override
-        public Widget build(BuildContext context) {
-            var enabled = this.widget().enabled;
-            this.resolvedStyle = (this.widget().style != null ? this.widget().style : SplitPaneStyle.DEFAULT).fillDefaults();
+        public Widget build(BuildContext outerContext) {
+            var widget = this.widget();
+            this.resolvedStyle = (widget.style != null ? widget.style : SplitPaneStyle.DEFAULT).fillDefaults();
             var style = this.resolvedStyle;
 
-            return new LayoutBuilder((innerContext, constraints) -> {
-                var axis = this.widget().axis;
+            return new LayoutBuilder((context, constraints) -> {
+                var axis = widget.axis;
                 var children = this.widget().children;
                 var numDividers = children.size() - 1;
                 var dividerThickness = style.dividerThickness();
 
+                //TODO: what do we do about intellij complaining that dividerThickness could be null (it won't because of defaults)
                 this.contentSpace = Math.floor(constraints.maxOnAxis(axis) - numDividers * dividerThickness);
                 var crossSize = constraints.maxOnAxis(axis.opposite());
 
                 if (this.contentSpace > 0) {
-                    if (this.ratiosInitialized && this.contentSpace != this.prevContentSpace && this.draggingIndex == -1 && this.widget().controller == null) {
-                        var sizes = this.paneSizes.clone();
-
-                        var fixedTotal = 0d;
-                        var flexTotal = 0d;
-                        var hasFlex = false;
-
-                        for (var i = 0; i < children.size(); i++) {
-                            if (children.get(i).size != null) {
-                                fixedTotal += sizes[i];
-                            } else {
-                                flexTotal += sizes[i];
-                                hasFlex = true;
-                            }
-                        }
-
-                        var availableForFlex = this.contentSpace - fixedTotal;
-
-                        if (availableForFlex < 0) {
-                            applyResizeDistribution(sizes, children, availableForFlex, style.overflowPolicy());
-                            fixedTotal = 0;
-                            for (var i = 0; i < children.size(); i++)
-                                if (children.get(i).size != null) fixedTotal += sizes[i];
-                            availableForFlex = this.contentSpace - fixedTotal;
-                        }
-
-                        if (hasFlex) {
-                            var clampedFlex = Math.max(0, availableForFlex);
-                            if (flexTotal > 0) {
-                                var scale = clampedFlex / flexTotal;
-                                for (var i = 0; i < children.size(); i++)
-                                    if (children.get(i).size == null)
-                                        sizes[i] = sizes[i] * scale;
-                            } else {
-                                var flexCount = 0;
-                                for (var child : children) if (child.size == null) flexCount++;
-                                var equalShare = clampedFlex / flexCount;
-                                for (var i = 0; i < children.size(); i++)
-                                    if (children.get(i).size == null)
-                                        sizes[i] = equalShare;
-                            }
-                        } else if (fixedTotal < this.contentSpace) {
-                            applyResizeDistribution(sizes, children, this.contentSpace - fixedTotal, style.underflowPolicy());
-                        }
-
-                        if (!Boolean.TRUE.equals(style.preserveSizes()))
-                            for (var i = 0; i < children.size(); i++)
-                                this.paneSizes[i] = sizes[i];
-
-                        var position = 0d;
-                        for (var i = 0; i < children.size(); i++) {
-                            position += sizes[i];
-                            if (i < numDividers) this.controller.ratios[i] = position / this.contentSpace;
-                        }
-                    }
+                    if (!this.ratiosInitialized)
+                        this.initializeRatios();
+                    else if (this.contentSpace != this.prevContentSpace && this.draggingIndex == -1 && this.widget().controller == null)
+                        this.recomputeRatios();
                     this.prevContentSpace = this.contentSpace;
-                }
-
-                double[] ratios;
-                if (!this.ratiosInitialized && this.contentSpace > 0) {
-                    var result = new double[numDividers];
-
-                    var fixedSpace = 0d;
-                    var totalWeight = 0d;
-
-                    for (var child : children) {
-                        if (child.size != null) {
-                            fixedSpace += child.size;
-                        } else {
-                            totalWeight += child.weight;
-                        }
-                    }
-
-                    var flexibleSpace = Math.max(0, this.contentSpace - fixedSpace);
-                    var position = 0d;
-
-                    for (var i = 0; i < children.size(); i++) {
-                        var child = children.get(i);
-                        var paneSize = child.size != null ? child.size : (child.weight / totalWeight) * flexibleSpace;
-                        position += paneSize;
-                        if (i < numDividers) result[i] = position / this.contentSpace;
-                    }
-
-                    ratios = result;
-                    System.arraycopy(ratios, 0, this.controller.ratios, 0, numDividers);
-                    this.paneSizes = new double[children.size()];
-                    var prevRatio = 0d;
-                    for (var i = 0; i < children.size(); i++) {
-                        var nextRatio = i < numDividers ? ratios[i] : 1.0;
-                        this.paneSizes[i] = i < children.size() - 1
-                            ? Math.floor(nextRatio * this.contentSpace) - Math.floor(prevRatio * this.contentSpace)
-                            : this.contentSpace - Math.floor(prevRatio * this.contentSpace);
-                        prevRatio = nextRatio;
-                    }
-                    this.ratiosInitialized = true;
-                } else {
-                    ratios = new double[numDividers];
-                    for (int i = 0; i < numDividers; i++) {
-                        ratios[i] = this.ratiosInitialized ? this.controller.getRatio(i) : (double) (i + 1) / children.size();
-                    }
                 }
 
                 var widgets = new ArrayList<Widget>();
@@ -254,7 +161,9 @@ public class RawSplitPane extends StatefulWidget {
 
                 for (var i = 0; i < children.size(); i++) {
                     var child = children.get(i).child;
-                    var nextRatio = i < numDividers ? ratios[i] : 1.0;
+                    var nextRatio = i < numDividers
+                        ? (this.ratiosInitialized ? this.controller.getRatio(i) : (i + 1.0) / children.size())
+                        : 1.0;
                     var paneSize = i < children.size() - 1
                         ? Math.floor(nextRatio * this.contentSpace) - Math.floor(prevRatio * this.contentSpace)
                         : this.contentSpace - Math.floor(prevRatio * this.contentSpace);
@@ -269,19 +178,23 @@ public class RawSplitPane extends StatefulWidget {
                         var dividerConstraints = Constraints.tight(axis.createSize(dividerThickness, crossSize));
 
                         Widget divider;
-                        if (!enabled) {
+                        if (!widget.enabled) {
                             divider = dividerVisual;
                         } else {
                             divider = new MouseArea(
-                                ma -> ma
-                                    .dragStartCallback((button, modifiers) -> setState(() -> {
+                                w -> w
+                                    .dragStartCallback((_, _) -> setState(() -> {
                                         this.draggingIndex = dividerIndex;
-                                        this.dragRatio = ratios[dividerIndex];
+                                        this.dragRatio = this.controller.getRatio(dividerIndex);
                                         this.firstDrag = true;
                                     }))
-                                    .dragCallback((x, y, dx, dy) -> this.moveDivider(dividerIndex, axis.choose(dx, dy)))
+                                    .dragCallback((_, _, dx, dy) -> this.moveDivider(dividerIndex, axis.choose(dx, dy)))
                                     .dragEndCallback(() -> setState(() -> updatePaneSizes(children)))
-                                    .cursorStyleSupplier((x, y) -> CursorStyle.forDraggingAlong(axis, innerContext.instance().computeGlobalTransform())),
+                                    .cursorStyleSupplier((_, _) -> {
+                                        if (this.draggingCursorStyle == null)
+                                            this.draggingCursorStyle = CursorStyle.forDraggingAlong(axis, context.instance().computeGlobalTransform());
+                                        return this.draggingCursorStyle;
+                                    }),
                                 dividerVisual
                             );
                         }
@@ -296,66 +209,156 @@ public class RawSplitPane extends StatefulWidget {
         private void updatePaneSizes(List<SplitChild> children) {
             this.draggingIndex = -1;
             if (this.paneSizes == null) return;
-            var prevRatio1 = 0d;
+            var previous = 0d;
             for (var j = 0; j < children.size(); j++) {
-                var nextRatio1 = j < children.size() - 1 ? this.controller.getRatio(j) : 1.0;
-                this.paneSizes[j] = j < children.size() - 1
-                    ? Math.floor(nextRatio1 * this.contentSpace) - Math.floor(prevRatio1 * this.contentSpace)
-                    : this.contentSpace - Math.floor(prevRatio1 * this.contentSpace);
-                prevRatio1 = nextRatio1;
+                var next = j < children.size() - 1 ? this.controller.getRatio(j) : 1;
+                this.paneSizes[j] = (j < children.size() - 1
+                    ? Math.floor(next * this.contentSpace)
+                    : this.contentSpace) - Math.floor(previous * this.contentSpace);
+                previous = next;
+            }
+        }
+
+        private void initializeRatios() {
+            var children = this.widget().children;
+            var numDividers = children.size() - 1;
+
+            var totalFixed = 0d;
+            var totalWeight = 0d;
+
+            //Collect the total fixed space and total weight of flexible panes
+            for (var child : children) {
+                if (child.size != null) totalFixed += child.size;
+                else totalWeight += child.weight;
+            }
+
+            var flexSpace = Math.max(0, this.contentSpace - totalFixed);
+            var position = 0d;
+
+            //Initialize paneSizes and ratios based on initial sizes/weights
+            this.paneSizes = new double[children.size()];
+            for (var i = 0; i < children.size(); i++) {
+                var child = children.get(i);
+                var start = Math.floor(position);
+                position += child.size != null ? child.size : child.weight / totalWeight * flexSpace;
+                this.paneSizes[i] = (i < numDividers ? Math.floor(position) : this.contentSpace) - start;
+                if (i < numDividers) this.controller.ratios[i] = position / this.contentSpace;
+            }
+            this.ratiosInitialized = true;
+        }
+
+        private void recomputeRatios() {
+            var children = this.widget().children;
+            var style = this.resolvedStyle;
+            var sizes = this.paneSizes.clone();
+
+            var totalFixed = 0d;
+            var totalFlex = 0d;
+            var anyFlex = false;
+
+            //Collect total fixed and flex sizes
+            for (var i = 0; i < children.size(); i++) {
+                if (children.get(i).size != null) {
+                    totalFixed += sizes[i];
+                } else {
+                    totalFlex += sizes[i];
+                    anyFlex = true;
+                }
+            }
+
+            var flexSpace = this.contentSpace - totalFixed;
+
+            //If the total size of fixed panes is larger than the space available, apply overflow policy
+            if (flexSpace < 0) {
+                applyResizeDistribution(sizes, children, flexSpace, style.overflowPolicy());
+                totalFixed = 0;
+                for (var i = 0; i < children.size(); i++)
+                    if (children.get(i).size != null) totalFixed += sizes[i];
+                flexSpace = this.contentSpace - totalFixed;
+            }
+
+            //If there are flexible panes, distribute remaining space according to their weights
+            if (anyFlex) {
+                var clampedFlex = Math.max(0, flexSpace);
+                if (totalFlex > 0) {
+                    var scale = clampedFlex / totalFlex;
+                    for (var i = 0; i < children.size(); i++)
+                        if (children.get(i).size == null) sizes[i] *= scale;
+                } else {
+                    var flexCount = 0;
+                    for (var child : children) if (child.size == null) flexCount++;
+                    var equalShare = clampedFlex / flexCount;
+                    for (var i = 0; i < children.size(); i++)
+                        if (children.get(i).size == null) sizes[i] = equalShare;
+                }
+            //If there are no flexible panes and fixed panes don't fill the available space, apply underflow policy
+            } else if (totalFixed < this.contentSpace) {
+                applyResizeDistribution(sizes, children, this.contentSpace - totalFixed, style.underflowPolicy());
+            }
+
+            //If we're not preserving sizes, update the actual paneSizes
+            if (!Boolean.TRUE.equals(style.preserveSizes()))
+                System.arraycopy(sizes, 0, this.paneSizes, 0, children.size());
+
+            //Convert sizes back into ratios and update the controller
+            var position = 0d;
+            for (var i = 0; i < children.size(); i++) {
+                position += sizes[i];
+                if (i < children.size() - 1) this.controller.ratios[i] = position / this.contentSpace;
             }
         }
 
         private void moveDivider(int clickedIndex, double pixelDelta) {
             var children = this.widget().children;
             var numDividers = children.size() - 1;
-            var cs = this.contentSpace;
             var push = Boolean.TRUE.equals(this.resolvedStyle.pushDividers());
 
+            //If its unclear what divider is being dragged, figure it out
             if (this.firstDrag && !push && pixelDelta != 0) {
                 this.firstDrag = false;
                 var controllerRatios = this.controller.ratios;
                 var step = pixelDelta < 0 ? -1 : 1;
                 var result = clickedIndex;
                 for (var j = clickedIndex; j + step >= 0 && j + step < children.size() - 1; j += step) {
-                    if ((controllerRatios[Math.max(j, j + step)] - controllerRatios[Math.min(j, j + step)]) * cs > EPSILON) break;
+                    if ((controllerRatios[Math.max(j, j + step)] - controllerRatios[Math.min(j, j + step)]) * this.contentSpace > EPSILON) break;
                     result = j + step;
                 }
                 this.draggingIndex = result;
-                this.dragRatio = this.controller.getRatio(this.draggingIndex) + (clickedIndex - this.draggingIndex) * this.resolvedStyle.dividerThickness() / cs;
+                this.dragRatio = this.controller.getRatio(this.draggingIndex) + (clickedIndex - this.draggingIndex) * this.resolvedStyle.dividerThickness() / this.contentSpace;
             }
 
             var index = this.draggingIndex;
-            this.dragRatio += pixelDelta / cs;
+            this.dragRatio += pixelDelta / this.contentSpace;
 
-            var lower = push ? 0d : (index == 0 ? 0 : this.controller.getRatio(index - 1));
-            var upper = push ? 1d : (index == numDividers - 1 ? 1 : this.controller.getRatio(index + 1));
+            //Figure out the bounds of where the divider can be moved
+            var lower = push ? 0d : (index == 0 ? 0 : this.controller.getRatio(index - 1)) + children.get(index).minSize / this.contentSpace;
+            var upper = push ? 1d : (index == numDividers - 1 ? 1 : this.controller.getRatio(index + 1)) - children.get(index + 1).minSize / this.contentSpace;
 
+            //If in push mode, accumulate the minimum sizes of panes on either sides
             if (push) {
-                for (var i = 0; i <= index; i++) lower += children.get(i).minSize / cs;
-                for (var i = index + 1; i < children.size(); i++) upper -= children.get(i).minSize / cs;
+                for (var i = 0; i <= index; i++) lower += children.get(i).minSize / this.contentSpace;
+                for (var i = index + 1; i < children.size(); i++) upper -= children.get(i).minSize / this.contentSpace;
+            // If not in push mode, respect max sizes of adjacent panes
             } else {
-                lower += children.get(index).minSize / cs;
-                upper -= children.get(index + 1).minSize / cs;
+                var left = children.get(index);
+                var right = children.get(index + 1);
+                if (left.maxSize != Double.POSITIVE_INFINITY)
+                    upper = Math.min(upper, (index == 0 ? 0 : this.controller.getRatio(index - 1)) + left.maxSize / this.contentSpace);
+                if (right.maxSize != Double.POSITIVE_INFINITY)
+                    lower = Math.max(lower, (index == numDividers - 1 ? 1 : this.controller.getRatio(index + 1)) - right.maxSize / this.contentSpace);
             }
-
-            var left = children.get(index);
-            var right = children.get(index + 1);
-            if (!push && left.maxSize != Double.POSITIVE_INFINITY)
-                upper = Math.min(upper, (index == 0 ? 0 : this.controller.getRatio(index - 1)) + left.maxSize / cs);
-            if (!push && right.maxSize != Double.POSITIVE_INFINITY)
-                lower = Math.max(lower, (index == numDividers - 1 ? 1 : this.controller.getRatio(index + 1)) - right.maxSize / cs);
 
             this.controller.setRatio(index, Mth.clamp(this.dragRatio, lower, upper));
 
+            //In push mode, push other divders
             if (push) {
                 for (var i = index - 1; i >= 0; i--) {
-                    var max = this.controller.ratios[i + 1] - children.get(i + 1).minSize / cs;
+                    var max = this.controller.ratios[i + 1] - children.get(i + 1).minSize / this.contentSpace;
                     if (this.controller.ratios[i] <= max) break;
                     this.controller.ratios[i] = max;
                 }
                 for (var i = index + 1; i < numDividers; i++) {
-                    var min = this.controller.ratios[i - 1] + children.get(i).minSize / cs;
+                    var min = this.controller.ratios[i - 1] + children.get(i).minSize / this.contentSpace;
                     if (this.controller.ratios[i] >= min) break;
                     this.controller.ratios[i] = min;
                 }

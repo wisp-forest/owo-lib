@@ -66,7 +66,6 @@ public class InstanceTitle extends StatefulWidget {
                             new Padding(
                                 Insets.left(2),
                                 new Tooltip(
-                                    //TODO: translate
                                     Component.literal("Relayout Boundary\n").append(Component.literal("with parent dependency").withStyle(ChatFormatting.GRAY)),
                                     new SpriteWidget(Owo.id("braid_inspector_relayout_boundary_with_dependency"))
                                 )
@@ -77,7 +76,6 @@ public class InstanceTitle extends StatefulWidget {
                             new Padding(
                                 Insets.left(2),
                                 new Tooltip(
-                                    //TODO: translate
                                     Component.literal("Relayout Boundary"),
                                     new SpriteWidget(Owo.id("braid_inspector_relayout_boundary"))
                                 )
@@ -88,7 +86,6 @@ public class InstanceTitle extends StatefulWidget {
                             new Padding(
                                 Insets.left(2),
                                 new Tooltip(
-                                    //TODO: translate
                                     Component.literal("Hit Test Boundary"),
                                     new SpriteWidget(Owo.id("braid_inspector_hit_test_boundary"))
                                 )

@@ -95,7 +95,7 @@ public class Align extends SingleChildInstanceWidget {
         @Override
         public List<InspectorProperty> debugListInspectorProperties() {
             var list = new ArrayList<InspectorProperty>();
-            list.add(new InspectorProperty("Alignment",InspectorProperty.roundedWithCommas(this.widget.alignment.horizontal(), this.widget.alignment.vertical())));
+            list.add(new InspectorProperty("Alignment", InspectorProperty.roundedWithCommas(this.widget.alignment.horizontal(), this.widget.alignment.vertical())));
             this.widget.widthFactor.ifPresent(factor -> list.add(new InspectorProperty("Width Factor", InspectorProperty.rounded(factor))));
             this.widget.heightFactor.ifPresent(factor -> list.add(new InspectorProperty("Height Factor", InspectorProperty.rounded(factor))));
             return list;

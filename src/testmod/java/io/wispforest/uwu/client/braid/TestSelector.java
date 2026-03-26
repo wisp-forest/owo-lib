@@ -100,7 +100,6 @@ public class TestSelector extends StatefulWidget {
         private Player chyz;
 
         private boolean disableEverything = false;
-        private final SelectedTest localSelectedTest = new SelectedTest();
 
         @Override
         public void init() {
@@ -115,10 +114,10 @@ public class TestSelector extends StatefulWidget {
         @Override
         public Widget build(BuildContext ctx) {
             return new SharedState<>(
-                GlobalStateTest.INSTANCE, new Builder(outerCtx -> {
+                GlobalStateTest.INSTANCE::self, new Builder(outerCtx -> {
                 var useGlobal = SharedState.get(outerCtx, GlobalStateTest.class);
                 return new SharedState<>(
-                useGlobal.global ? SelectedTest.INSTANCE : this.localSelectedTest,
+                    useGlobal.global ? SelectedTest.INSTANCE::self : SelectedTest::new,
                 new Builder(context -> {
                     var selectedTest = SharedState.get(context, SelectedTest.class);
                     var buttons = Arrays.stream(Tests.values()).map(test -> {

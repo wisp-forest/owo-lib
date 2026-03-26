@@ -1,12 +1,14 @@
 package io.wispforest.owo.braid.widgets.splitpane;
 
+import java.util.Arrays;
+
 import static com.mojang.math.Constants.EPSILON;
 
 public interface ResizeDistribution {
     double distribute(double[] sizes, double delta);
 
     ResizeDistribution ALL = (sizes, delta) -> {
-        var total = 0d;
+        var total = Arrays.stream(sizes).sum();
         for (var size : sizes) total += size;
         if (total > 0) {
             var scale = (total + delta) / total;
@@ -39,33 +41,24 @@ public interface ResizeDistribution {
     };
 
     ResizeDistribution LARGEST = (sizes, delta) -> {
-        var max = 0d;
-        for (var s : sizes) if (s > max) max = s;
-        var count = 0;
-        for (var s : sizes) if (s >= max - EPSILON) count++;
-        var next = 0d;
-        for (var s : sizes) if (s > next && s < max - EPSILON) next = s;
-
-        var cap = (max - next) * count;
-        var absorbed = delta < 0 ? Math.max(delta, -cap) : delta;
+        final var max = Arrays.stream(sizes).max().orElse(0);
+        final var next = Arrays.stream(sizes).filter(s -> s < max - EPSILON).max().orElse(0);
+        var count = Arrays.stream(sizes).filter(s -> s >= max - EPSILON).count();
+        if (count == 0) return delta;
+        var absorbed = delta < 0 ? Math.max(delta, -(max - next) * count) : delta;
         for (var i = 0; i < sizes.length; i++)
             if (sizes[i] >= max - EPSILON) sizes[i] += absorbed / count;
         return delta - absorbed;
     };
 
     ResizeDistribution SMALLEST = (sizes, delta) -> {
-        var minVal = Double.MAX_VALUE;
-        for (var s : sizes) if (s < minVal) minVal = s;
-        if (minVal == Double.MAX_VALUE) return delta;
-        var count = 0;
-        for (var s : sizes) if (s <= minVal + EPSILON) count++;
-        var nextLevel = Double.MAX_VALUE;
-        for (var s : sizes) if (s > minVal + EPSILON && s < nextLevel) nextLevel = s;
-
-        var cap = nextLevel == Double.MAX_VALUE ? delta : Math.min(delta, (nextLevel - minVal) * count);
-        var absorbed = delta > 0 ? cap : delta;
+        var min = Arrays.stream(sizes).min().orElse(0);
+        var next = Arrays.stream(sizes).filter(s -> s > min + EPSILON).min().orElse(Double.MAX_VALUE);
+        var count = Arrays.stream(sizes).filter(s -> s <= min + EPSILON).count();
+        if (count == 0) return delta;
+        var absorbed = delta > 0 && next != Double.MAX_VALUE ? Math.min(delta, (next - min) * count) : delta;
         for (var i = 0; i < sizes.length; i++)
-            if (sizes[i] <= minVal + EPSILON) sizes[i] += absorbed / count;
+            if (sizes[i] <= min + EPSILON) sizes[i] += absorbed / count;
         return delta - absorbed;
     };
 }

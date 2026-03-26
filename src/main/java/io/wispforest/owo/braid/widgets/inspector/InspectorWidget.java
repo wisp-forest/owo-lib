@@ -80,7 +80,11 @@ public class InspectorWidget extends StatefulWidget {
             return new DefaultScrollAnimationSettings(
                 ScrollAnimationSettings.DEFAULT,
                 new SharedState<>(
-                    InspectorState::new,
+                    () -> {
+                        var state = new InspectorState();
+                        state.revealSource = this.widget().inspector.onReveal();
+                        return state;
+                    },
                     new Builder(stateContext -> {
                         this.inspectorState = SharedState.getWithoutDependency(stateContext, InspectorState.class);
 
@@ -101,19 +105,7 @@ public class InspectorWidget extends StatefulWidget {
                                             (axis, controller) -> new FlatScrollbar(axis, controller, Color.rgb(0xabb0bf), Color.rgb(0xabb0bf)),
                                             new Align(
                                                 Alignment.TOP_LEFT,
-                                                new TreeView<>(
-                                                    this.widget().rootProxy,
-                                                    proxy -> {
-                                                        var children = new ArrayList<WidgetProxy>();
-                                                        proxy.visitChildren(children::add);
-                                                        return children;
-                                                    },
-                                                    ProxyTitle::new,
-                                                    null,
-                                                    null,
-                                                    0,
-                                                    0
-                                                )
+                                                new TreeView(new InspectorTreeNode.Proxy(this.widget().rootProxy))
                                             )
                                         )
                                     ),
@@ -127,19 +119,7 @@ public class InspectorWidget extends StatefulWidget {
                                                 (axis, controller) -> new FlatScrollbar(axis, controller, Color.rgb(0xabb0bf), Color.rgb(0xabb0bf)),
                                                 new Align(
                                                     Alignment.TOP_LEFT,
-                                                    new TreeView<WidgetInstance<?>>(
-                                                        this.widget().rootInstance,
-                                                        instance -> {
-                                                            var c = new ArrayList<WidgetInstance<?>>();
-                                                            instance.visitChildren(c::add);
-                                                            return c;
-                                                        },
-                                                        InstanceTitle::new,
-                                                        this.widget().inspector.onReveal(),
-                                                        null,
-                                                        0,
-                                                        0
-                                                    )
+                                                    new TreeView(new InspectorTreeNode.Instance(this.widget().rootInstance))
                                                 )
                                             ),
                                             new Align(
@@ -184,7 +164,7 @@ public class InspectorWidget extends StatefulWidget {
                                                                 new Tooltip(
                                                                     Component.literal("pick widget"),
                                                                     new Button(
-                                                                        () -> this.widget().inspector.pick(true),
+                                                                        () -> this.widget().inspector.pick(BraidInspector.PickEvent.START),
                                                                         new SpriteWidget(Owo.id("braid_inspector_pick"))
                                                                     )
                                                                 )

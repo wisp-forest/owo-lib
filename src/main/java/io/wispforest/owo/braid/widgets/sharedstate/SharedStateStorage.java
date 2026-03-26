@@ -30,7 +30,7 @@ public class SharedStateStorage {
     private static final Map<ShareableState, Entry<?>> ENTRIES = new HashMap<>();
 
     static {
-        ClientLifecycleEvents.CLIENT_STOPPING.register((client) -> ENTRIES.values().forEach(Entry::save));
+        ClientLifecycleEvents.CLIENT_STOPPING.register((_) -> ENTRIES.values().forEach(Entry::save));
     }
 
     public static <T extends ShareableState> T persist(Identifier id, Endec<T> endec, Supplier<T> defaults) {
@@ -82,7 +82,7 @@ public class SharedStateStorage {
 
         private void scheduleSave() {
             if (this.pendingSave != null) this.pendingSave.cancel();
-            this.pendingSave = TIMER.newTimeout(t -> save(), 10, TimeUnit.SECONDS);
+            this.pendingSave = TIMER.newTimeout(_ -> save(), 10, TimeUnit.SECONDS);
         }
 
         private void save() {

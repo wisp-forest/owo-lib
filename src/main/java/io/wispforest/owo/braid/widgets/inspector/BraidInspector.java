@@ -20,8 +20,8 @@ public class BraidInspector {
     public WidgetInstance<?> rootInstance;
 
     private final BraidEventStream<Unit> refreshEvents = new BraidEventStream<>();
-    private final BraidEventStream<Boolean> pickEvents = new BraidEventStream<>();
-    private final BraidEventStream<RevealEvent<?>> revealEvents = new BraidEventStream<>();
+    private final BraidEventStream<PickEvent> pickEvents = new BraidEventStream<>();
+    private final BraidEventStream<RevealEvent> revealEvents = new BraidEventStream<>();
 
     private boolean active = false;
     @Nullable AppState currentApp;
@@ -31,20 +31,20 @@ public class BraidInspector {
         this.subject = subject;
     }
 
-    public BraidEventSource<Boolean> onPick() {
+    public BraidEventSource<PickEvent> onPick() {
         return this.pickEvents.source();
     }
 
-    public void pick(boolean picking) {
-        this.pickEvents.sink().onEvent(picking);
-        if (currentWindow != null && picking) GLFW.glfwIconifyWindow(currentWindow.handle);
+    public void pick(PickEvent event) {
+        this.pickEvents.sink().onEvent(event);
+        if (currentWindow != null && event == PickEvent.START) GLFW.glfwIconifyWindow(currentWindow.handle);
     }
 
     public BraidEventSource<Unit> onRefresh() {
         return this.refreshEvents.source();
     }
 
-    public BraidEventSource<RevealEvent<?>> onReveal() {
+    public BraidEventSource<RevealEvent> onReveal() {
         return this.revealEvents.source();
     }
 
@@ -74,7 +74,7 @@ public class BraidInspector {
         this.currentWindow = result.window();
 
         this.currentApp.onTerminate(() -> {
-            pick(false);
+            this.pick(PickEvent.STOP);
             this.currentApp = null;
             this.currentWindow = null;
             this.active = false;
@@ -83,7 +83,7 @@ public class BraidInspector {
 
     public void revealInstance(WidgetInstance<?> instance) {
         if (!this.active) return;
-        this.revealEvents.sink().onEvent(new RevealEvent<>(instance, Stream.concat(instance.ancestors().stream(), Stream.of(instance)).collect(Collectors.toSet())));
+        this.revealEvents.sink().onEvent(new RevealEvent(instance));
         if (currentWindow != null) GLFW.glfwShowWindow(currentWindow.handle);
     }
 
@@ -95,4 +95,6 @@ public class BraidInspector {
         if (this.currentApp == null) return;
         this.currentApp.scheduleShutdown();
     }
+
+    public enum PickEvent {START, STOP}
 }

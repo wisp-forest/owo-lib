@@ -54,15 +54,6 @@ public class ProxyTitle extends StatefulWidget {
                     ))
                 ));
 
-            if (proxy.needsRebuild()) {
-                text = text.append(Component.literal(" !").withStyle(style -> style
-                    .withColor(ChatFormatting.RED)
-                    .withHoverEvent(new HoverEvent.ShowText(
-                        Component.literal("Needs Rebuild")
-                    ))
-                ));
-            }
-
             return new MouseArea(
                 w -> w.enterCallback(() -> this.setState(() -> this.hovered = true))
                     .exitCallback(() -> this.setState(() -> this.hovered = false)),
