@@ -9,11 +9,9 @@ public interface ResizeDistribution {
 
     ResizeDistribution ALL = (sizes, delta) -> {
         var total = Arrays.stream(sizes).sum();
-        for (var size : sizes) total += size;
         if (total > 0) {
-            var scale = (total + delta) / total;
             for (var i = 0; i < sizes.length; i++)
-                sizes[i] = Math.max(0, sizes[i] * scale);
+                sizes[i] = Math.max(0, sizes[i] * (total + delta) / total);
         }
         return 0;
     };
