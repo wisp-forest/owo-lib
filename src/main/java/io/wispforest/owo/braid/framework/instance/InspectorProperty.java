@@ -13,9 +13,16 @@ public record InspectorProperty(Component name, Component value) {
         this(Component.literal(name), Component.literal(value));
     }
 
-    public static String rounded(double value) {
+    public static String rounded(double value, int precision) {
         if (Double.isNaN(value) || Double.isInfinite(value)) return String.valueOf(value);
-        return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).toPlainString().replaceAll("(\\.0*|(?<=\\d)\\.0+)$", "");
+        return BigDecimal.valueOf(value)
+            .setScale(precision, RoundingMode.HALF_UP)
+            .stripTrailingZeros()
+            .toPlainString();
+    }
+
+    public static String rounded(double value) {
+        return rounded(value, 2);
     }
 
     public static String roundedWithCommas(double... values) {
