@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.splitpane;
 
+import com.google.common.base.Preconditions;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
@@ -39,6 +40,14 @@ public class RawSplitPane extends StatefulWidget {
         boolean enabled,
         List<? extends Widget> children
     ) {
+        //FIXME: this error message kinda sucks
+        // Idk how to explain the actual problem
+        if (controller != null) Preconditions.checkArgument(
+            (controller.ratios != null && controller.ratios.length == children.size() - 1),
+            "A SplitPane's controller must have exactly one less ratio than the number of panes: (%s ratio(s), %s pane(s))",
+            controller.ratios == null ? 0 : controller.ratios.length,
+            children.size()
+        );
         this.axis = axis;
         this.controller = controller;
         this.style = style;
@@ -125,6 +134,7 @@ public class RawSplitPane extends StatefulWidget {
                     : new SplitController(this.widget().children.size());
                 this.controller.addListener(this.controllerListener);
             }
+            if (this.widget().style != oldWidget.style) this.prevContentSpace = -1;
         }
 
         @Override
@@ -163,7 +173,7 @@ public class RawSplitPane extends StatefulWidget {
                     var child = children.get(i).child;
                     var nextRatio = i < numDividers
                         ? (this.ratiosInitialized ? this.controller.getRatio(i) : (i + 1.0) / children.size())
-                        : 1.0;
+                        : 1;
                     var paneSize = i < children.size() - 1
                         ? Math.floor(nextRatio * this.contentSpace) - Math.floor(prevRatio * this.contentSpace)
                         : this.contentSpace - Math.floor(prevRatio * this.contentSpace);
@@ -174,16 +184,14 @@ public class RawSplitPane extends StatefulWidget {
                     if (i < numDividers) {
                         var dividerIndex = i;
                         var dragging = this.draggingIndex == dividerIndex;
-                        var dividerVisual = style.dividerBuilder().build(dragging);
+                        var divider = style.dividerBuilder().build(dragging);
                         var dividerConstraints = Constraints.tight(axis.createSize(dividerThickness, crossSize));
 
-                        Widget divider;
-                        if (!widget.enabled) {
-                            divider = dividerVisual;
-                        } else {
+                        if (widget.enabled) {
                             divider = new MouseArea(
                                 w -> w
-                                    .dragStartCallback((_, _) -> setState(() -> {
+                                    .dragStartCallback((button, modifiers) -> setState(() -> {
+                                        if (button != 0) return;
                                         this.draggingIndex = dividerIndex;
                                         this.dragRatio = this.controller.getRatio(dividerIndex);
                                         this.firstDrag = true;
@@ -195,7 +203,7 @@ public class RawSplitPane extends StatefulWidget {
                                             this.draggingCursorStyle = CursorStyle.forDraggingAlong(axis, context.instance().computeGlobalTransform());
                                         return this.draggingCursorStyle;
                                     }),
-                                dividerVisual
+                                divider
                             );
                         }
                         widgets.add(new Constrain(dividerConstraints, divider).key(Key.of("divider-" + dividerIndex)));
@@ -223,24 +231,35 @@ public class RawSplitPane extends StatefulWidget {
             var children = this.widget().children;
             var numDividers = children.size() - 1;
 
+            if (this.widget().controller != null) {
+                this.paneSizes = new double[children.size()];
+                updatePaneSizes(children);
+                this.ratiosInitialized = true;
+                return;
+            }
+
             var totalFixed = 0d;
             var totalWeight = 0d;
 
-            //Collect the total fixed space and total weight of flexible panes
             for (var child : children) {
                 if (child.size != null) totalFixed += child.size;
                 else totalWeight += child.weight;
             }
 
             var flexSpace = Math.max(0, this.contentSpace - totalFixed);
-            var position = 0d;
-
-            //Initialize paneSizes and ratios based on initial sizes/weights
-            this.paneSizes = new double[children.size()];
+            var sizes = new double[children.size()];
             for (var i = 0; i < children.size(); i++) {
                 var child = children.get(i);
+                sizes[i] = child.size != null ? child.size : child.weight / totalWeight * flexSpace;
+            }
+
+            adjustSizes(sizes);
+
+            this.paneSizes = new double[children.size()];
+            var position = 0d;
+            for (var i = 0; i < children.size(); i++) {
                 var start = Math.floor(position);
-                position += child.size != null ? child.size : child.weight / totalWeight * flexSpace;
+                position += sizes[i];
                 this.paneSizes[i] = (i < numDividers ? Math.floor(position) : this.contentSpace) - start;
                 if (i < numDividers) this.controller.ratios[i] = position / this.contentSpace;
             }
@@ -252,11 +271,26 @@ public class RawSplitPane extends StatefulWidget {
             var style = this.resolvedStyle;
             var sizes = this.paneSizes.clone();
 
+            adjustSizes(sizes);
+
+            if (!Boolean.TRUE.equals(style.preserveSizes()))
+                System.arraycopy(sizes, 0, this.paneSizes, 0, children.size());
+
+            var position = 0d;
+            for (var i = 0; i < children.size(); i++) {
+                position += sizes[i];
+                if (i < children.size() - 1) this.controller.ratios[i] = position / this.contentSpace;
+            }
+        }
+
+        private void adjustSizes(double[] sizes) {
+            var children = this.widget().children;
+            var style = this.resolvedStyle;
+
             var totalFixed = 0d;
             var totalFlex = 0d;
             var anyFlex = false;
 
-            //Collect total fixed and flex sizes
             for (var i = 0; i < children.size(); i++) {
                 if (children.get(i).size != null) {
                     totalFixed += sizes[i];
@@ -268,7 +302,7 @@ public class RawSplitPane extends StatefulWidget {
 
             var flexSpace = this.contentSpace - totalFixed;
 
-            //If the total size of fixed panes is larger than the space available, apply overflow policy
+            //If there's not enough space to satisfy fixed sizes, apply overflow policy
             if (flexSpace < 0) {
                 applyResizeDistribution(sizes, children, flexSpace, style.overflowPolicy());
                 totalFixed = 0;
@@ -277,7 +311,7 @@ public class RawSplitPane extends StatefulWidget {
                 flexSpace = this.contentSpace - totalFixed;
             }
 
-            //If there are flexible panes, distribute remaining space according to their weights
+            //If there's extra space and flexible panes we can give it to, do that
             if (anyFlex) {
                 var clampedFlex = Math.max(0, flexSpace);
                 if (totalFlex > 0) {
@@ -291,20 +325,9 @@ public class RawSplitPane extends StatefulWidget {
                     for (var i = 0; i < children.size(); i++)
                         if (children.get(i).size == null) sizes[i] = equalShare;
                 }
-            //If there are no flexible panes and fixed panes don't fill the available space, apply underflow policy
+                //If there's more space than fixed panes will take, apply underflow policy
             } else if (totalFixed < this.contentSpace) {
                 applyResizeDistribution(sizes, children, this.contentSpace - totalFixed, style.underflowPolicy());
-            }
-
-            //If we're not preserving sizes, update the actual paneSizes
-            if (!Boolean.TRUE.equals(style.preserveSizes()))
-                System.arraycopy(sizes, 0, this.paneSizes, 0, children.size());
-
-            //Convert sizes back into ratios and update the controller
-            var position = 0d;
-            for (var i = 0; i < children.size(); i++) {
-                position += sizes[i];
-                if (i < children.size() - 1) this.controller.ratios[i] = position / this.contentSpace;
             }
         }
 
@@ -338,7 +361,7 @@ public class RawSplitPane extends StatefulWidget {
             if (push) {
                 for (var i = 0; i <= index; i++) lower += children.get(i).minSize / this.contentSpace;
                 for (var i = index + 1; i < children.size(); i++) upper -= children.get(i).minSize / this.contentSpace;
-            // If not in push mode, respect max sizes of adjacent panes
+                // If not in push mode, respect max sizes of adjacent panes
             } else {
                 var left = children.get(index);
                 var right = children.get(index + 1);
@@ -350,7 +373,7 @@ public class RawSplitPane extends StatefulWidget {
 
             this.controller.setRatio(index, Mth.clamp(this.dragRatio, lower, upper));
 
-            //In push mode, push other divders
+            //In push mode, push other dividers
             if (push) {
                 for (var i = index - 1; i >= 0; i--) {
                     var max = this.controller.ratios[i + 1] - children.get(i + 1).minSize / this.contentSpace;
@@ -366,37 +389,45 @@ public class RawSplitPane extends StatefulWidget {
         }
 
         private void applyResizeDistribution(double[] sizes, List<SplitChild> children, double delta, ResizeDistribution policy) {
-            var fixedSizes = new double[children.size()];
-            for (var i = 0; i < children.size(); i++) if (children.get(i).size != null) fixedSizes[i] = sizes[i];
-
             var clamped = new boolean[children.size()];
-            var remaining = policy.distribute(fixedSizes, delta);
 
+            var remaining = delta;
             while (Math.abs(remaining) > EPSILON) {
+                var indices = buildIndices(sizes, children, clamped, delta);
+                if (indices.length == 0) break;
+
+                var compact = new double[indices.length];
+                for (var j = 0; j < indices.length; j++) compact[j] = sizes[indices[j]];
+                remaining = policy.distribute(compact, remaining);
+                for (var j = 0; j < indices.length; j++) sizes[indices[j]] = compact[j];
+
                 for (var i = 0; i < children.size(); i++) {
                     if (children.get(i).size == null) continue;
                     var child = children.get(i);
-                    var original = fixedSizes[i];
+                    var original = sizes[i];
                     var clampedSize = Mth.clamp(original, child.minSize, child.maxSize);
                     remaining += original - clampedSize;
-                    fixedSizes[i] = clampedSize;
+                    sizes[i] = clampedSize;
                     clamped[i] |= clampedSize != original;
                 }
-
-                var unclamped = 0;
-                for (var i = 0; i < children.size(); i++)
-                    if (children.get(i).size != null && !clamped[i]) unclamped++;
-                if (unclamped == 0) break;
-
-                var redistribution = new double[children.size()];
-                for (var i = 0; i < children.size(); i++)
-                    if (children.get(i).size != null && !clamped[i]) redistribution[i] = fixedSizes[i];
-                remaining = policy.distribute(redistribution, remaining);
-                for (var i = 0; i < children.size(); i++)
-                    if (children.get(i).size != null && !clamped[i]) fixedSizes[i] = redistribution[i];
             }
+        }
 
-            for (var i = 0; i < children.size(); i++) if (children.get(i).size != null) sizes[i] = fixedSizes[i];
+        private int[] buildIndices(double[] sizes, List<SplitChild> children, boolean[] clamped, double delta) {
+            var count = 0;
+            for (var i = 0; i < children.size(); i++) {
+                if (children.get(i).size == null || clamped[i]) continue;
+                if (delta < 0 && sizes[i] < EPSILON) continue;
+                count++;
+            }
+            var indices = new int[count];
+            var j = 0;
+            for (var i = 0; i < children.size(); i++) {
+                if (children.get(i).size == null || clamped[i]) continue;
+                if (delta < 0 && sizes[i] < EPSILON) continue;
+                indices[j++] = i;
+            }
+            return indices;
         }
 
     }

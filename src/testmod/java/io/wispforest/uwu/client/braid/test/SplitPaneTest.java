@@ -2,6 +2,7 @@ package io.wispforest.uwu.client.braid.test;
 
 import io.wispforest.owo.braid.core.*;
 import io.wispforest.owo.braid.framework.BuildContext;
+import io.wispforest.owo.braid.framework.instance.InspectorProperty;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
@@ -11,7 +12,7 @@ import io.wispforest.owo.braid.widgets.button.MessageButton;
 import io.wispforest.owo.braid.widgets.flex.Column;
 import io.wispforest.owo.braid.widgets.flex.CrossAxisAlignment;
 import io.wispforest.owo.braid.widgets.flex.MainAxisAlignment;
-import io.wispforest.owo.braid.widgets.flex.Row;
+import io.wispforest.owo.braid.widgets.grid.Grid;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.slider.slider.MessageSlider;
 import io.wispforest.owo.braid.widgets.splitpane.*;
@@ -30,10 +31,6 @@ public class SplitPaneTest extends StatefulWidget {
         return new Box(Color.mix(0.5, color, new Color(0)), Label.literal(label));
     }
 
-    private static String fmt(double v) {
-        return BigDecimal.valueOf(v).setScale(1, RoundingMode.HALF_UP).toPlainString();
-    }
-
     @Override
     public WidgetState<SplitPaneTest> createState() {
         return new State();
@@ -43,8 +40,8 @@ public class SplitPaneTest extends StatefulWidget {
         private static final ResizeDistribution[] DISTRIBUTIONS = {ResizeDistribution.ALL, ResizeDistribution.FIRST, ResizeDistribution.LAST, ResizeDistribution.LARGEST, ResizeDistribution.SMALLEST};
         private static final String[] DISTRIBUTION_NAMES = {"ALL", "FIRST", "LAST", "LARGEST", "SMALLEST"};
 
-        private int overflowIndex = 0;
-        private int underflowIndex = 0;
+        private int overflowIndex = 3;
+        private int underflowIndex = 4;
         private double dividerThickness = 1;
         private boolean pushDividers = false;
         private boolean preserveSizes = true;
@@ -56,184 +53,147 @@ public class SplitPaneTest extends StatefulWidget {
         public Widget build(BuildContext context) {
             var style = new SplitPaneStyle(dividerThickness, null, DISTRIBUTIONS[overflowIndex], DISTRIBUTIONS[underflowIndex], preserveSizes, pushDividers);
 
-            var controller1 = sharedGridController;
-            var style1 = style;
-            var controller2 = fiveLayerController;
-            var style2 = style;
             return new Stack(
                 Alignment.CENTER,
-                new Column(
-                    MainAxisAlignment.CENTER,
-                    CrossAxisAlignment.CENTER,
-                    new Row(
-                        MainAxisAlignment.START,
-                        CrossAxisAlignment.START,
-                        new Column(
-                            Label.literal("Horizontal"),
-                            new Sized(
-                                TEST_WIDTH, TEST_HEIGHT, new SplitPane(
-                                LayoutAxis.HORIZONTAL, style,
-                                pane(Color.GREEN, "1"),
-                                pane(Color.GREEN, "2"),
-                                pane(Color.GREEN, "3"),
-                                pane(Color.GREEN, "4")
-                            )
-                            )
-                        ),
-                        new Column(
-                            Label.literal("Vertical"),
-                            new Sized(
-                                TEST_WIDTH, TEST_HEIGHT, new SplitPane(
-                                LayoutAxis.VERTICAL, style,
-                                pane(Color.BLUE, "top"),
-                                pane(Color.BLUE, "mid"),
-                                pane(Color.BLUE, "bot")
-                            )
-                            )
-                        ),
-                        new Column(
-                            Label.literal("Mixed Sizing"),
-                            new Sized(
-                                TEST_WIDTH, TEST_HEIGHT, new SplitPane(
-                                LayoutAxis.HORIZONTAL, style,
-                                new SplitPane(
-                                    LayoutAxis.HORIZONTAL, style,
-                                    new SplitChild(sc -> sc.size(60), pane(Color.RED, "fix 60")),
-                                    pane(Color.RED, "flex"),
-                                    pane(Color.RED, "flex"),
-                                    new SplitChild(sc -> sc.size(50), pane(Color.RED, "fix 50"))
-                                ),
-                                new SplitChild(sc -> sc.weight(0.1), pane(Color.YELLOW, "←"))
-                            )
-                            )
+                new Grid(
+                    LayoutAxis.VERTICAL, 3, Grid.CellFit.loose(Alignment.TOP_LEFT),
+                    new Column(
+                        Label.literal("Horizontal"),
+                        new Sized(
+                            TEST_WIDTH, TEST_HEIGHT, new SplitPane(
+                            LayoutAxis.HORIZONTAL, style,
+                            pane(Color.GREEN, "1"),
+                            pane(Color.GREEN, "2"),
+                            pane(Color.GREEN, "3"),
+                            pane(Color.GREEN, "4")
+                        )
                         )
                     ),
-                    new Row(
-                        MainAxisAlignment.START,
-                        CrossAxisAlignment.START,
-                        new Column(
-                            Label.literal("Weighted"),
-                            new Sized(
-                                TEST_WIDTH, TEST_HEIGHT, new SplitPane(
+                    new Column(
+                        Label.literal("Vertical"),
+                        new Sized(
+                            TEST_WIDTH, TEST_HEIGHT, new SplitPane(
+                            LayoutAxis.VERTICAL, style,
+                            pane(Color.BLUE, "top"),
+                            pane(Color.BLUE, "mid"),
+                            pane(Color.BLUE, "bot")
+                        )
+                        )
+                    ),
+                    new Column(
+                        Label.literal("Weighted"),
+                        new Sized(
+                            TEST_WIDTH, TEST_HEIGHT, new SplitPane(
+                            LayoutAxis.HORIZONTAL, style,
+                            new SplitChild(sc -> sc.weight(1), pane(Color.YELLOW, "w1")),
+                            new SplitChild(sc -> sc.weight(2), pane(Color.YELLOW, "w2")),
+                            new SplitChild(sc -> sc.weight(1), pane(Color.YELLOW, "w1"))
+                        )
+                        )
+                    ),
+                    new Column(
+                        Label.literal("Constrained"),
+                        new Sized(
+                            TEST_WIDTH, TEST_HEIGHT, new SplitPane(
+                            LayoutAxis.HORIZONTAL, style,
+                            new SplitChild(sc -> sc.minSize(50), pane(Color.YELLOW, "min 50")),
+                            new SplitChild(sc -> sc.maxSize(100), pane(Color.YELLOW, "max 100")),
+                            pane(Color.YELLOW, "free")
+                        )
+                        )
+                    ),
+                    new Column(
+                        Label.literal("Over/Under Flow"),
+                        new Sized(
+                            TEST_WIDTH, TEST_HEIGHT, new SplitPane(
+                            LayoutAxis.HORIZONTAL, style,
+                            new SplitPane(
                                 LayoutAxis.HORIZONTAL, style,
-                                new SplitChild(sc -> sc.weight(1), pane(Color.YELLOW, "w1")),
-                                new SplitChild(sc -> sc.weight(2), pane(Color.YELLOW, "w2")),
-                                new SplitChild(sc -> sc.weight(1), pane(Color.YELLOW, "w1"))
+                                new SplitChild(sc -> sc.size(20), pane(Color.RED, "fix 20")),
+                                new SplitChild(sc -> sc.size(60), pane(Color.RED, "fix 60")),
+                                new SplitChild(sc -> sc.size(40), pane(Color.RED, "fix 40"))
+                            ),
+                            new SplitChild(sc -> sc.size(60), pane(Color.YELLOW, "←"))
+                        )
+                        )
+                    ),
+                    new Column(
+                        Label.literal("Mixed Sizing"),
+                        new Sized(
+                            TEST_WIDTH, TEST_HEIGHT, new SplitPane(
+                            LayoutAxis.HORIZONTAL, style,
+                            new SplitPane(
+                                LayoutAxis.HORIZONTAL, style,
+                                new SplitChild(sc -> sc.size(60), pane(Color.RED, "fix 60")),
+                                pane(Color.RED, "flex"),
+                                pane(Color.RED, "flex"),
+                                new SplitChild(sc -> sc.size(50), pane(Color.RED, "fix 50"))
+                            ),
+                            new SplitChild(sc -> sc.weight(0.1), pane(Color.YELLOW, "←"))
+                        )
+                        )
+                    ),
+                    new Column(
+                        Label.literal("Nested"),
+                        new Sized(
+                            TEST_WIDTH, TEST_HEIGHT, new SplitPane(
+                            LayoutAxis.HORIZONTAL, style,
+                            new SplitPane(
+                                LayoutAxis.VERTICAL, style,
+                                pane(Color.AQUA, "1"),
+                                new SplitChild(sc -> sc.weight(2), pane(Color.AQUA, "2"))
+                            ),
+                            new SplitPane(
+                                LayoutAxis.VERTICAL, style,
+                                new SplitChild(sc -> sc.weight(2), pane(Color.MAGENTA, "3")),
+                                pane(Color.MAGENTA, "4")
                             )
-                            )
-                        ),
-                        new Column(
-                            Label.literal("Nested"),
-                            new Sized(
-                                TEST_WIDTH, TEST_HEIGHT, new SplitPane(
+                        )
+                        )
+                    ),
+                    new Column(
+                        Label.literal("Shared Controller"),
+                        new Sized(
+                            TEST_WIDTH, TEST_HEIGHT,
+                            new SplitPane(
                                 LayoutAxis.HORIZONTAL, style,
                                 new SplitPane(
-                                    LayoutAxis.VERTICAL, style,
-                                    pane(Color.AQUA, "1"),
-                                    new SplitChild(sc -> sc.weight(2),pane(Color.AQUA, "2"))
+                                    LayoutAxis.VERTICAL, sharedGridController, style,
+                                    pane(Color.RED, "1"),
+                                    pane(Color.RED, "2")
                                 ),
                                 new SplitPane(
-                                    LayoutAxis.VERTICAL, style,
-                                    new SplitChild(sc -> sc.weight(2), pane(Color.MAGENTA, "3")),
-                                    pane(Color.MAGENTA, "4")
+                                    LayoutAxis.VERTICAL, sharedGridController, style,
+                                    pane(Color.GREEN, "3"),
+                                    pane(Color.GREEN, "4")
                                 )
                             )
-                            )
-                        ),
-                        new Column(
-                            Label.literal("Constrained"),
-                            new Sized(
-                                TEST_WIDTH, TEST_HEIGHT, new SplitPane(
-                                LayoutAxis.HORIZONTAL, style,
-                                new SplitChild(sc -> sc.minSize(50), pane(Color.YELLOW, "min 50")),
-                                new SplitChild(sc -> sc.maxSize(100), pane(Color.YELLOW, "max 100")),
-                                pane(Color.YELLOW, "free")
-                            )
-                            )
                         )
                     ),
-                    new Row(
-                        MainAxisAlignment.START,
-                        CrossAxisAlignment.START,
-                        new Column(
-                            Label.literal("Shared Controller"),
-                            new Sized(
-                                TEST_WIDTH, TEST_HEIGHT, new StatelessWidget() {
-                                private final SplitController controller = controller1;
-                                private final SplitPaneStyle style = style1;
-
-                                @Override
-                                public Widget build(BuildContext context) {
-                                    return new SplitPane(
-                                        LayoutAxis.HORIZONTAL, style,
+                    new Column(
+                        Label.literal("Funni"),
+                        new Sized(
+                            TEST_WIDTH, TEST_HEIGHT,
+                            new SplitPane(
+                                LayoutAxis.HORIZONTAL, fiveLayerController, style,
+                                pane(Color.BLUE, "1"),
+                                new SplitPane(
+                                    LayoutAxis.VERTICAL, fiveLayerController, style,
+                                    pane(Color.YELLOW, "2"),
+                                    new SplitPane(
+                                        LayoutAxis.HORIZONTAL, fiveLayerController, style,
+                                        pane(Color.RED, "3"),
                                         new SplitPane(
-                                            LayoutAxis.VERTICAL, controller, style,
-                                            pane(Color.RED, "1"),
-                                            pane(Color.RED, "2")
-                                        ),
-                                        new SplitPane(
-                                            LayoutAxis.VERTICAL, controller, style,
-                                            pane(Color.GREEN, "3"),
-                                            pane(Color.GREEN, "4")
-                                        )
-                                    );
-                                }
-                            }
-                            )
-                        ),
-                        new Column(
-                            Label.literal("Push"),
-                            new Sized(
-                                TEST_WIDTH, TEST_HEIGHT, new SplitPane(
-                                LayoutAxis.HORIZONTAL,
-                                style,
-                                pane(Color.RED, "1"),
-                                pane(Color.mix(0.5, Color.RED, Color.YELLOW), "2"),
-                                pane(Color.YELLOW, "3"),
-                                pane(Color.GREEN, "4"),
-                                pane(Color.AQUA, "5"),
-                                pane(Color.BLUE, "6"),
-                                pane(Color.MAGENTA, "7"),
-                                pane(Color.RED, "8"),
-                                pane(Color.mix(0.5, Color.RED, Color.YELLOW), "9"),
-                                pane(Color.YELLOW, "10"),
-                                pane(Color.GREEN, "11"),
-                                pane(Color.AQUA, "12")
-                            )
-                            )
-                        ),
-                        new Column(
-                            Label.literal("Funni"),
-                            new Sized(
-                                TEST_WIDTH, TEST_HEIGHT, new StatelessWidget() {
-                                private final SplitController controller = controller2;
-                                private final SplitPaneStyle style = style2;
-
-                                @Override
-                                public Widget build(BuildContext context) {
-                                    return new SplitPane(
-                                        LayoutAxis.HORIZONTAL, controller, style,
-                                        pane(Color.BLUE, "1"),
-                                        new SplitPane(
-                                            LayoutAxis.VERTICAL, controller, style,
-                                            pane(Color.YELLOW, "2"),
+                                            LayoutAxis.VERTICAL, fiveLayerController, style,
+                                            pane(Color.GREEN, "4"),
                                             new SplitPane(
-                                                LayoutAxis.HORIZONTAL, controller, style,
-                                                pane(Color.RED, "3"),
-                                                new SplitPane(
-                                                    LayoutAxis.VERTICAL, controller, style,
-                                                    pane(Color.GREEN, "4"),
-                                                    new SplitPane(
-                                                        LayoutAxis.HORIZONTAL, controller, style,
-                                                        pane(Color.AQUA, "5"),
-                                                        pane(Color.AQUA, "6")
-                                                    )
-                                                )
+                                                LayoutAxis.HORIZONTAL, fiveLayerController, style,
+                                                pane(Color.AQUA, "5"),
+                                                pane(Color.AQUA, "6")
                                             )
                                         )
-                                    );
-                                }
-                            }
+                                    )
+                                )
                             )
                         )
                     )
@@ -262,7 +222,7 @@ public class SplitPaneTest extends StatefulWidget {
                                             new Sized(
                                                 null, 20, new MessageSlider(
                                                 dividerThickness,
-                                                Component.literal("Divider: " + fmt(dividerThickness)),
+                                                Component.literal("Divider: " + InspectorProperty.rounded(dividerThickness)),
                                                 slider -> slider.range(1, 12).step(1),
                                                 v -> setState(() -> dividerThickness = v)
                                             )

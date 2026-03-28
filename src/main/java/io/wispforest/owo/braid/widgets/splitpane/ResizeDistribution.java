@@ -9,33 +9,20 @@ public interface ResizeDistribution {
 
     ResizeDistribution ALL = (sizes, delta) -> {
         var total = Arrays.stream(sizes).sum();
-        if (total > 0) {
+        if (total > 0)
             for (var i = 0; i < sizes.length; i++)
                 sizes[i] = Math.max(0, sizes[i] * (total + delta) / total);
-        }
         return 0;
     };
 
     ResizeDistribution FIRST = (sizes, delta) -> {
-        for (var i = 0; i < sizes.length; i++) {
-            if (sizes[i] > 0 || delta > 0) {
-                var prev = sizes[i];
-                sizes[i] = Math.max(0, sizes[i] + delta);
-                return delta - (sizes[i] - prev);
-            }
-        }
-        return delta;
+        sizes[0] += delta;
+        return 0;
     };
 
     ResizeDistribution LAST = (sizes, delta) -> {
-        for (var i = sizes.length - 1; i >= 0; i--) {
-            if (sizes[i] > 0 || delta > 0) {
-                var prev = sizes[i];
-                sizes[i] = Math.max(0, sizes[i] + delta);
-                return delta - (sizes[i] - prev);
-            }
-        }
-        return delta;
+        sizes[sizes.length - 1] += delta;
+        return 0;
     };
 
     ResizeDistribution LARGEST = (sizes, delta) -> {
