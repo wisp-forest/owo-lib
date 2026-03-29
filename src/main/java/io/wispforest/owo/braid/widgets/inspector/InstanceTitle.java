@@ -47,6 +47,12 @@ public class InstanceTitle extends StatefulWidget {
                 instanceName = matcher.group(1).replaceAll("\\$", ".");
             }
 
+            var className = this.widget().instance.widget().getClass().getSimpleName();
+
+            var instanceText = instanceName.endsWith(className)
+                ? Component.literal(instanceName)
+                : Component.literal(className).append(Component.literal(" " + instanceName).withStyle(ChatFormatting.GRAY));
+
             var title = new Panel(
                 selected ? Owo.id("braid_inspector_selected") : null,
                 new Padding(
@@ -54,7 +60,7 @@ public class InstanceTitle extends StatefulWidget {
                     new Row(
                         MainAxisAlignment.START,
                         CrossAxisAlignment.CENTER,
-                        new Label(Component.literal(instanceName).withStyle(style -> style.withBold(this.hovered))),
+                        new Label(instanceText.withStyle(style -> style.withBold(this.hovered))),
                         new Visibility(
                             this.widget().instance.isRelayoutBoundary() && this.widget().instance.debugParentHasDependency(),
                             new Padding(

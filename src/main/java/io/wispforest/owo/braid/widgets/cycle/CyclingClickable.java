@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.cycle;
 
+import io.wispforest.owo.braid.core.KeyModifiers;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
@@ -10,6 +11,7 @@ import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 import java.util.Map;
@@ -69,8 +71,9 @@ public class CyclingClickable extends StatelessWidget {
 
     // ---
 
+    //FIXME: making a shortcut with modifiers is a pain in the ass
     private static final Map<List<ShortcutTrigger>, Intent> SHORTCUTS = Map.of(
-        List.of(ShortcutTrigger.of(ShortcutTrigger.UP, ShortcutTrigger.RIGHT)), new AdjustIntent(AdjustIntent.Direction.INCREMENT),
-        List.of(ShortcutTrigger.of(ShortcutTrigger.RIGHT_CLICK, ShortcutTrigger.DOWN, ShortcutTrigger.LEFT)), new AdjustIntent(AdjustIntent.Direction.DECREMENT)
+        List.of(ShortcutTrigger.of(ShortcutTrigger.RIGHT_CLICK.withModifiers(new KeyModifiers(GLFW.GLFW_MOD_SHIFT)), ShortcutTrigger.UP, ShortcutTrigger.RIGHT)), new AdjustIntent(AdjustIntent.Direction.INCREMENT),
+        List.of(ShortcutTrigger.of(ShortcutTrigger.LEFT_CLICK.withModifiers(new KeyModifiers(GLFW.GLFW_MOD_SHIFT)), ShortcutTrigger.RIGHT_CLICK, ShortcutTrigger.DOWN, ShortcutTrigger.LEFT)), new AdjustIntent(AdjustIntent.Direction.DECREMENT)
     );
 }

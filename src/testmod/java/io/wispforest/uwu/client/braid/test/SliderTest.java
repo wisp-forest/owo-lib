@@ -1,4 +1,4 @@
-package io.wispforest.uwu.client.braid;
+package io.wispforest.uwu.client.braid.test;
 
 import io.wispforest.owo.braid.core.*;
 import io.wispforest.owo.braid.framework.BuildContext;
@@ -28,7 +28,8 @@ import io.wispforest.owo.braid.widgets.slider.xlyder.MessageXlyder;
 import io.wispforest.owo.braid.widgets.slider.xlyder.Xlyder;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.ui.core.OwoUIGraphics;
-import io.wispforest.uwu.client.Bikeshed;
+import io.wispforest.uwu.client.braid.Bikeshed;
+import io.wispforest.uwu.client.braid.GayAmogus;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix3x2f;
@@ -40,20 +41,22 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class SliderTests extends StatefulWidget {
+import static io.wispforest.owo.braid.framework.instance.InspectorProperty.rounded;
 
-    public enum SliderTest {
+public class SliderTest extends StatefulWidget {
+
+    public enum Test {
         BASIC, DIRECTION, REDUNDANT, SLIDER
     }
 
     @Override
-    public WidgetState<SliderTests> createState() {
+    public WidgetState<SliderTest> createState() {
         return new State();
     }
 
-    public static class State extends WidgetState<SliderTests> {
+    public static class State extends WidgetState<SliderTest> {
 
-        private SliderTest test = SliderTest.BASIC;
+        private Test test = Test.BASIC;
 
         @Override
         public Widget build(BuildContext context) {
@@ -63,7 +66,7 @@ public class SliderTests extends StatefulWidget {
                     new SliderStyle<>(
                         null,
                         active -> new HoverableBuilder((hoverableContext, hovered) -> {
-                            return hovered ? new TestSelector.GayAmogus(4) : new Box(Color.WHITE);
+                            return hovered ? new GayAmogus(4) : new Box(Color.WHITE);
                         }),
                         Size.of(16, 16),
                         null
@@ -95,7 +98,7 @@ public class SliderTests extends StatefulWidget {
                                                     MainAxisAlignment.START,
                                                     CrossAxisAlignment.CENTER,
                                                     new Padding(Insets.all(2)),
-                                                    Stream.of(SliderTest.values()).map(test -> new MessageButton(
+                                                    Stream.of(Test.values()).map(test -> new MessageButton(
                                                         Component.literal(test.name().toLowerCase(Locale.ROOT).replace('_', ' ')),
                                                         test != this.test ? () -> this.setState(() -> this.test = test) : null
                                                     )).collect(Collectors.toList())
@@ -111,11 +114,6 @@ public class SliderTests extends StatefulWidget {
             );
         }
     }
-
-    public static String formatDouble(double value) {
-        return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).toPlainString().replaceAll("(\\.0*|(?<=\\d)\\.0+)$", "");
-    }
-
 
     public static class BasicSliderTest extends StatefulWidget {
 
@@ -145,7 +143,7 @@ public class SliderTests extends StatefulWidget {
                         100, 20,
                         new MessageSlider(
                             discreteX,
-                            Component.literal("v: " + formatDouble(discreteX)), widget -> widget
+                            Component.literal("v: " + rounded(discreteX)), widget -> widget
                                 .range(0, 32)
                                 .step(2),
                             newValue -> this.setState(() -> this.discreteX = newValue)
@@ -155,7 +153,7 @@ public class SliderTests extends StatefulWidget {
                         100, 20,
                         new MessageSlider(
                             smoothX,
-                            Component.literal("v: " + formatDouble(smoothX)), widget -> widget.range(0, 32),
+                            Component.literal("v: " + rounded(smoothX)), widget -> widget.range(0, 32),
                             newValue -> this.setState(() -> this.smoothX = newValue)
                         )
                     ),
@@ -164,7 +162,7 @@ public class SliderTests extends StatefulWidget {
                         100, 100,
                         new MessageXlyder(
                             discreteX, discreteY,
-                            Component.literal("x: " + formatDouble(discreteX) + "\ny: " + formatDouble(discreteY)),
+                            Component.literal("x: " + rounded(discreteX) + "\ny: " + rounded(discreteY)),
                             xlyder -> xlyder
                                 .range(0, 32)
                                 .step(2),
@@ -178,7 +176,7 @@ public class SliderTests extends StatefulWidget {
                         100, 100,
                         new MessageXlyder(
                             smoothX, smoothY,
-                            Component.literal("x: " + formatDouble(smoothX) + "\ny: " + formatDouble(smoothY)),
+                            Component.literal("x: " + rounded(smoothX) + "\ny: " + rounded(smoothY)),
                             xlyder -> xlyder.range(0, 32),
                             (x, y) -> this.setState(() -> {
                                 this.smoothX = x;
@@ -191,7 +189,7 @@ public class SliderTests extends StatefulWidget {
                         100, 20,
                         new MessageRangeSlider(
                             discreteX, discreteY,
-                            Component.literal("v: " + formatDouble(discreteX) + "-" + formatDouble(discreteY)), slider -> slider
+                            Component.literal("v: " + rounded(discreteX) + "-" + rounded(discreteY)), slider -> slider
                                 .range(0, 32)
                                 .step(2),
                             (min, max) -> this.setState(() -> {
@@ -204,7 +202,7 @@ public class SliderTests extends StatefulWidget {
                         100, 20,
                         new MessageRangeSlider(
                             smoothX, smoothY,
-                            Component.literal("v: " + formatDouble(smoothX) + "-" + formatDouble(smoothY)), slider -> slider.range(0, 32),
+                            Component.literal("v: " + rounded(smoothX) + "-" + rounded(smoothY)), slider -> slider.range(0, 32),
                             (min, max) -> this.setState(() -> {
                                 this.smoothX = min;
                                 this.smoothY = max;
@@ -218,7 +216,7 @@ public class SliderTests extends StatefulWidget {
                             discreteX,
                             drag -> drag.range(0, 32).step(2),
                             newValue -> this.setState(() -> this.discreteX = newValue),
-                            Component.literal("v: " + formatDouble(discreteX))
+                            Component.literal("v: " + rounded(discreteX))
                         )
                     ),
                     new Sized(
@@ -227,7 +225,7 @@ public class SliderTests extends StatefulWidget {
                             smoothX,
                             drag -> drag.range(0, 32),
                             newValue -> this.setState(() -> this.smoothX = newValue),
-                            Component.literal("v: " + formatDouble(smoothX))
+                            Component.literal("v: " + rounded(smoothX))
                         )
                     )
                 );
@@ -275,7 +273,7 @@ public class SliderTests extends StatefulWidget {
                     100, 20,
                     new MessageSlider(
                         value,
-                        Component.literal("v: " + formatDouble(value)), setupCallback,
+                        Component.literal("v: " + rounded(value)), setupCallback,
                         newValue -> this.setState(() -> this.value = newValue)
                     )
                 );
@@ -345,7 +343,7 @@ public class SliderTests extends StatefulWidget {
                                 null,
                                 false,
                                 Label.Overflow.SHOW,
-                                Component.literal(formatDouble(x) + "\n" + formatDouble(y))
+                                Component.literal(rounded(x) + "\n" + rounded(y))
                             )
                         )
                     ),
@@ -405,7 +403,7 @@ public class SliderTests extends StatefulWidget {
                     CrossAxisAlignment.CENTER,
                     new Padding(
                         Insets.all(20),
-                        new Label(Component.literal("incredibly redundant slider™"))
+                        Label.literal("incredibly redundant slider™")
                     ),
                     new Sized(
                         100.0,

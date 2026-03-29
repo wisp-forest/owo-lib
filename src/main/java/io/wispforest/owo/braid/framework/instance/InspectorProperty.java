@@ -2,4 +2,32 @@ package io.wispforest.owo.braid.framework.instance;
 
 import net.minecraft.network.chat.Component;
 
-public record InspectorProperty(Component name, Component value) {}
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
+public record InspectorProperty(Component name, Component value) {
+
+    public InspectorProperty(String name, String value) {
+        this(Component.literal(name), Component.literal(value));
+    }
+
+    public static String rounded(double value, int precision) {
+        if (Double.isNaN(value) || Double.isInfinite(value)) return String.valueOf(value);
+        return BigDecimal.valueOf(value)
+            .setScale(precision, RoundingMode.HALF_UP)
+            .stripTrailingZeros()
+            .toPlainString();
+    }
+
+    public static String rounded(double value) {
+        return rounded(value, 2);
+    }
+
+    public static String roundedWithCommas(double... values) {
+        return Arrays.stream(values)
+            .mapToObj(InspectorProperty::rounded)
+            .collect(Collectors.joining(", "));
+    }
+}

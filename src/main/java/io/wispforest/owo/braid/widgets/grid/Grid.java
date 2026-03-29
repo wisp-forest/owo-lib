@@ -175,10 +175,7 @@ public class Grid extends MultiChildInstanceWidget {
         @Override
         public List<InspectorProperty> debugListInspectorProperties() {
             return List.of(
-                new InspectorProperty(
-                    Component.literal("Main Axis"),
-                    Component.literal(this.widget.mainAxis.toString())
-                )
+                new InspectorProperty("Main Axis", this.widget.mainAxis.toString())
             );
         }
 

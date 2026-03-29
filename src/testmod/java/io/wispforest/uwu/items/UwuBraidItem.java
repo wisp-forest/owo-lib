@@ -9,7 +9,8 @@ import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.braid.widgets.object.EntityWidget;
+import io.wispforest.owo.braid.widgets.object.entity.EntityDisplayMode;
+import io.wispforest.owo.braid.widgets.object.entity.EntityRenderStateWidget;
 import io.wispforest.owo.braid.widgets.object.ItemStackWidget;
 import io.wispforest.owo.braid.widgets.Navigator;
 import io.wispforest.owo.braid.widgets.basic.*;
@@ -18,6 +19,7 @@ import io.wispforest.owo.braid.widgets.button.MessageButton;
 import io.wispforest.owo.braid.widgets.flex.*;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
+import io.wispforest.owo.braid.widgets.object.entity.EntityWidget;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
 import io.wispforest.uwu.client.braid.TestSelector;
@@ -26,7 +28,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.cow.Cow;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -238,7 +239,7 @@ public class UwuBraidItem extends Item {
                 return new EntityWidget(
                     1.35,
                     this.cow,
-                    widget -> widget.displayMode(EntityWidget.DisplayMode.CURSOR)
+                    widget -> widget.displayMode(EntityDisplayMode.CURSOR)
                 );
             }
         }

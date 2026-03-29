@@ -1,5 +1,6 @@
-package io.wispforest.owo.braid.widgets.object;
+package io.wispforest.owo.braid.widgets.object.entity;
 
+import com.google.common.base.Preconditions;
 import com.mojang.math.Axis;
 import io.wispforest.owo.braid.core.BraidGraphics;
 import io.wispforest.owo.braid.core.Constraints;
@@ -7,8 +8,8 @@ import io.wispforest.owo.braid.core.element.BraidEntityElement;
 import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix4f;
@@ -16,33 +17,47 @@ import org.joml.Vector4f;
 
 import java.util.OptionalDouble;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-public class EntityWidget extends LeafInstanceWidget {
+public class EntityRenderStateWidget extends LeafInstanceWidget {
 
     public final double scale;
-    public final Entity entity;
+    public final Supplier<EntityRenderState> renderStateSupplier;
 
-    protected DisplayMode displayMode = DisplayMode.FIXED;
+    protected EntityDisplayMode displayMode = EntityDisplayMode.FIXED;
     protected boolean scaleToFit = true;
     protected boolean showNametag = false;
     protected @Nullable Consumer<Matrix4f> transform = null;
 
-    public EntityWidget(double scale, Entity entity, @Nullable WidgetSetupCallback<EntityWidget> setupCallback) {
+    public EntityRenderStateWidget(double scale, Supplier<EntityRenderState> renderStateSupplier, @Nullable WidgetSetupCallback<EntityRenderStateWidget> setupCallback) {
         this.scale = scale;
-        this.entity = entity;
+        Preconditions.checkNotNull(renderStateSupplier, "The RenderState provided to an EntityRenderStateWidget cannot be null");
+        this.renderStateSupplier = renderStateSupplier;
         if (setupCallback != null) setupCallback.setup(this);
     }
 
-    public EntityWidget displayMode(DisplayMode displayMode) {
+    public EntityRenderStateWidget(double scale, EntityRenderState renderState, @Nullable WidgetSetupCallback<EntityRenderStateWidget> setupCallback) {
+        this(scale, () -> renderState, setupCallback);
+    }
+
+    public EntityRenderStateWidget(double scale, Supplier<EntityRenderState> renderStateSupplier) {
+        this(scale, renderStateSupplier, null);
+    }
+
+    public EntityRenderStateWidget(double scale, EntityRenderState renderState) {
+        this(scale, renderState, null);
+    }
+
+    public EntityRenderStateWidget displayMode(EntityDisplayMode displayMode) {
         this.displayMode = displayMode;
         return this;
     }
 
-    public DisplayMode displayMode() {
+    public EntityDisplayMode displayMode() {
         return this.displayMode;
     }
 
-    public EntityWidget scaleToFit(boolean scaleToFit) {
+    public EntityRenderStateWidget scaleToFit(boolean scaleToFit) {
         this.scaleToFit = scaleToFit;
         return this;
     }
@@ -51,7 +66,7 @@ public class EntityWidget extends LeafInstanceWidget {
         return this.scaleToFit;
     }
 
-    public EntityWidget showNametag(boolean showNametag) {
+    public EntityRenderStateWidget showNametag(boolean showNametag) {
         this.showNametag = showNametag;
         return this;
     }
@@ -60,7 +75,7 @@ public class EntityWidget extends LeafInstanceWidget {
         return this.showNametag;
     }
 
-    public EntityWidget transform(Consumer<Matrix4f> transform) {
+    public EntityRenderStateWidget transform(Consumer<Matrix4f> transform) {
         this.transform = transform;
         return this;
     }
@@ -74,16 +89,16 @@ public class EntityWidget extends LeafInstanceWidget {
         return new Instance(this);
     }
 
-    public static class Instance extends LeafWidgetInstance<EntityWidget> {
+    public static class Instance extends LeafWidgetInstance<EntityRenderStateWidget> {
 
         protected double baseScale = 1.0;
 
-        public Instance(EntityWidget widget) {
+        public Instance(EntityRenderStateWidget widget) {
             super(widget);
         }
 
         @Override
-        public void setWidget(EntityWidget widget) {
+        public void setWidget(EntityRenderStateWidget widget) {
             if (this.widget.scaleToFit != widget.scaleToFit) {
                 this.markNeedsLayout();
             }
@@ -95,10 +110,12 @@ public class EntityWidget extends LeafInstanceWidget {
         protected void doLayout(Constraints constraints) {
             this.transform.setSize(constraints.minSize());
 
+            var renderState = this.widget.renderStateSupplier.get();
+
             if (this.widget.scaleToFit) {
                 this.baseScale = Math.min(
-                    this.transform.width() / this.widget.entity.getBbWidth(),
-                    this.transform.height() / this.widget.entity.getBbHeight()
+                    this.transform.width() / renderState.boundingBoxWidth,
+                    this.transform.height() / renderState.boundingBoxHeight
                 ) * .6;
             }
         }
@@ -120,7 +137,7 @@ public class EntityWidget extends LeafInstanceWidget {
 
         @Override
         public void draw(BraidGraphics graphics) {
-            var entity = this.widget.entity;
+            var state = this.widget.renderStateSupplier.get();
 
             var entitySpaceToWidgetSpace = new Matrix4f();
             entitySpaceToWidgetSpace.translate(0, (float) (this.transform.height() / 2), 100);
@@ -132,19 +149,19 @@ public class EntityWidget extends LeafInstanceWidget {
                 this.widget.transform.accept(entityTransform);
             }
 
-            entityTransform.translate(0, -entity.getBbHeight() / 2, 0);
+            entityTransform.translate(0, -state.boundingBoxHeight / 2, 0);
 
             var xRotation = 0f;
             var yRotation = 0f;
 
-            var lastHeadYaw = entity instanceof LivingEntity living ? living.yHeadRotO : 0;
-            var lastYaw = entity.yRotO;
-            var lastPitch = entity.xRotO;
+//            var lastHeadYaw = renderState instanceof LivingEntityRenderState livingState ? livingState.yHeadRotO : 0;
+//            var lastYaw = renderState.yRotO;
+//            var lastPitch = renderState.xRotO;
 
-            if (this.widget.displayMode == DisplayMode.FIXED) {
+            if (this.widget.displayMode == EntityDisplayMode.FIXED) {
                 xRotation = 35;
                 yRotation = -45;
-            } else if (this.widget.displayMode != DisplayMode.NONE) {
+            } else if (this.widget.displayMode != EntityDisplayMode.NONE) {
                 var globalCursorPos = this.host().cursorPosition();
                 var cursor4x4Buffer = graphics.pose().get4x4(new float[16]);
 
@@ -161,24 +178,41 @@ public class EntityWidget extends LeafInstanceWidget {
 
                 switch (widget.displayMode) {
                     case CURSOR -> {
-                        var center = new Vector4f(0, entity.getEyeHeight(entity.getPose()), 0, 1);
+                        var center = new Vector4f(0, state.eyeHeight, 0, 1);
 
                         xRotation = (float) Math.toDegrees(Math.atan(localCursorPos.y - center.y)) * -.15f;
                         yRotation = (float) Math.toDegrees(Math.atan(localCursorPos.x - center.x)) * .15f;
-                        if (entity instanceof LivingEntity living) living.yHeadRotO = -yRotation * 3;
-
-                        entity.yRotO = -yRotation * .65f;
-                        entity.xRotO = xRotation * 2.5f;
+                        if (state instanceof LivingEntityRenderState living) {
+                            living.yRot = -yRotation * 3;
+                            //TODO: how does this not seem to matter for non living entities
+                            living.bodyRot = -yRotation * .65f;
+                            living.xRot = xRotation * 2.5f;
+                        }
                     }
                     case VANILLA -> {
-                        var center = new Vector4f(0, entity.getBbHeight() / 2, 0, 1);
+                        var center = new Vector4f(0, state.boundingBoxHeight / 2, 0, 1);
 
                         xRotation = (float) Math.atan(localCursorPos.y - center.y) * -20f;
                         yRotation = (float) Math.atan(localCursorPos.x - center.x) * 20f;
-                        if (entity instanceof LivingEntity living) living.yHeadRotO = -yRotation;
+                        if (state instanceof LivingEntityRenderState living) {
+                            living.yRot = -yRotation;
+                            //TODO: how does this not seem to matter for non living entities
+                            living.bodyRot = -yRotation;
+                            living.xRot = xRotation;
+                        }
+                    }
+                    case VANILLA_CURSOR -> {
+                        //fuck you mojang
+                        var center = new Vector4f(0, state.eyeHeight, 0, 1);
 
-                        entity.yRotO = -yRotation;
-                        entity.xRotO = xRotation;
+                        xRotation = (float) Math.atan(localCursorPos.y - center.y) * -20f;
+                        yRotation = (float) Math.atan(localCursorPos.x - center.x) * 20f;
+                        if (state instanceof LivingEntityRenderState living) {
+                            living.yRot = -yRotation;
+                            //TODO: how does this not seem to matter for non living entities
+                            living.bodyRot = -yRotation;
+                            living.xRot = xRotation;
+                        }
                     }
                 }
             }
@@ -189,27 +223,21 @@ public class EntityWidget extends LeafInstanceWidget {
             entityTransform.rotate(Axis.XP.rotationDegrees(xRotation));
             entityTransform.rotate(Axis.YP.rotationDegrees(yRotation));
 
-            var entityState = this.host().client().getEntityRenderDispatcher().extractEntity(this.widget.entity, 0);
-
             if (!this.widget.showNametag) {
-                entityState.nameTag = null;
+                state.nameTag = null;
             }
 
             graphics.guiRenderState.addPicturesInPictureState(new BraidEntityElement(
-                entityState,
+                state,
                 new Matrix4f().mul(entitySpaceToWidgetSpace).mul(entityTransform),
                 new Matrix3x2f(graphics.pose()),
                 this.transform.width(), this.transform.height(),
                 graphics.scissorStack.peek()
             ));
 
-            if (entity instanceof LivingEntity living) living.yHeadRotO = lastHeadYaw;
-            entity.xRotO = lastPitch;
-            entity.yRotO = lastYaw;
+//            if (state instanceof LivingEntity living) living.yHeadRotO = lastHeadYaw;
+//            state.xRotO = lastPitch;
+//            state.yRotO = lastYaw;
         }
-    }
-
-    public enum DisplayMode {
-        FIXED, VANILLA, CURSOR, NONE
     }
 }

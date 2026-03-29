@@ -13,9 +13,9 @@ import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import io.wispforest.owo.braid.widgets.basic.Padding;
 import io.wispforest.owo.braid.widgets.eventstream.BraidEventSource;
 import io.wispforest.owo.braid.widgets.eventstream.StreamListenerState;
+import io.wispforest.owo.braid.widgets.inspector.BraidInspector.PickEvent;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
-import net.minecraft.util.Unit;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -24,11 +24,11 @@ import java.util.Comparator;
 
 public class InstancePicker extends StatefulWidget {
 
-    public final BraidEventSource<Unit> activateEvents;
+    public final BraidEventSource<PickEvent> activateEvents;
     public final PickCallback pickCallback;
     public final Widget child;
 
-    public InstancePicker(BraidEventSource<Unit> activateEvents, PickCallback pickCallback, Widget child) {
+    public InstancePicker(BraidEventSource<PickEvent> activateEvents, PickCallback pickCallback, Widget child) {
         this.activateEvents = activateEvents;
         this.pickCallback = pickCallback;
         this.child = child;
@@ -48,8 +48,12 @@ public class InstancePicker extends StatefulWidget {
 
         @Override
         public void init() {
-            this.streamListen(widget -> widget.activateEvents, unit -> {
-                this.setState(() -> this.picking = true);
+            this.streamListen(widget -> widget.activateEvents, event -> {
+                if (event == PickEvent.START && this.pickedInstance != null) {
+                    this.pickedInstance.debugHighlighted = false;
+                    this.pickedInstance = null;
+                }
+                this.setState(() -> this.picking = event == PickEvent.START);
             });
         }
 
@@ -82,10 +86,10 @@ public class InstancePicker extends StatefulWidget {
                             if (this.pickedInstance != null) this.pickedInstance.debugHighlighted = true;
                         })
                         .clickCallback((x, y, button, modifiers) -> {
-                            if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+                            if (button <= 1) {
                                 if (this.pickedInstance != null) {
                                     this.pickedInstance.debugHighlighted = false;
-                                    this.widget().pickCallback.onPick(this.pickedInstance);
+                                    if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) this.widget().pickCallback.onPick(this.pickedInstance);
                                 }
 
                                 this.setState(() -> this.picking = false);

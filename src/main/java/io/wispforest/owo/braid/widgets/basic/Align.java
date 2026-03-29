@@ -3,11 +3,15 @@ package io.wispforest.owo.braid.widgets.basic;
 import io.wispforest.owo.braid.core.Alignment;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.Size;
+import io.wispforest.owo.braid.framework.instance.InspectorProperty;
 import io.wispforest.owo.braid.framework.instance.SingleChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.OptionalDouble;
 
@@ -86,6 +90,15 @@ public class Align extends SingleChildInstanceWidget {
         @Override
         protected OptionalDouble measureBaselineOffset() {
             return this.child.getBaselineOffset().stream().map(operand -> operand + this.child.transform.y()).findAny();
+        }
+
+        @Override
+        public List<InspectorProperty> debugListInspectorProperties() {
+            var list = new ArrayList<InspectorProperty>();
+            list.add(new InspectorProperty("Alignment", InspectorProperty.roundedWithCommas(this.widget.alignment.horizontal(), this.widget.alignment.vertical())));
+            this.widget.widthFactor.ifPresent(factor -> list.add(new InspectorProperty("Width Factor", InspectorProperty.rounded(factor))));
+            this.widget.heightFactor.ifPresent(factor -> list.add(new InspectorProperty("Height Factor", InspectorProperty.rounded(factor))));
+            return list;
         }
     }
 }

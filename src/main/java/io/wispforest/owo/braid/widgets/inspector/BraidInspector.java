@@ -10,6 +10,9 @@ import net.minecraft.util.Unit;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public class BraidInspector {
 
     public final AppState subject;
@@ -17,8 +20,8 @@ public class BraidInspector {
     public WidgetInstance<?> rootInstance;
 
     private final BraidEventStream<Unit> refreshEvents = new BraidEventStream<>();
-    private final BraidEventStream<Unit> pickEvents = new BraidEventStream<>();
-    private final BraidEventStream<RevealInstanceEvent> revealEvents = new BraidEventStream<>();
+    private final BraidEventStream<PickEvent> pickEvents = new BraidEventStream<>();
+    private final BraidEventStream<RevealEvent> revealEvents = new BraidEventStream<>();
 
     private boolean active = false;
     @Nullable AppState currentApp;
@@ -28,19 +31,20 @@ public class BraidInspector {
         this.subject = subject;
     }
 
-    public BraidEventSource<Unit> onPick() {
+    public BraidEventSource<PickEvent> onPick() {
         return this.pickEvents.source();
     }
 
-    public void pick() {
-        this.pickEvents.sink().onEvent(Unit.INSTANCE);
+    public void pick(PickEvent event) {
+        this.pickEvents.sink().onEvent(event);
+        if (currentWindow != null && event == PickEvent.START) GLFW.glfwIconifyWindow(currentWindow.handle);
     }
 
     public BraidEventSource<Unit> onRefresh() {
         return this.refreshEvents.source();
     }
 
-    public BraidEventSource<RevealInstanceEvent> onReveal() {
+    public BraidEventSource<RevealEvent> onReveal() {
         return this.revealEvents.source();
     }
 
@@ -70,6 +74,7 @@ public class BraidInspector {
         this.currentWindow = result.window();
 
         this.currentApp.onTerminate(() -> {
+            this.pick(PickEvent.STOP);
             this.currentApp = null;
             this.currentWindow = null;
             this.active = false;
@@ -78,7 +83,8 @@ public class BraidInspector {
 
     public void revealInstance(WidgetInstance<?> instance) {
         if (!this.active) return;
-        this.revealEvents.sink().onEvent(new RevealInstanceEvent(instance));
+        this.revealEvents.sink().onEvent(new RevealEvent(instance));
+        if (currentWindow != null) GLFW.glfwShowWindow(currentWindow.handle);
     }
 
     public void refresh() {
@@ -89,4 +95,6 @@ public class BraidInspector {
         if (this.currentApp == null) return;
         this.currentApp.scheduleShutdown();
     }
+
+    public enum PickEvent {START, STOP}
 }
