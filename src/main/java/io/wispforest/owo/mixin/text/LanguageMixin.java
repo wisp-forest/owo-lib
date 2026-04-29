@@ -45,7 +45,8 @@ public class LanguageMixin {
         @Local(argsOnly = true) InputStream stream
     ) {
         var enabledByDefault = featureEnabled(instance, "extended_lang", false) || stream instanceof DataExtensionUtil.CoercedByteArrayInputStream;
-        richTranslationsEnabled.set(featureEnabled(instance, RICH_TRANSLATIONS_ENABLER, enabledByDefault));
+         // 1.21-specific patch to always enable rich translations by default - necessary to maintain backwards compat
+        richTranslationsEnabled.set(featureEnabled(instance, RICH_TRANSLATIONS_ENABLER, /* enabledByDefault */ true));
         nestedLangEnabled.set(featureEnabled(instance, NESTED_LANG_ENABLER, enabledByDefault));
         return nestedLangEnabled.get() ? NestedLangHandler.deNest(original.call(instance)) : original.call(instance);
     }
