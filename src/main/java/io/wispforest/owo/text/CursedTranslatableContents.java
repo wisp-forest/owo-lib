@@ -15,7 +15,7 @@ public class CursedTranslatableContents extends TranslatableContents {
     private static final CursedTranslatableContents INSTANCE = new CursedTranslatableContents();
 
     private CursedTranslatableContents() {
-        super("", null, null);
+        super("", null, new Object[0]);
     }
 
     public static Component unpackArgs(Component text) {
