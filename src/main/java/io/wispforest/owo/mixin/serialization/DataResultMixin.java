@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+// TODO: SUCH IS IMPOSSIBLE TO EVEN ATTEMPT DUE TO HOW DFU IS LOADED ON NEO
 @Mixin(value = DataResult.class, remap = false)
 public interface DataResultMixin {
 

@@ -5,6 +5,7 @@ import io.wispforest.owo.braid.framework.instance.HitTestState;
 import io.wispforest.owo.braid.framework.instance.SingleChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
+import io.wispforest.owo.mixin.ui.access.GuiGraphicsExtractorAccessor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 
 // TODO: stencil clip
@@ -42,7 +43,7 @@ public class Clip extends SingleChildInstanceWidget {
                 return;
             }
 
-            graphics.scissorStack.push(new ScreenRectangle(0, 0, (int) this.transform.width(), (int) this.transform.height()).transformMaxBounds(graphics.pose()));
+            ((GuiGraphicsExtractorAccessor) graphics).owo$getScissorStack().push(new ScreenRectangle(0, 0, (int) this.transform.width(), (int) this.transform.height()).transformMaxBounds(graphics.pose()));
             super.draw(graphics);
             graphics.disableScissor();
         }

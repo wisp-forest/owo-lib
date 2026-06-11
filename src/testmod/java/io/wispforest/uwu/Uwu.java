@@ -37,13 +37,11 @@ import io.wispforest.uwu.config.UwuConfig;
 import io.wispforest.uwu.items.UwuItems;
 import io.wispforest.uwu.network.*;
 import io.wispforest.uwu.text.BasedTextContent;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
-import net.fabricmc.fabric.api.networking.v1.FriendlyByteBufs;
-import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
-import net.fabricmc.loader.api.FabricLoader;
+import io.wispforest.owo.neoforge.env.EnvType;
+//import net.fabricmc.api.ModInitializer;
+//import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+//import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
+//import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.Block;
@@ -69,6 +67,12 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.resources.Identifier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -77,7 +81,7 @@ import java.util.function.Consumer;
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
-public class Uwu implements ModInitializer {
+public class Uwu /*implements ModInitializer*/ {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -95,7 +99,7 @@ public class Uwu implements ModInitializer {
     );
 
     public static final Block BRAID_DISPLAY_BLOCK = new BraidDisplayBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).setId(ResourceKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("uwu", "braid_display"))));
-    public static final BlockEntityType<BraidDisplayBlockEntity> BRAID_DISPLAY_ENTITY = FabricBlockEntityTypeBuilder.create(BraidDisplayBlockEntity::new, BRAID_DISPLAY_BLOCK).build();
+    public static final BlockEntityType<BraidDisplayBlockEntity> BRAID_DISPLAY_ENTITY = new BlockEntityType<>(BraidDisplayBlockEntity::new, BRAID_DISPLAY_BLOCK);
 
     public static final OwoItemGroup FOUR_TAB_GROUP = OwoItemGroup.builder(Identifier.fromNamespaceAndPath("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET))
         .disableDynamicTitle()
@@ -144,7 +148,7 @@ public class Uwu implements ModInitializer {
         .initializer(group -> group.addTab(Icon.of(Items.SPONGE), "tab_1", null, true))
         .build();
 
-    public static final CreativeModeTab VANILLA_GROUP = Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, Identifier.fromNamespaceAndPath("uwu", "vanilla_group"), FabricCreativeModeTab.builder()
+    public static final CreativeModeTab VANILLA_GROUP = Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, Identifier.fromNamespaceAndPath("uwu", "vanilla_group"), CreativeModeTab.builder()
         .title(Component.literal("who did this"))
         .icon(Items.ACACIA_BOAT::getDefaultInstance)
         .displayItems((context, entries) -> entries.accept(Items.MANGROVE_CHEST_BOAT))
@@ -177,7 +181,13 @@ public class Uwu implements ModInitializer {
 //        builder.janksonBuilder().registerSerializer(Color.class, (color, marshaller) -> new JsonPrimitive("bruv"));
     });
 
-    @Override
+    public Uwu(IEventBus modBus) {
+        modBus.<FMLCommonSetupEvent>addListener(event -> {
+            this.onInitialize();
+        });
+    }
+
+    /*@Override*/
     public void onInitialize() {
 
 //        var stackEndec = CodecUtils.toEndec(ItemStack.CODEC);
@@ -220,7 +230,7 @@ public class Uwu implements ModInitializer {
             access.player().sendSystemMessage(Component.nullToEmpty(String.valueOf(message)));
         });
 
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER && WE_TESTEN_HANDSHAKE) {
+        if (FMLEnvironment.getDist() == Dist.DEDICATED_SERVER && WE_TESTEN_HANDSHAKE) {
             OwoNetChannel.create(Identifier.fromNamespaceAndPath("uwu", "server_only_channel"));
             new ParticleSystemController(Identifier.fromNamespaceAndPath("uwu", "server_only_particles"));
         }
@@ -234,7 +244,8 @@ public class Uwu implements ModInitializer {
 
 //        UwuShapedRecipe.init();
 
-        CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
+        NeoForge.EVENT_BUS.<RegisterCommandsEvent>addListener((event) -> {
+            var dispatcher = event.getDispatcher(); var access = event.getBuildContext(); var environment = event.getCommandSelection();
 
             dispatcher.register(literal("get_option")
                 .then(argument("config", StringArgumentType.string())

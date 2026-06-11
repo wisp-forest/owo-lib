@@ -34,7 +34,7 @@
     "serialization.CachedRegistryInfoGetterAccessor",
     "serialization.CompoundTagMixin",
     "serialization.DataComponentTypeBuilderMixin",
-    "serialization.DataResultMixin",
+
     "serialization.DataResultMixin$DataResultErrorMixin",
     "serialization.DelegatingOpsAccessor",
     "serialization.FriendlyByteBufMixin",

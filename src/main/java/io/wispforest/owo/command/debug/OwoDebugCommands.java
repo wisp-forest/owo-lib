@@ -13,13 +13,18 @@ import io.wispforest.owo.renderdoc.RenderdocScreen;
 import io.wispforest.owo.ui.hud.HudInspectorScreen;
 import io.wispforest.owo.ui.parsing.ConfigureHotReloadScreen;
 import io.wispforest.owo.ui.parsing.UIModelLoader;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.loader.api.FabricLoader;
+import io.wispforest.owo.neoforge.env.EnvType;
+import io.wispforest.owo.neoforge.env.Environment;
+//import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+//import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
+//import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+//import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+//import net.fabricmc.loader.api.FabricLoader;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+import net.minecraft.commands.Commands;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.fml.ModList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
@@ -57,8 +62,8 @@ public class OwoDebugCommands {
     public static final int VALUE_BLUE = 0x94DAFF;
 
     public static void register() {
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-
+        NeoForge.EVENT_BUS.<RegisterCommandsEvent>addListener((event) -> {
+            var dispatcher = event.getDispatcher(); var registryAccess = event.getBuildContext(); var environment = event.getCommandSelection();
             dispatcher.register(literal("logger").then(argument("level", LEVEL_ARGUMENT_TYPE).executes(context -> {
                 final var level = LEVEL_ARGUMENT_TYPE.get(context, "level");
                 LogUtils.configureRootLoggingLevel(level);
@@ -138,7 +143,8 @@ public class OwoDebugCommands {
             DumpdataCommand.register(dispatcher);
             HealCommand.register(dispatcher);
 
-            if (FabricLoader.getInstance().isModLoaded("cardinal-components-base")) {
+            // TODO: MAY NOT WORK WITH SYNTRA CONNECTOR?
+            if (ModList.get().isLoaded("cardinal-components-base")) {
                 CcaDataCommand.register(dispatcher);
             }
         });
@@ -147,21 +153,22 @@ public class OwoDebugCommands {
     @Environment(EnvType.CLIENT)
     public static class Client {
 
-        private static final SuggestionProvider<FabricClientCommandSource> LOADED_UI_MODELS =
+        private static final SuggestionProvider<CommandSourceStack> LOADED_UI_MODELS =
             (context, builder) -> SharedSuggestionProvider.suggestResource(UIModelLoader.allLoadedModels(), builder);
 
         private static final SimpleCommandExceptionType NO_SUCH_UI_MODEL = new SimpleCommandExceptionType(Component.literal("No such UI model is loaded"));
 
         public static void register() {
-            ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-                dispatcher.register(ClientCommands.literal("owo-hud-inspect")
+            NeoForge.EVENT_BUS.<RegisterClientCommandsEvent>addListener((event) -> {
+                var dispatcher = event.getDispatcher(); var registryAccess = event.getBuildContext();
+                dispatcher.register(Commands.literal("owo-hud-inspect")
                     .executes(context -> {
                         Minecraft.getInstance().setScreen(new HudInspectorScreen());
                         return 0;
                     }));
 
-                dispatcher.register(ClientCommands.literal("owo-ui-set-reload-path")
-                    .then(ClientCommands.argument("model-id", IdentifierArgument.id()).suggests(LOADED_UI_MODELS).executes(context -> {
+                dispatcher.register(Commands.literal("owo-ui-set-reload-path")
+                    .then(Commands.argument("model-id", IdentifierArgument.id()).suggests(LOADED_UI_MODELS).executes(context -> {
                         var modelId = context.getArgument("model-id", Identifier.class);
                         if (UIModelLoader.getPreloaded(modelId) == null) throw NO_SUCH_UI_MODEL.create();
 
@@ -170,21 +177,21 @@ public class OwoDebugCommands {
                     })));
 
                 if (RenderDoc.isAvailable()) {
-                    dispatcher.register(ClientCommands.literal("renderdoc").executes(context -> {
+                    dispatcher.register(Commands.literal("renderdoc").executes(context -> {
                         Minecraft.getInstance().setScreen(new RenderdocScreen());
                         return 1;
-                    }).then(ClientCommands.literal("comment")
-                        .then(ClientCommands.argument("capture_index", IntegerArgumentType.integer(0))
-                            .then(ClientCommands.argument("comment", StringArgumentType.greedyString())
+                    }).then(Commands.literal("comment")
+                        .then(Commands.argument("capture_index", IntegerArgumentType.integer(0))
+                            .then(Commands.argument("comment", StringArgumentType.greedyString())
                                 .executes(context -> {
                                     var capture = RenderDoc.getCapture(IntegerArgumentType.getInteger(context, "capture_index"));
                                     if (capture == null) {
-                                        context.getSource().sendError(TextOps.concat(Owo.PREFIX, Component.nullToEmpty("no such capture")));
+                                        context.getSource().sendFailure(TextOps.concat(Owo.PREFIX, Component.nullToEmpty("no such capture")));
                                         return 0;
                                     }
 
                                     RenderDoc.setCaptureComments(capture, StringArgumentType.getString(context, "comment"));
-                                    context.getSource().sendFeedback(TextOps.concat(Owo.PREFIX, Component.nullToEmpty("comment updated")));
+                                    context.getSource().sendSystemMessage(TextOps.concat(Owo.PREFIX, Component.nullToEmpty("comment updated")));
 
                                     return 1;
                                 })))));

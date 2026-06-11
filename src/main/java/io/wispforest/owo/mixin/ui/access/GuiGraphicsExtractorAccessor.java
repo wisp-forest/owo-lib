@@ -4,6 +4,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
+import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2fStack;
@@ -45,4 +46,7 @@ public interface GuiGraphicsExtractorAccessor {
 
     @Accessor("mouseY")
     int owo$getMouseY();
+
+    @Accessor("guiRenderState")
+    GuiRenderState owo$guiRenderState();
 }

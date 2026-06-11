@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "plugin": "io.wispforest.owo.neoforge.mixin.EnvironmentStripperPlugin",
+  "package": "io.wispforest.owo.neoforge.mixin",
+  "compatibilityLevel": "JAVA_16",
+  "mixins": [
+    "neoforge.NetworkRegistryMixin",
+    "text.TranslatableContentsMixin"
+  ],
+  "client": [
+    "neoforge.PictureInPictureRendererPoolAccessor"
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

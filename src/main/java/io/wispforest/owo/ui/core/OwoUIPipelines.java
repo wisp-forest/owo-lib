@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
+import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Optional;
@@ -50,11 +51,11 @@ public final class OwoUIPipelines {
         .build();
 
     @ApiStatus.Internal
-    public static void register() {
-        RenderPipelines.register(GUI_HSV);
-        RenderPipelines.register(GUI_BLUR);
-        RenderPipelines.register(GUI_TRIANGLE_FAN);
-        RenderPipelines.register(GUI_TRIANGLE_STRIP);
-        RenderPipelines.register(GUI_TEXTURED_NO_BLEND);
+    public static void register(RegisterRenderPipelinesEvent event) {
+        event.registerPipeline(GUI_HSV);
+        event.registerPipeline(GUI_BLUR);
+        event.registerPipeline(GUI_TRIANGLE_FAN);
+        event.registerPipeline(GUI_TRIANGLE_STRIP);
+        event.registerPipeline(GUI_TEXTURED_NO_BLEND);
     }
 }

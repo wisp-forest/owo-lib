@@ -46,10 +46,10 @@ public class Blur extends SingleChildInstanceWidget {
         }
 
         private void drawBlur(BraidGraphics ctx) {
-            ctx.guiRenderState.addGuiElement(new BlurQuadElementRenderState(
+            ctx.submitGuiElementRenderState(new BlurQuadElementRenderState(
                 new Matrix3x2f(ctx.pose()),
                 new ScreenRectangle(0, 0, (int) this.transform.width(), (int) this.transform.height()),
-                ctx.scissorStack.peek(),
+                ctx.peekScissorStack(),
                 16, this.widget.quality, this.widget.size
             ));
         }

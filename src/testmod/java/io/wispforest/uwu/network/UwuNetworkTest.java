@@ -5,7 +5,7 @@ import io.wispforest.endec.format.bytebuf.ByteBufDeserializer;
 import io.wispforest.endec.format.bytebuf.ByteBufSerializer;
 import io.wispforest.endec.impl.RecordEndec;
 import io.wispforest.endec.impl.StructEndecBuilder;
-import net.fabricmc.fabric.api.networking.v1.FriendlyByteBufs;
+import io.wispforest.owo.neoforge.api.FriendlyByteBufs;
 
 import java.util.LinkedList;
 import java.util.List;

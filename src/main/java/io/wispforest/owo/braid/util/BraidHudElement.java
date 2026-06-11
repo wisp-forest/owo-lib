@@ -5,14 +5,24 @@ import io.wispforest.owo.braid.core.AppState;
 import io.wispforest.owo.braid.core.EventBinding;
 import io.wispforest.owo.braid.core.Surface;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
+//import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+//import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.gui.GuiLayer;
+import net.neoforged.neoforge.common.NeoForge;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.jetbrains.annotations.Nullable;
 
-public class BraidHudElement implements HudElement {
+import java.util.Collections;
+import java.util.Set;
+import java.util.WeakHashMap;
+
+// TODO: ADD MIXIN TO ADD BINARY COMPAT FOR THIS
+public class BraidHudElement implements /*HudElement*/ GuiLayer {
+
+    private static final Set<BraidHudElement> activeElements = Collections.newSetFromMap(new WeakHashMap<>());
 
     public final Widget widget;
     private AppState app;
@@ -20,12 +30,16 @@ public class BraidHudElement implements HudElement {
     public BraidHudElement(Widget widget) {
         this.widget = widget;
 
-        ClientPlayConnectionEvents.JOIN.register((clientPlayNetworkHandler, packetSender, minecraftClient) -> {
-            this.setupAppState();
+        activeElements.add(this);
+    }
+
+    static {
+        NeoForge.EVENT_BUS.<ClientPlayerNetworkEvent.LoggingIn>addListener(event -> {
+            for (var activeElement : activeElements) activeElement.setupAppState();
         });
 
-        ClientPlayConnectionEvents.DISCONNECT.register((clientPlayNetworkHandler, minecraftClient) -> {
-            this.resetAppState();
+        NeoForge.EVENT_BUS.<ClientPlayerNetworkEvent.LoggingOut>addListener(event -> {
+            for (var activeElement : activeElements) activeElement.resetAppState();
         });
     }
 
@@ -34,6 +48,11 @@ public class BraidHudElement implements HudElement {
     }
 
     @Override
+    public void render(GuiGraphicsExtractor guiGraphicsExtractor, DeltaTracker deltaTracker) {
+        extractRenderState(guiGraphicsExtractor, deltaTracker);
+    }
+
+    /*@Override*/
     public void extractRenderState(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
         if (this.app == null) {
             if (!Owo.DEBUG) {

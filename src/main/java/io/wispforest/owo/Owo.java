@@ -2,24 +2,34 @@ package io.wispforest.owo;
 
 import io.wispforest.owo.client.screens.MenuNetworkingInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
+import io.wispforest.owo.config.ConfigSynchronizer;
+import io.wispforest.owo.network.OwoHandshake;
+import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.ops.LootOps;
 import io.wispforest.owo.text.CustomTextRegistry;
 import io.wispforest.owo.text.InsertingTextContent;
 import io.wispforest.owo.util.Wisdom;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.loader.api.FabricLoader;
+//import net.fabricmc.api.ModInitializer;
+//import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+//import net.fabricmc.loader.api.FabricLoader;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.wispforest.owo.ops.TextOps.withColor;
 
-public class Owo implements ModInitializer {
+public class Owo /*implements ModInitializer*/ {
 
     public static final String MOD_ID = "owo";
     /**
@@ -37,7 +47,7 @@ public class Owo implements ModInitializer {
         .append(Component.literal(" > ").withStyle(ChatFormatting.GRAY));
 
     static {
-        boolean debug = FabricLoader.getInstance().isDevelopmentEnvironment();
+        boolean debug = !FMLEnvironment.isProduction();
         if (System.getProperty("owo.debug") != null) debug = Boolean.getBoolean("owo.debug");
         if (Boolean.getBoolean("owo.forceDisableDebug")) {
             LOGGER.warn("Deprecated system property 'owo.forceDisableDebug=true' was used - use 'owo.debug=false' instead");
@@ -47,21 +57,34 @@ public class Owo implements ModInitializer {
         DEBUG = debug;
     }
 
-    @Override
+    public Owo(IEventBus modBus) {
+        modBus.<FMLCommonSetupEvent>addListener((event) -> this.onInitialize(modBus));
+    }
+
+    /*@Override*/
     @ApiStatus.Internal
-    public void onInitialize() {
+    public void onInitialize(IEventBus modBus) {
         LootOps.registerListener();
         CustomTextRegistry.register("index", InsertingTextContent.CODEC);
-        MenuNetworkingInternals.init();
 
-        ServerLifecycleEvents.SERVER_STARTING.register(server -> SERVER = server);
-        ServerLifecycleEvents.SERVER_STOPPED.register(server -> SERVER = null);
+
+        NeoForge.EVENT_BUS.<ServerStartingEvent>addListener((event) -> SERVER = event.getServer());
+        NeoForge.EVENT_BUS.<ServerStoppingEvent>addListener((_) -> SERVER = null);
 
         Wisdom.spread();
 
         if (!DEBUG) return;
 
         OwoDebugCommands.register();
+
+        modBus.<RegisterPayloadHandlersEvent>addListener(event -> {
+            var registrar = event.registrar("1.0.0");
+
+            MenuNetworkingInternals.init(registrar);
+            ConfigSynchronizer.init(registrar);
+            OwoHandshake.init(registrar);
+            OwoNetChannel.init(registrar);
+        });
     }
 
     @ApiStatus.Internal

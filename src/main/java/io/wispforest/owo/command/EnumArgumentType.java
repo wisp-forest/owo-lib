@@ -8,7 +8,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.wispforest.owo.Owo;
-import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
+import io.wispforest.owo.neoforge.api.ArgumentTypeRegistry;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.network.chat.Component;
@@ -93,3 +93,4 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>
         }
     }
 }
+

@@ -1,12 +1,12 @@
 //file:noinspection GradlePackageVersionRange
 plugins {
-    id 'net.fabricmc.fabric-loom' version '1.15-SNAPSHOT'
+    id 'org.relativitymc.neo-loom' version '1.17.0-alpha.10'
     id 'maven-publish'
 }
 
 allprojects {
     apply plugin: "java"
-    apply plugin: "net.fabricmc.fabric-loom"
+    apply plugin: "org.relativitymc.neo-loom"
     apply plugin: "maven-publish"
 
     def ENV = System.getenv()
@@ -20,9 +20,27 @@ allprojects {
 
     dependencies {
         minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-        implementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
+        forgeUserdev "net.neoforged:neoforge:${project.neoforge_version}:userdev"
+        //implementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
 
-        implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+        def setupModuleDep = { String moduleName ->
+            include(implementation(fabricApi.module(moduleName, project.fabric_version)))
+        }
+
+        setupModuleDep "fabric-api-base"
+        //setupModuleDep "fabric-networking-api-v1"
+        //setupModuleDep "fabric-screen-api-v1"
+        //setupModuleDep "fabric-command-api-v2"
+        //setupModuleDep "fabric-lifecycle-events-v1"
+        //setupModuleDep "fabric-registry-sync-v0"
+        //setupModuleDep "fabric-loot-api-v3"
+        //setupModuleDep "fabric-key-mapping-api-v1"
+        //setupModuleDep "fabric-object-builder-api-v1"
+        //setupModuleDep "fabric-resource-loader-v1"
+        //setupModuleDep "fabric-transfer-api-v1"
+        //setupModuleDep "fabric-rendering-v1"
+
+        //implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     }
 
     processResources {
@@ -121,7 +139,8 @@ loom {
         }
     }
 
-    accessWidenerPath = file("src/main/resources/owo.accesswidener")
+    accessWidenerPath = file("src/main/resources/owo.classtweaker")
+    convertAw2At(tasks.named("jar"), ["owo.classtweaker"])
 }
 
 dependencies {

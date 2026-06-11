@@ -1,7 +1,9 @@
 package io.wispforest.owo.braid.core;
 
 import io.wispforest.owo.ui.event.ClientRenderCallback;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
+//import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
+import net.neoforged.neoforge.client.event.lifecycle.ClientStoppingEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import net.minecraft.client.Minecraft;
 
 import java.util.ArrayList;
@@ -34,7 +36,7 @@ public class BraidWindowScheduler {
 
     static {
         ClientRenderCallback.BEFORE_SWAP.register(client -> frame());
-        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
+        NeoForge.EVENT_BUS.<ClientStoppingEvent>addListener((_) -> {
             APPS.forEach(app -> app.state().dispose());
             APPS.clear();
         });

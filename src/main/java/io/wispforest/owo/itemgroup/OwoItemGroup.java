@@ -9,8 +9,8 @@ import it.unimi.dsi.fastutil.ints.IntAVLTreeSet;
 import it.unimi.dsi.fastutil.ints.IntComparators;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.ints.IntSets;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.loader.api.FabricLoader;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -69,7 +69,7 @@ public abstract class OwoItemGroup extends CreativeModeTab {
     private final boolean allowMultiSelect;
 
     protected OwoItemGroup(Identifier id, Consumer<OwoItemGroup> initializer, Supplier<Icon> iconSupplier, int tabStackHeight, int buttonStackHeight, @Nullable Identifier backgroundTexture, @Nullable ScrollerTextures scrollerTextures, @Nullable TabTextures tabTextures, boolean useDynamicTitle, boolean displaySingleTab, boolean allowMultiSelect) {
-        super(null, -1, Type.CATEGORY, Component.translatable("itemGroup.%s.%s".formatted(id.getNamespace(), id.getPath())), () -> ItemStack.EMPTY, (displayContext, entries) -> {});
+        super(null, -1, Type.CATEGORY, Component.translatable("itemGroup.%s.%s".formatted(id.getNamespace(), id.getPath())), () -> ItemStack.EMPTY, (displayContext, entries) -> {}, null, false, 89, Identifier.withDefaultNamespace("textures/gui/container/creative_inventory/tabs.png"), -12566464, List.of(), List.of());
         this.initializer = initializer;
         this.iconSupplier = iconSupplier;
         this.tabStackHeight = tabStackHeight;
@@ -108,7 +108,7 @@ public abstract class OwoItemGroup extends CreativeModeTab {
     public void initialize() {
         if (this.initialized) return;
 
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) this.initializer.accept(this);
+        if (FMLEnvironment.getDist() == Dist.CLIENT) this.initializer.accept(this);
         if (this.tabs.isEmpty()) this.tabs.add(PLACEHOLDER_TAB);
 
         if (this.allowMultiSelect) {

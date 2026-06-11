@@ -13,13 +13,22 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.loader.api.FabricLoader;
+import io.wispforest.owo.neoforge.env.EnvType;
+import io.wispforest.owo.neoforge.env.Environment;
+//import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+//import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+//import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+//import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+//import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.level.ChunkPos;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.registration.NetworkRegistry;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import io.wispforest.owo.neoforge.api.SidedStreamCodec;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.Connection;
@@ -34,6 +43,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -112,6 +122,9 @@ public class OwoNetChannel {
         return new OwoNetChannel(id, ReflectionUtils.getCallingClassName(2), false);
     }
 
+    private final Endec<MessagePayload> serverEndec;
+    private final Endec<MessagePayload> clientEndec;
+
     private OwoNetChannel(Identifier id, String ownerClassName, boolean required) {
         OwoFreezer.checkRegister("Network channels");
 
@@ -136,32 +149,19 @@ public class OwoNetChannel {
             OwoHandshake.requireHandshake();
         }
 
-        Endec<MessagePayload> serverEndec = Endec.<Record, Integer>dispatched(
+        this.serverEndec = Endec.<Record, Integer>dispatched(
             index -> this.endecsByIndex.get(index).endec,
             msg -> this.endecsByClass.get(msg.getClass()).serverHandlerIndex,
             Endec.VAR_INT
         )
             .xmap(x -> new MessagePayload(this.packetId, x), x -> x.message);
 
-        Endec<MessagePayload> clientEndec = Endec.<Record, Integer>dispatched(
+        this.clientEndec = Endec.<Record, Integer>dispatched(
                 index -> this.endecsByIndex.get(-index).endec,
                 msg -> this.endecsByClass.get(msg.getClass()).clientHandlerIndex,
                 Endec.VAR_INT
             )
             .xmap(x -> new MessagePayload(this.packetId, x), x -> x.message);
-
-        PayloadTypeRegistry.serverboundPlay().register(this.packetId, CodecUtils.toPacketCodec(serverEndec));
-        PayloadTypeRegistry.clientboundPlay().register(this.packetId, CodecUtils.toPacketCodec(clientEndec));
-
-        ServerPlayNetworking.registerGlobalReceiver(this.packetId, (payload, context) -> {
-            serverHandlers.get(endecsByClass.get(payload.message().getClass()).serverHandlerIndex).handle(payload.message, new ServerAccess(context.player()));
-        });
-
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            ClientPlayNetworking.registerGlobalReceiver(this.packetId, (payload, context) -> {
-                clientHandlers.get(endecsByClass.get(payload.message.getClass()).clientHandlerIndex).handle(payload.message, new ClientAccess(context.player().connection));
-            });
-        }
 
         clientHandlers.add(null);
         serverHandlers.add(null);
@@ -172,6 +172,25 @@ public class OwoNetChannel {
         } else {
             OPTIONAL_CHANNELS.put(id, this);
         }
+    }
+
+    public static void init(PayloadRegistrar registrar) {
+        REGISTERED_CHANNELS.forEach((id, channel) -> {
+            registrar.playBidirectional(channel.packetId,
+                new SidedStreamCodec<>(CodecUtils.toPacketCodec(channel.serverEndec), CodecUtils.toPacketCodec(channel.clientEndec)),
+                channel::handlePacketOnServer,
+                !FMLEnvironment.getDist().isClient() ? null : channel::handlePacketOnClient
+            );
+        });
+    }
+
+    private void handlePacketOnServer(MessagePayload payload, IPayloadContext context) {
+        serverHandlers.get(endecsByClass.get(payload.message().getClass()).serverHandlerIndex).handle(payload.message, new ServerAccess((ServerPlayer) context.player()));
+    }
+
+    @Environment(EnvType.CLIENT)
+    private void handlePacketOnClient(MessagePayload payload, IPayloadContext context) {
+        clientHandlers.get(endecsByClass.get(payload.message.getClass()).clientHandlerIndex).handle(payload.message, new ClientAccess(((LocalPlayer) context.player()).connection));
     }
 
     public OwoNetChannel addEndecs(Consumer<ReflectiveEndecBuilder> endecBuilder) {
@@ -310,7 +329,7 @@ public class OwoNetChannel {
 
         return OwoHandshake.isValidClient() ?
                 getChannelSet(((ServerCommonPacketListenerImplAccessor) networkHandler).owo$getConnection()).contains(this.packetId.id())
-                : ServerPlayNetworking.canSend(networkHandler, this.packetId);
+                : NetworkRegistry.hasChannel(networkHandler, this.packetId.id());
     }
 
     @Environment(EnvType.CLIENT)
@@ -319,7 +338,7 @@ public class OwoNetChannel {
 
         return OwoHandshake.isValidClient() ?
                 getChannelSet(Minecraft.getInstance().getConnection().getConnection()).contains(this.packetId.id())
-                : ClientPlayNetworking.canSend(this.packetId);
+                : NetworkRegistry.hasChannel(Minecraft.getInstance().getConnection(), this.packetId.id());
     }
 
     private static Set<Identifier> getChannelSet(Connection connection) {
@@ -333,8 +352,8 @@ public class OwoNetChannel {
      * @return The client handle of this channel
      */
     public ClientHandle clientHandle() {
-        if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT)
-            throw new NetworkException("Cannot obtain client handle in environment type '" + FabricLoader.getInstance().getEnvironmentType() + "'");
+        if (FMLEnvironment.getDist() != Dist.CLIENT)
+            throw new NetworkException("Cannot obtain client handle in environment type '" + FMLEnvironment.getDist() + "'");
 
         if (this.clientHandle == null) this.clientHandle = new ClientHandle();
         return clientHandle;
@@ -352,25 +371,25 @@ public class OwoNetChannel {
      */
     public ServerHandle serverHandle(MinecraftServer server) {
         var handle = getServerHandle();
-        handle.targets = PlayerLookup.all(server);
+        handle.targets = PacketDistributor::sendToAllPlayers;
         return handle;
     }
 
     /**
      * Obtains a server handle used to send packets
-     * <i>to all given players</i>. Use {@link PlayerLookup} to obtain
-     * the required collections
+     * <i>to all given players</i>.
+     *
      * <p>
      * <b>This handle will be reused - do not retain references</b>
      *
      * @param targets The players to target
      * @return A server handle configured for sending packets
      * to all players in the given collection
-     * @see PlayerLookup
+     *
      */
     public ServerHandle serverHandle(Collection<ServerPlayer> targets) {
         var handle = getServerHandle();
-        handle.targets = targets;
+        handle.targets = (payload, payloads) -> targets.forEach((player) -> PacketDistributor.sendToPlayer(player, payload, payloads));
         return handle;
     }
 
@@ -388,7 +407,7 @@ public class OwoNetChannel {
         if (!(player instanceof ServerPlayer serverPlayer)) throw new NetworkException("'player' must be a 'ServerPlayerEntity'");
 
         var handle = getServerHandle();
-        handle.targets = Collections.singleton(serverPlayer);
+        handle.targets = (payload, payloads) -> PacketDistributor.sendToPlayer(serverPlayer, payload, payloads);
         return handle;
     }
 
@@ -404,7 +423,9 @@ public class OwoNetChannel {
      */
     public ServerHandle serverHandle(BlockEntity entity) {
         if (entity.getLevel().isClientSide()) throw new NetworkException("Server handle cannot be obtained on the client");
-        return serverHandle(PlayerLookup.tracking(entity));
+        var handle = getServerHandle();
+        handle.targets = PacketDistributorConsumer.tracking(entity);
+        return handle;
     }
 
     /**
@@ -419,7 +440,9 @@ public class OwoNetChannel {
      * to all players tracking the given position in the given world
      */
     public ServerHandle serverHandle(ServerLevel world, BlockPos pos) {
-        return serverHandle(PlayerLookup.tracking(world, pos));
+        var handle = getServerHandle();
+        handle.targets = (payload, payloads) -> PacketDistributor.sendToPlayersTrackingChunk(world, ChunkPos.containing(pos), payload, payloads);
+        return handle;
     }
 
     private ServerHandle getServerHandle() {
@@ -452,7 +475,7 @@ public class OwoNetChannel {
          * @see #send(Record[])
          */
         public <R extends Record> void send(R message) {
-            ClientPlayNetworking.send(new MessagePayload(packetId, message));
+            Minecraft.getInstance().getConnection().send(new MessagePayload(packetId, message));
         }
 
         /**
@@ -468,7 +491,7 @@ public class OwoNetChannel {
 
     public class ServerHandle {
 
-        private Collection<ServerPlayer> targets = Collections.emptySet();
+        private PacketDistributorConsumer targets = (packet, extraPackets) -> {};
 
         /**
          * Sends the given message to the configured target(s)
@@ -479,7 +502,7 @@ public class OwoNetChannel {
          * @see #send(Record[])
          */
         public <R extends Record> void send(R message) {
-            this.targets.forEach(player -> ServerPlayNetworking.send(player, new MessagePayload(packetId, message)));
+            this.targets.send(new MessagePayload(packetId, message));
             this.targets = null;
         }
 
@@ -492,11 +515,7 @@ public class OwoNetChannel {
          */
         @SafeVarargs
         public final <R extends Record> void send(R... messages) {
-            this.targets.forEach(player -> {
-                for (R message : messages) {
-                    ServerPlayNetworking.send(player, new MessagePayload(packetId, message));
-                }
-            });
+            this.targets.send((message) -> new MessagePayload(packetId, message), messages);
             this.targets = null;
         }
     }
@@ -544,7 +563,7 @@ public class OwoNetChannel {
     }
 
     private void verify() {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+        if (FMLEnvironment.getDist() == Dist.CLIENT) {
             if (!this.deferredClientEndecs.isEmpty()) {
                 throw new NetworkException("Some deferred client handlers for channel " + this.packetId + " haven't been registered: " + deferredClientEndecs.keySet().stream().map(Class::getName).collect(Collectors.joining(", ")));
             }
@@ -603,3 +622,26 @@ public class OwoNetChannel {
     }
 }
 
+interface PacketDistributorConsumer {
+    void send(CustomPacketPayload payload, CustomPacketPayload ...extraPayloads);
+    default <R> void send(Function<R, CustomPacketPayload> mapper, R... messages) {
+        CustomPacketPayload baseMessage = null;
+        var extraPayloads = new ArrayList<CustomPacketPayload>(messages.length - 1);
+        for (R message : messages) {
+            if (baseMessage == null) baseMessage = mapper.apply(message);
+            else extraPayloads.add(mapper.apply(message));
+        }
+        send(baseMessage, extraPayloads.toArray(new CustomPacketPayload[messages.length - 1]));
+    }
+
+    public static PacketDistributorConsumer tracking(BlockEntity blockEntity) {
+        Objects.requireNonNull(blockEntity, "BlockEntity cannot be null");
+
+        //noinspection ConstantConditions - IJ intrinsics don't know hasLevel == true will result in no null
+        if (!blockEntity.hasLevel() || blockEntity.getLevel().isClientSide()) {
+            throw new IllegalArgumentException("Only supported on server levels!");
+        }
+
+        return (payload, payloads) -> PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) blockEntity.getLevel(),  ChunkPos.containing(blockEntity.getBlockPos()), payload, payloads);
+    }
+}

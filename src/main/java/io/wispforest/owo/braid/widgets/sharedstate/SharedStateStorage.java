@@ -8,8 +8,11 @@ import io.wispforest.endec.format.jankson.JanksonSerializer;
 import io.wispforest.owo.Owo;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timeout;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
-import net.fabricmc.loader.api.FabricLoader;
+//import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
+//import net.fabricmc.loader.api.FabricLoader;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.client.event.lifecycle.ClientStoppingEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import net.minecraft.resources.Identifier;
 
 import java.io.IOException;
@@ -30,7 +33,7 @@ public class SharedStateStorage {
     private static final Map<ShareableState, Entry<?>> ENTRIES = new HashMap<>();
 
     static {
-        ClientLifecycleEvents.CLIENT_STOPPING.register((_) -> ENTRIES.values().forEach(Entry::save));
+        NeoForge.EVENT_BUS.<ClientStoppingEvent>addListener((_) -> ENTRIES.values().forEach(Entry::save));
     }
 
     public static <T extends ShareableState> T persist(Identifier id, Endec<T> endec, Supplier<T> defaults) {
@@ -60,7 +63,7 @@ public class SharedStateStorage {
     }
 
     public static Path configPath(Identifier id) {
-        return FabricLoader.getInstance().getConfigDir()
+        return FMLPaths.CONFIGDIR.get()
             .resolve("braid")
             .resolve("shared_state")
             .resolve(id.getNamespace())

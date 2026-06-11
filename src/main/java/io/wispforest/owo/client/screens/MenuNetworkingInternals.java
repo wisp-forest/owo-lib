@@ -6,12 +6,15 @@ import io.wispforest.owo.Owo;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.pond.OwoAbstractContainerMenuExtension;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import io.wispforest.owo.neoforge.env.EnvType;
+import io.wispforest.owo.neoforge.env.Environment;
+//import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import io.wispforest.owo.neoforge.api.screen.ScreenEvents;
+//import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+//import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.network.codec.StreamCodec;
+import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -22,14 +25,10 @@ import org.jetbrains.annotations.ApiStatus;
 public class MenuNetworkingInternals {
     public static final Identifier SYNC_PROPERTIES = Owo.id("sync_menu_properties");
 
-    public static void init() {
-        var localPacketCodec = CodecUtils.toPacketCodec(LocalPacket.ENDEC);
+    public static void init(PayloadRegistrar registrar) {
+        registrar.playToClient(SyncPropertiesPacket.ID, CodecUtils.toPacketCodec(SyncPropertiesPacket.ENDEC));
 
-        PayloadTypeRegistry.clientboundPlay().register(LocalPacket.ID, localPacketCodec);
-        PayloadTypeRegistry.serverboundPlay().register(LocalPacket.ID, localPacketCodec);
-        PayloadTypeRegistry.clientboundPlay().register(SyncPropertiesPacket.ID, CodecUtils.toPacketCodec(SyncPropertiesPacket.ENDEC));
-
-        ServerPlayNetworking.registerGlobalReceiver(LocalPacket.ID, (payload, context) -> {
+        registrar.playToServer(LocalPacket.ID, CodecUtils.toPacketCodec(LocalPacket.ENDEC), (payload, context) -> {
             var menu = context.player().containerMenu;
 
             if (menu == null) {
@@ -70,13 +69,13 @@ public class MenuNetworkingInternals {
 
     @Environment(EnvType.CLIENT)
     public static class Client {
-        public static void init() {
+        public static void init(RegisterClientPayloadHandlersEvent registrar) {
             ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
                 if (screen instanceof MenuAccess<?> handled)
                     ((OwoAbstractContainerMenuExtension) handled.getMenu()).owo$attachToPlayer(client.player);
             });
 
-            ClientPlayNetworking.registerGlobalReceiver(LocalPacket.ID, (payload, context) -> {
+            registrar.register(LocalPacket.ID, (payload, context) -> {
                 var menu = context.player().containerMenu;
 
                 if (menu == null) {
@@ -87,7 +86,7 @@ public class MenuNetworkingInternals {
                 ((OwoAbstractContainerMenuExtension) menu).owo$handlePacket(payload, true);
             });
 
-            ClientPlayNetworking.registerGlobalReceiver(SyncPropertiesPacket.ID, (payload, context) -> {
+            registrar.register(SyncPropertiesPacket.ID, (payload, context) -> {
                 var menu = context.player().containerMenu;
 
                 if (menu == null) {

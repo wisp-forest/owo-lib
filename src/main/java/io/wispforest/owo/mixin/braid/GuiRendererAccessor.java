@@ -5,6 +5,7 @@ import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.renderer.CubeMap;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
+import net.neoforged.neoforge.client.gui.PictureInPictureRendererPool;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -18,6 +19,6 @@ public interface GuiRendererAccessor {
     @Accessor("cubeMap")
     CubeMap owo$getCubeMap();
 
-    @Accessor("pictureInPictureRenderers")
-    Map<Class<? extends PictureInPictureRenderState>, PictureInPictureRenderer<?>> owo$getPictureInPictureRenderers();
+    @Accessor("pictureInPictureRendererPools")
+    Map<Class<? extends PictureInPictureRenderState>, PictureInPictureRendererPool<?>> owo$getPictureInPictureRenderers();
 }

@@ -41,7 +41,7 @@
     "owo-impl",
     "owo-lib"
   ],
-  "accessWidener": "owo.accesswidener",
+  "accessWidener": "owo.classtweaker",
   "depends": {
     "fabricloader": ">=0.15.0",
     "fabric-api": ">=0.100",
@@ -54,41 +54,6 @@
       },
       "badges": [
         "library"
-      ]
-    },
-    "loom:injected_interfaces": {
-      "net/minecraft/nbt/CompoundTag": [
-        "io/wispforest/endec/util/MapCarrier"
-      ],
-      "net/minecraft/world/level/storage/ValueInput": [
-        "io/wispforest/endec/util/MapCarrierDecodable"
-      ],
-      "net/minecraft/world/level/storage/ValueOutput": [
-        "io/wispforest/endec/util/MapCarrierEncodable"
-      ],
-      "net/minecraft/network/FriendlyByteBuf": [
-        "io/wispforest/endec/util/EndecBuffer"
-      ],
-      "net/minecraft/client/gui/components/AbstractWidget": [
-        "io/wispforest/owo/ui/inject/UIComponentStub"
-      ],
-      "net/minecraft/client/gui/components/EditBox": [
-        "io/wispforest/owo/ui/inject/GreedyInputUIComponent"
-      ],
-      "net/minecraft/world/inventory/AbstractContainerMenu": [
-        "io/wispforest/owo/client/screens/OwoAbstractContainerMenu"
-      ],
-      "net/minecraft/client/gui/GuiGraphicsExtractor": [
-        "io/wispforest/owo/ui/util/MatrixStackTransformer"
-      ],
-      "net/minecraft/core/component/DataComponentType\u0024Builder": [
-        "io/wispforest/owo/serialization/OwoDataComponentTypeBuilder<TT;>"
-      ],
-      "net/minecraft/world/item/Item\u0024Properties": [
-        "io/wispforest/owo/itemgroup/OwoItemSettingsExtension"
-      ],
-      "net/minecraft/world/item/Item": [
-        "io/wispforest/owo/ext/OwoItem"
       ]
     }
   }

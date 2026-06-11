@@ -11,11 +11,12 @@ import java.util.ArrayList;
 
 public class CursedTranslatableContents extends TranslatableContents {
     public static int argIndex = 0;
+    private static final Object[] EMPTY_ARGS_ARRAY = new Object[0];
 
     private static final CursedTranslatableContents INSTANCE = new CursedTranslatableContents();
 
     private CursedTranslatableContents() {
-        super("", null, null);
+        super("", null, EMPTY_ARGS_ARRAY);
     }
 
     public static Component unpackArgs(Component text) {

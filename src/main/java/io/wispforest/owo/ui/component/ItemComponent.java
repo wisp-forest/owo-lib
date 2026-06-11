@@ -10,7 +10,7 @@ import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.renderstate.OwoItemElementRenderState;
-import net.fabricmc.fabric.api.client.rendering.v1.ClientTooltipComponentCallback;
+//import net.fabricmc.fabric.api.client.rendering.v1.ClientTooltipComponentCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -75,10 +75,10 @@ public class ItemComponent extends BaseUIComponent {
             var state = new ItemStackRenderState();
             this.itemModelManager.appendItemLayers(state, this.stack, ItemDisplayContext.GUI, Minecraft.getInstance().level, Minecraft.getInstance().player, 0);
 
-            graphics.guiRenderState.addPicturesInPictureState(new OwoItemElementRenderState(
+            graphics.submitPictureInPictureRenderState(new OwoItemElementRenderState(
                 state,
                 new ScreenRectangle(this.x, this.y, this.width, this.height),
-                graphics.scissorStack.peek()
+                graphics.peekScissorStack()
             ));
         }
 
@@ -155,10 +155,7 @@ public class ItemComponent extends BaseUIComponent {
             .forEach(tooltip::add);
 
         stack.getTooltipImage().ifPresent(data -> {
-            tooltip.add(1, Objects.requireNonNullElseGet(
-                ClientTooltipComponentCallback.EVENT.invoker().getClientComponent(data),
-                () -> ClientTooltipComponent.create(data)
-            ));
+            tooltip.add(1, ClientTooltipComponent.create(data));
         });
 
         return tooltip;

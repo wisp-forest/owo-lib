@@ -187,7 +187,7 @@ public abstract class CreativeModeInventoryScreenMixin extends AbstractContainer
                         : List.of(button.getMessage()),
                     mouseX,
                     mouseY,
-                    null
+                    (Identifier) null
                 );
                 anyButtonHovered = true;
             }

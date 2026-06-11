@@ -1,7 +1,7 @@
 package io.wispforest.owo.ops;
 
 import io.wispforest.owo.mixin.SetComponentsFunctionAccessor;
-import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
+//import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
@@ -12,6 +12,8 @@ import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.LootTableLoadEvent;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
@@ -27,7 +29,7 @@ public final class LootOps {
 
     private LootOps() {}
 
-    private static final Map<Identifier[], Supplier<LootPoolEntryContainer>> ADDITIONS = new HashMap<>();
+    private static final Map<Identifier[], Supplier<LootPoolEntryContainer.Builder>> ADDITIONS = new HashMap<>();
 
     /**
      * Injects a single item entry into the specified LootTable(s)
@@ -37,7 +39,7 @@ public final class LootOps {
      * @param targetTables The LootTable(s) to inject into
      */
     public static void injectItem(ItemLike item, float chance, Identifier... targetTables) {
-        ADDITIONS.put(targetTables, () -> LootItem.lootTableItem(item).when(LootItemRandomChanceCondition.randomChance(chance)).build());
+        ADDITIONS.put(targetTables, () -> LootItem.lootTableItem(item).when(LootItemRandomChanceCondition.randomChance(chance)));
     }
 
     /**
@@ -53,8 +55,7 @@ public final class LootOps {
     public static void injectItemWithCount(ItemLike item, float chance, int min, int max, Identifier... targetTables) {
         ADDITIONS.put(targetTables, () -> LootItem.lootTableItem(item)
                 .when(LootItemRandomChanceCondition.randomChance(chance))
-                .apply(SetItemCountFunction.setCount(UniformGenerator.between(min, max)))
-                .build());
+                .apply(SetItemCountFunction.setCount(UniformGenerator.between(min, max))));
     }
 
     /**
@@ -68,8 +69,7 @@ public final class LootOps {
         ADDITIONS.put(targetTables, () -> LootItem.lootTableItem(stack.getItem())
                 .when(LootItemRandomChanceCondition.randomChance(chance))
                 .apply(() -> SetComponentsFunctionAccessor.createSetComponentsLootFunction(List.of(), stack.getComponentsPatch()))
-                .apply(SetItemCountFunction.setCount(ConstantValue.exactly(stack.getCount())))
-                .build());
+                .apply(SetItemCountFunction.setCount(ConstantValue.exactly(stack.getCount()))));
     }
 
     /**
@@ -87,9 +87,10 @@ public final class LootOps {
 
     @ApiStatus.Internal
     public static void registerListener() {
-        LootTableEvents.MODIFY.register((key, tableBuilder, source, provider) -> {
+        NeoForge.EVENT_BUS.<LootTableLoadEvent>addListener((event) -> {
+            var key = event.getKey();
             ADDITIONS.forEach((identifiers, lootPoolEntrySupplier) -> {
-                if (anyMatch(key.identifier(), identifiers)) tableBuilder.withPool(LootPool.lootPool().add(lootPoolEntrySupplier.get()));
+                if (anyMatch(key.identifier(), identifiers)) event.getTable().addPool(LootPool.lootPool().add(lootPoolEntrySupplier.get()).build());
             });
         });
     }

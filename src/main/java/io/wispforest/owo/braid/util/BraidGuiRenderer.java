@@ -6,6 +6,7 @@ import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.Surface;
 import io.wispforest.owo.mixin.braid.GameRendererAccessor;
 import io.wispforest.owo.mixin.braid.GuiRendererAccessor;
+import io.wispforest.owo.neoforge.mixin.neoforge.PictureInPictureRendererPoolAccessor;
 import io.wispforest.owo.util.pond.BraidGuiRendererExtension;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -25,7 +26,7 @@ public class BraidGuiRenderer extends GuiRenderer {
             client.renderBuffers().bufferSource(),
             client.gameRenderer.getSubmitNodeStorage(),
             client.gameRenderer.getFeatureRenderDispatcher(),
-            new ArrayList<>(((GuiRendererAccessor) ((GameRendererAccessor) client.gameRenderer).owo$getGuiRenderer()).owo$getPictureInPictureRenderers().values())
+            new ArrayList<>(((GuiRendererAccessor) ((GameRendererAccessor) client.gameRenderer).owo$getGuiRenderer()).owo$getPictureInPictureRenderers().values().stream().map(pool -> ((PictureInPictureRendererPoolAccessor<?>) pool).owo$factory()).toList())
         );
         this.client = client;
     }
