@@ -1,6 +1,7 @@
 package io.wispforest.owo.client;
 
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.braid.core.BraidRenderPipelines;
 import io.wispforest.owo.braid.display.BraidDisplay;
 import io.wispforest.owo.client.screens.MenuNetworkingInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
