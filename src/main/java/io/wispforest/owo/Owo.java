@@ -82,7 +82,7 @@ public class Owo /*implements ModInitializer*/ {
 
             MenuNetworkingInternals.init(registrar);
             ConfigSynchronizer.init(registrar);
-            OwoHandshake.init(registrar);
+            OwoHandshake.init(modBus, registrar);
             OwoNetChannel.init(registrar);
         });
     }
