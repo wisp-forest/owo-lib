@@ -53,6 +53,7 @@ public class OwoClient implements ClientModInitializer {
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new NinePatchTexture.MetadataLoader());
 
         OwoUIPipelines.register();
+        BraidRenderPipelines.register();
         RenderPipelines.register(BraidDisplay.PIPELINE);
 
         final var renderdocPath = System.getProperty("owo.renderdocPath");
