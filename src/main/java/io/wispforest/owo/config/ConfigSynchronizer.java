@@ -8,16 +8,25 @@ import io.wispforest.owo.mixin.ServerCommonPacketListenerImplAccessor;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.api.networking.v1.FriendlyByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.loader.api.FabricLoader;
+import io.wispforest.owo.neoforge.env.EnvType;
+import io.wispforest.owo.neoforge.env.Environment;
+//import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+//import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+//import net.fabricmc.fabric.api.event.Event;
+import io.wispforest.owo.neoforge.api.FriendlyByteBufs;
+//import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+//import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+//import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
@@ -117,11 +126,12 @@ public class ConfigSynchronizer {
     }
 
     @Environment(EnvType.CLIENT)
-    private static void applyClient(ConfigSyncPacket payload, ClientPlayNetworking.Context context) {
+    private static void applyClient(ConfigSyncPacket payload, IPayloadContext context) {
+        var client = Minecraft.getInstance();
         Owo.LOGGER.info("Applying server overrides");
         var mismatchedOptions = new HashMap<Option<?>, Object>();
 
-        if (!(context.client().hasSingleplayerServer() && context.client().getSingleplayerServer().isSingleplayer())) {
+        if (!(client.hasSingleplayerServer() && client.getSingleplayerServer().isSingleplayer())) {
             read(payload, (option, packetByteBuf) -> {
                 var mismatchedValue = option.read(packetByteBuf);
                 if (mismatchedValue != null) mismatchedOptions.put(option, mismatchedValue);
@@ -153,18 +163,18 @@ public class ConfigSynchronizer {
                 errorMessage.append(TextOps.withFormatting("they require your client to be restarted\n", ChatFormatting.GRAY));
                 errorMessage.append(TextOps.withFormatting("change them manually and restart if you want to join this server", ChatFormatting.GRAY));
 
-                context.player().connection.getConnection().disconnect(TextOps.concat(PREFIX, errorMessage));
+                ((LocalPlayer) context.player()).connection.getConnection().disconnect(TextOps.concat(PREFIX, errorMessage));
                 return;
             }
         }
 
         Owo.LOGGER.info("Responding with client values");
-        context.responseSender().sendPacket(toPacket(Option.SyncMode.INFORM_SERVER));
+        context.handle(toPacket(Option.SyncMode.INFORM_SERVER));
     }
 
-    private static void applyServer(ConfigSyncPacket payload, ServerPlayNetworking.Context context) {
+    private static void applyServer(ConfigSyncPacket payload, IPayloadContext context) {
         Owo.LOGGER.info("Receiving client config");
-        var connection = ((ServerCommonPacketListenerImplAccessor) context.player().connection).owo$getConnection();
+        var connection = ((ServerCommonPacketListenerImplAccessor) ((ServerPlayer)context.player()).connection).owo$getConnection();
 
         read(payload, (option, optionBuf) -> {
             var config = CLIENT_OPTION_STORAGE.computeIfAbsent(connection, $ -> new HashMap<>()).computeIfAbsent(option.configName(), s -> new HashMap<>());
@@ -192,28 +202,24 @@ public class ConfigSynchronizer {
         );
     }
 
-    static {
+    public static void init(PayloadRegistrar registrar) {
         var packetCodec = CodecUtils.toPacketCodec(ConfigSyncPacket.ENDEC);
 
-        PayloadTypeRegistry.clientboundPlay().register(ConfigSyncPacket.ID, packetCodec);
-        PayloadTypeRegistry.serverboundPlay().register(ConfigSyncPacket.ID, packetCodec);
+        registrar.playBidirectional(ConfigSyncPacket.ID, packetCodec, ConfigSynchronizer::applyServer, ConfigSynchronizer::applyClient);
 
-        var earlyPhase = Owo.id("early");
-        ServerPlayConnectionEvents.JOIN.addPhaseOrdering(earlyPhase, Event.DEFAULT_PHASE);
-        ServerPlayConnectionEvents.JOIN.register(earlyPhase, (handler, sender, server) -> {
+        NeoForge.EVENT_BUS.<PlayerEvent.PlayerLoggedInEvent>addListener(EventPriority.HIGHEST, (event) -> {
             Owo.LOGGER.info("Sending server config values to client");
 
-            sender.sendPacket(toPacket(Option.SyncMode.OVERRIDE_CLIENT));
+            ((ServerPlayer) event.getEntity()).connection.send(toPacket(Option.SyncMode.OVERRIDE_CLIENT));
         });
 
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            ClientPlayNetworking.registerGlobalReceiver(ConfigSyncPacket.ID, ConfigSynchronizer::applyClient);
+        if (FMLEnvironment.getDist() == Dist.CLIENT) initClient();
+    }
 
-            ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
-                KNOWN_CONFIGS.forEach((name, config) -> config.forEachOption(Option::reattach));
-            });
-        }
-
-        ServerPlayNetworking.registerGlobalReceiver(ConfigSyncPacket.ID, ConfigSynchronizer::applyServer);
+    @Environment(EnvType.CLIENT)
+    public static void initClient() {
+        NeoForge.EVENT_BUS.<ClientPlayerNetworkEvent.LoggingOut>addListener((event) -> {
+            KNOWN_CONFIGS.forEach((name, config) -> config.forEachOption(Option::reattach));
+        });
     }
 }

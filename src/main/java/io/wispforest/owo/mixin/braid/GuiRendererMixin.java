@@ -16,6 +16,7 @@ import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.renderer.Projection;
 import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
+import net.neoforged.neoforge.client.gui.PictureInPictureRendererPool;
 import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -102,8 +103,8 @@ public class GuiRendererMixin implements BraidGuiRendererExtension {
 
     // ---
 
-    @ModifyExpressionValue(method = "close", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/render/GuiRenderer;pictureInPictureRenderers:Ljava/util/Map;"))
-    private Map<Class<? extends PictureInPictureRenderState>, PictureInPictureRenderer<?>> keepAliveRenderers(Map<Class<? extends PictureInPictureRenderState>, PictureInPictureRenderer<?>> original) {
+    @ModifyExpressionValue(method = "close", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/render/GuiRenderer;pictureInPictureRendererPools:Ljava/util/Map;"))
+    private Map<Class<? extends PictureInPictureRenderState>, PictureInPictureRendererPool<?>> keepAliveRenderers(Map<Class<? extends PictureInPictureRenderState>, PictureInPictureRendererPool<?>> original) {
         if (((Object) this) instanceof BraidGuiRenderer) {
             return Map.of();
         }

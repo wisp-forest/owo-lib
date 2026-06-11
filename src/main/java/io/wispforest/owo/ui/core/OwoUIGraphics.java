@@ -46,7 +46,7 @@ public class OwoUIGraphics extends GuiGraphicsExtractor {
     public static OwoUIGraphics of(GuiGraphicsExtractor graphics) {
         var owoContext = new OwoUIGraphics(
             Minecraft.getInstance(),
-            graphics.guiRenderState,
+            ((GuiGraphicsExtractorAccessor) graphics).owo$guiRenderState(),
             ((GuiGraphicsExtractorAccessor) graphics).owo$getMouseY(),
             ((GuiGraphicsExtractorAccessor) graphics).owo$getMouseX(),
             ((GuiGraphicsExtractorAccessor) graphics)::owo$setDeferredTooltip
@@ -65,7 +65,7 @@ public class OwoUIGraphics extends GuiGraphicsExtractor {
     public boolean intersectsScissor(PositionedRectangle other) {
         other = other.transform(getMatrixStack());
 
-        var rect = this.scissorStack.peek();
+        var rect = this.peekScissorStack();
 
         if (rect == null) return true;
 
@@ -115,11 +115,11 @@ public class OwoUIGraphics extends GuiGraphicsExtractor {
      * @param bottomLeftColor  The color at the rectangle's bottom left corner
      */
     public void drawGradientRect(RenderPipeline pipeline, int x, int y, int width, int height, int topLeftColor, int topRightColor, int bottomRightColor, int bottomLeftColor) {
-        this.guiRenderState.addGuiElement(new GradientQuadElementRenderState(
+        this.submitGuiElementRenderState(new GradientQuadElementRenderState(
             pipeline,
             new Matrix3x2f(this.pose()),
             new ScreenRectangle(new ScreenPosition(x, y), width, height),
-            this.scissorStack.peek(),
+            this.peekScissorStack(),
             Color.ofArgb(topLeftColor),
             Color.ofArgb(topRightColor),
             Color.ofArgb(bottomLeftColor),
@@ -142,11 +142,11 @@ public class OwoUIGraphics extends GuiGraphicsExtractor {
     }
 
     public void drawSpectrum(int x, int y, int width, int height, boolean vertical) {
-        this.guiRenderState.addGuiElement(new GradientQuadElementRenderState(
+        this.submitGuiElementRenderState(new GradientQuadElementRenderState(
             OwoUIPipelines.GUI_HSV,
             new Matrix3x2f(this.pose()),
             new ScreenRectangle(new ScreenPosition(x, y), width, height),
-            this.scissorStack.peek(),
+            this.peekScissorStack(),
             Color.WHITE,
             new Color(vertical ? 1f : 0f, 1f, 1f),
             new Color(vertical ? 0f : 1f, 1f, 1f),
@@ -187,10 +187,10 @@ public class OwoUIGraphics extends GuiGraphicsExtractor {
     }
 
     public void drawLine(RenderPipeline pipeline, int x1, int y1, int x2, int y2, double thiccness, Color color) {
-        this.guiRenderState.addGuiElement(new LineElementRenderState(
+        this.submitGuiElementRenderState(new LineElementRenderState(
             pipeline,
             new Matrix3x2f(this.pose()),
-            this.scissorStack.peek(),
+            this.peekScissorStack(),
             x1, y1, x2, y2,
             thiccness,
             color
@@ -212,10 +212,10 @@ public class OwoUIGraphics extends GuiGraphicsExtractor {
     public void drawCircle(RenderPipeline pipeline, int centerX, int centerY, double angleFrom, double angleTo, int segments, double radius, Color color) {
         Preconditions.checkArgument(angleFrom < angleTo, "angleFrom must be less than angleTo");
 
-        this.guiRenderState.addGuiElement(new CircleElementRenderState(
+        this.submitGuiElementRenderState(new CircleElementRenderState(
             pipeline,
             new Matrix3x2f(this.pose()),
-            this.scissorStack.peek(),
+            this.peekScissorStack(),
             centerX, centerY, angleFrom, angleTo, segments, radius, color
         ));
     }
@@ -236,10 +236,10 @@ public class OwoUIGraphics extends GuiGraphicsExtractor {
         Preconditions.checkArgument(angleFrom < angleTo, "angleFrom must be less than angleTo");
         Preconditions.checkArgument(innerRadius < outerRadius, "innerRadius must be less than outerRadius");
 
-        this.guiRenderState.addGuiElement(new RingElementRenderState(
+        this.submitGuiElementRenderState(new RingElementRenderState(
             pipeline,
             new Matrix3x2f(this.pose()),
-            this.scissorStack.peek(),
+            this.peekScissorStack(),
             centerX, centerY, angleFrom, angleTo, segments, innerRadius, outerRadius, innerColor, outerColor
         ));
     }

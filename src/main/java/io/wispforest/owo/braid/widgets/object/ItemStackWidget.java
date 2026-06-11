@@ -128,11 +128,11 @@ public class ItemStackWidget extends LeafInstanceWidget {
                     this.widget.transform.accept(transformThisFrame);
                 }
 
-                graphics.guiRenderState.addPicturesInPictureState(new BraidItemElement(
+                graphics.submitPictureInPictureRenderState(new BraidItemElement(
                     state,
                     this.transform.width(),
                     this.transform.height(),
-                    graphics.scissorStack.peek(),
+                    graphics.peekScissorStack(),
                     transformThisFrame,
                     new Matrix3x2f(graphics.pose())
                 ));

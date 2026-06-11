@@ -8,7 +8,7 @@ import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIParsing;
 import io.wispforest.owo.ui.util.UISounds;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
+import io.wispforest.owo.neoforge.api.screen.ScreenMouseEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;

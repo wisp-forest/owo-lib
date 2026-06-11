@@ -124,11 +124,11 @@ public class EntityComponent<E extends Entity> extends BaseUIComponent {
             entityState.nameTagAttachment = null;
         }
 
-        graphics.guiRenderState.addPicturesInPictureState(new EntityElementRenderState(
+        graphics.submitPictureInPictureRenderState(new EntityElementRenderState(
             entityState,
             matrix,
             new ScreenRectangle(this.x, this.y, this.width, this.height),
-            graphics.scissorStack.peek()
+            graphics.peekScissorStack()
         ));
     }
 

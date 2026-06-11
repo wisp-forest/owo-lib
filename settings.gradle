@@ -4,8 +4,12 @@ pluginManagement {
             name = 'Fabric'
             url = 'https://maven.fabricmc.net/'
         }
+        maven {
+            name = 'RelativityMC'
+            url = 'https://repo.codemc.io/repository/relativitymc/'
+        }
         gradlePluginPortal()
     }
 }
 
-include 'owo-sentinel'
+//include 'owo-sentinel'

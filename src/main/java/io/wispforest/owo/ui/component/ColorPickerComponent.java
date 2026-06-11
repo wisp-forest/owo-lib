@@ -54,11 +54,11 @@ public class ColorPickerComponent extends BaseUIComponent {
 
         // Color area
 
-        graphics.guiRenderState.addGuiElement(new GradientQuadElementRenderState(
+        graphics.submitGuiElementRenderState(new GradientQuadElementRenderState(
             OwoUIPipelines.GUI_HSV,
             new Matrix3x2f(graphics.pose()),
             new ScreenRectangle(new ScreenPosition(this.renderX(), this.renderY()), this.colorAreaWidth(), this.renderHeight()),
-            graphics.scissorStack.peek(),
+            graphics.peekScissorStack(),
             new Color(this.hue, 0f, 1f),
             new Color(this.hue, 1f, 1f),
             new Color(this.hue, 0f, 0f),

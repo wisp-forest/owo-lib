@@ -3,6 +3,7 @@ package io.wispforest.owo.braid.core;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import io.wispforest.owo.Owo;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 import org.jetbrains.annotations.ApiStatus;
 
 public class BraidRenderPipelines {
@@ -19,9 +20,9 @@ public class BraidRenderPipelines {
         .build();
 
     @ApiStatus.Internal
-    public static void register() {
-        RenderPipelines.register(TEXTURED_DEFAULT);
-        RenderPipelines.register(TEXTURED_NEAREST);
-        RenderPipelines.register(TEXTURED_BILINEAR);
+    public static void register(RegisterRenderPipelinesEvent event) {
+        event.registerPipeline(TEXTURED_DEFAULT);
+        event.registerPipeline(TEXTURED_NEAREST);
+        event.registerPipeline(TEXTURED_BILINEAR);
     }
 }

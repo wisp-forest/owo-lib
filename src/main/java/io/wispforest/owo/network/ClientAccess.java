@@ -1,7 +1,7 @@
 package io.wispforest.owo.network;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import io.wispforest.owo.neoforge.env.EnvType;
+import io.wispforest.owo.neoforge.env.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;

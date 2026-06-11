@@ -21,9 +21,11 @@ import io.wispforest.owo.ui.core.Color;
 import io.wispforest.owo.util.NumberReflection;
 import io.wispforest.owo.util.Observable;
 import io.wispforest.owo.util.ReflectionUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.loader.api.FabricLoader;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
+//import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.Identifier;
+import net.neoforged.fml.loading.FMLPaths;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -101,7 +103,7 @@ public abstract class ConfigWrapper<C> {
                     + " is already taken by an instance of class '" + KNOWN_CONFIG_CLASSES.get(this.name).getName() + "'");
         }
 
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT && clazz.isAnnotationPresent(Modmenu.class)) {
+        if (FMLEnvironment.getDist() == Dist.CLIENT && clazz.isAnnotationPresent(Modmenu.class)) {
             var modmenuAnnotation = clazz.getAnnotation(Modmenu.class);
             ConfigScreenProviders.register(
                     modmenuAnnotation.modId(),
@@ -232,7 +234,7 @@ public abstract class ConfigWrapper<C> {
      * @return The location to which this config is saved
      */
     public Path fileLocation() {
-        return FabricLoader.getInstance().getConfigDir().resolve(this.name + ".json5");
+        return FMLPaths.CONFIGDIR.get().resolve(this.name + ".json5");
     }
 
     /**

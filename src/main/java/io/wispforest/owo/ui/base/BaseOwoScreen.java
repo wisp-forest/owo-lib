@@ -8,7 +8,7 @@ import io.wispforest.owo.ui.core.UIComponent;
 import io.wispforest.owo.ui.inject.GreedyInputUIComponent;
 import io.wispforest.owo.ui.util.DisposableScreen;
 import io.wispforest.owo.ui.util.UIErrorToast;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import io.wispforest.owo.neoforge.api.screen.ScreenEvents;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;

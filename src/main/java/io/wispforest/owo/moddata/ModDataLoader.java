@@ -4,8 +4,12 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.util.DataExtensionUtil;
-import net.fabricmc.loader.api.FabricLoader;
+//import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.Identifier;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.jarcontents.JarContents;
+import net.neoforged.fml.jarcontents.JarResource;
+import net.neoforged.fml.loading.FMLPaths;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
@@ -14,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * Contains the logic to load JSON from all other mods' data directories
@@ -24,7 +29,7 @@ public final class ModDataLoader {
 
     private static final Gson GSON = new Gson();
 
-    private static final Path DATA_PATH = FabricLoader.getInstance().getGameDir().resolve("moddata");
+    private static final Path DATA_PATH = FMLPaths.GAMEDIR.get().resolve("moddata");
 
     private ModDataLoader() {}
 
@@ -36,11 +41,13 @@ public final class ModDataLoader {
     public static void load(ModDataConsumer consumer) {
         Map<Identifier, JsonObject> foundFiles = new HashMap<>();
 
-        FabricLoader.getInstance().getAllMods().forEach(modContainer -> {
-            for (var rootPath : modContainer.getRootPaths()) {
-                final var targetPath = rootPath.resolve(String.format("data/%s/%s", modContainer.getMetadata().getId(), consumer.getDataSubdirectory()));
-                tryLoadFilesFrom(foundFiles, modContainer.getMetadata().getId(), targetPath);
-            }
+        ModList.get().getMods().forEach(modInfo -> {
+            var relativePathMaker = (Function<String, String>) (namespace) -> String.format("data/%s/%s", namespace, consumer.getDataSubdirectory());
+            var modid = modInfo.getModId();
+            var contents = modInfo.getOwningFile().getFile().getContents();
+
+            tryLoadFilesFrom(foundFiles, modid, relativePathMaker, contents);
+            tryLoadFilesFrom(foundFiles, modid.replace("_", "-"), relativePathMaker, contents);
         });
 
         try {
@@ -83,6 +90,27 @@ public final class ModDataLoader {
 
         } catch (IOException e) {
             Owo.LOGGER.error("### Unable to traverse data tree {} ++ Stacktrace below ###", targetPath, e);
+        }
+    }
+
+    private static void tryLoadFilesFrom(Map<Identifier, JsonObject> foundFiles, String namespace, Function<String, String> relativePathMaker, JarContents contents) {
+        var relativePath = relativePathMaker.apply(namespace);
+        try {
+            contents.visitContent(relativePath, (path, resource) -> {
+                if (!path.endsWith(".json")) return;
+
+                try {
+                    try (final var reader = resource.bufferedReader()) {
+                        var idPath = path.replace(relativePath + "/", "");
+
+                        foundFiles.put(Identifier.fromNamespaceAndPath(namespace, FilenameUtils.removeExtension(idPath)), GSON.fromJson(reader, JsonObject.class));
+                    }
+                } catch (IOException e) {
+                    Owo.LOGGER.warn("### Unable to open data file {} ++ Stacktrace below ###", path, e);
+                }
+            });
+        } catch (Exception e) {
+            Owo.LOGGER.error("### Unable to traverse data tree {}:{} ++ Stacktrace below ###", namespace, relativePath, e);
         }
     }
 }

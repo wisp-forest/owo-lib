@@ -1,6 +1,8 @@
 package io.wispforest.owo.util;
 
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+//import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -30,6 +32,6 @@ public final class RecipeRemainderStorage {
     }
 
     static {
-        ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, resourceManager) -> REMAINDERS.clear());
+        NeoForge.EVENT_BUS.<AddServerReloadListenersEvent>addListener((event) -> REMAINDERS.clear());
     }
 }

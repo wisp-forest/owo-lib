@@ -6,7 +6,7 @@ import io.wispforest.endec.SerializationAttributes;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.serialization.CodecUtils;
-import net.fabricmc.fabric.api.networking.v1.FriendlyByteBufs;
+import io.wispforest.owo.neoforge.api.FriendlyByteBufs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;

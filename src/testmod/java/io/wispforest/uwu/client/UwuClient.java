@@ -29,11 +29,11 @@ import io.wispforest.uwu.client.braid.Amogus;
 import io.wispforest.uwu.items.UwuBraidItem;
 import io.wispforest.uwu.network.UwuNetworkExample;
 import io.wispforest.uwu.network.UwuOptionalNetExample;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
-import net.fabricmc.fabric.api.client.rendering.v1.ClientTooltipComponentCallback;
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+//import net.fabricmc.api.ClientModInitializer;
+//import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+//import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+//import net.fabricmc.fabric.api.client.rendering.v1.ClientTooltipComponentCallback;
+//import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -49,6 +49,11 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.Identifier;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.event.IModBusEvent;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.*;
+import net.neoforged.neoforge.client.gui.ClientTooltipComponentManager;
 import org.joml.Matrix3x2f;
 import org.lwjgl.glfw.GLFW;
 
@@ -58,21 +63,28 @@ import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class UwuClient implements ClientModInitializer {
+public class UwuClient /*implements ClientModInitializer*/ {
 
-    @Override
-    public void onInitializeClient() {
-        UwuNetworkExample.Client.init();
-        UwuOptionalNetExample.Client.init();
+    public UwuClient(IEventBus modBus) {
+        modBus.<FMLClientSetupEvent>addListener((event) -> {
+            onInitializeClient(modBus);
+        });
+    }
 
-        MenuScreens.register(Uwu.EPIC_SCREEN_HANDLER_TYPE, EpicContainerScreen::new);
+    /*@Override*/
+    public void onInitializeClient(IEventBus modBus) {
+        UwuNetworkExample.Client.init(modBus);
+        UwuOptionalNetExample.Client.init(modBus);
+
+        modBus.<RegisterMenuScreensEvent>addListener(event -> event.register(Uwu.EPIC_SCREEN_HANDLER_TYPE, EpicContainerScreen::new));
 //        HandledScreens.register(EPIC_SCREEN_HANDLER_TYPE, EpicHandledModelScreen::new);
 
         final var binding = new KeyMapping("key.uwu.hud_test", GLFW.GLFW_KEY_J, KeyMapping.Category.MISC);
-        KeyMappingHelper.registerKeyMapping(binding);
-
         final var bindingButCooler = new KeyMapping("key.uwu.hud_test_two", GLFW.GLFW_KEY_K, KeyMapping.Category.MISC);
-        KeyMappingHelper.registerKeyMapping(bindingButCooler);
+        modBus.<RegisterKeyMappingsEvent>addListener((event) -> {
+            event.register(binding);
+            event.register(bindingButCooler);
+        });
 
         final var hudComponentId = Identifier.fromNamespaceAndPath("uwu", "test_element");
         final Supplier<UIComponent> hudComponent = () ->
@@ -90,12 +102,12 @@ public class UwuClient implements ClientModInitializer {
         final Supplier<UIComponent> coolerComponent = () -> UIModel.load(Path.of("../src/testmod/resources/assets/uwu/owo_ui/test_element_two.xml")).expandTemplate(FlowLayout.class, "hud-element", Map.of());
         Hud.add(coolerComponentId, coolerComponent);
 
-        ClientTooltipComponentCallback.EVENT.register(data -> {
-            if (data instanceof UwuBraidItem.Tooltip tooltip) {
+        modBus.<RegisterClientTooltipComponentFactoriesEvent>addListener(event -> {
+            event.register(UwuBraidItem.Tooltip.class, (data) -> {
                 var random = new Random(System.currentTimeMillis() / 450);
                 return new BraidTooltipComponent(new Sized(
                     32 * 5, 32 * 5, new Clip(
-                        true, true,
+                    true, true,
                     new Row(
                         new Transform(
                             new Matrix3x2f().translation(((float) (System.currentTimeMillis() / 450d - Math.floor(System.currentTimeMillis() / 450d))) * -32, 0),
@@ -114,17 +126,17 @@ public class UwuClient implements ClientModInitializer {
                     )
                 )
                 ));
-            }
-
-            return null;
+            });
         });
 
-        HudElementRegistry.addLast(
-            Identifier.fromNamespaceAndPath("uwu", "braid_test"),
-            new BraidHudElement(new HudTestWidget())
-        );
+        modBus.<RegisterGuiLayersEvent>addListener((event) -> {
+            event.registerBelowAll(
+                Identifier.fromNamespaceAndPath("uwu", "braid_test"),
+                new BraidHudElement(new HudTestWidget())
+            );
+        });
 
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+        modBus.<ClientTickEvent.Post>addListener(event -> {
             while (binding.consumeClick()) {
                 if (Hud.hasComponent(hudComponentId)) {
                     Hud.remove(hudComponentId);

@@ -51,10 +51,10 @@ public interface Surface {
 
     static Surface blur(float quality, float size) {
         return (context, component) -> {
-            context.guiRenderState.addGuiElement(new BlurQuadElementRenderState(
+            context.submitGuiElementRenderState(new BlurQuadElementRenderState(
                 new Matrix3x2f(context.pose()),
                 new ScreenRectangle(component.x(), component.y(), component.width(), component.height()),
-                context.scissorStack.peek(),
+                context.peekScissorStack(),
                 16, quality, size
             ));
         };
@@ -71,10 +71,10 @@ public interface Surface {
     static Surface panorama(CubeMap renderer, boolean alwaysVisible) {
         return (context, component) -> {
             if (!alwaysVisible && Minecraft.getInstance().level != null) return;
-            context.guiRenderState.addPicturesInPictureState(new CubeMapElementRenderState(
+            context.submitPictureInPictureRenderState(new CubeMapElementRenderState(
                 renderer, true,
                 new ScreenRectangle(component.x(), component.y(), component.width(), component.height()),
-                context.scissorStack.peek()
+                context.peekScissorStack()
             ));
         };
     }

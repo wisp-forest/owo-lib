@@ -5,7 +5,9 @@ import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.UIComponent;
 import io.wispforest.owo.ui.event.ClientRenderCallback;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+//import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
@@ -90,7 +92,7 @@ public class Hud {
         adapter.inflateAndMount();
     }
 
-    static {
+    public static void init(IEventBus modBus) {
         WindowResizeCallback.EVENT.register((client, window) -> {
             if (adapter == null) return;
             adapter.moveAndResize(0, 0, window.getGuiScaledWidth(), window.getGuiScaledHeight());
@@ -106,9 +108,11 @@ public class Hud {
             }
         });
 
-        HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("owo", "owo_ui_hud"), (context, tickCounter) -> {
-            if (adapter == null || suppress || Minecraft.getInstance().options.hideGui) return;
-            adapter.extractRenderState(context, -69, -69, tickCounter.getGameTimeDeltaPartialTick(false));
+        modBus.<RegisterGuiLayersEvent>addListener((event) -> {
+            event.registerBelowAll(Identifier.fromNamespaceAndPath("owo", "owo_ui_hud"), (context, tickCounter) -> {
+                if (adapter == null || suppress || Minecraft.getInstance().options.hideGui) return;
+                adapter.extractRenderState(context, -69, -69, tickCounter.getGameTimeDeltaPartialTick(false));
+            });
         });
     }
 }

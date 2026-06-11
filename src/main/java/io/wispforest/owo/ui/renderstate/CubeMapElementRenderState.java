@@ -3,6 +3,7 @@ package io.wispforest.owo.ui.renderstate;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.PoseStack;
+import io.wispforest.owo.mixin.ui.access.GuiGraphicsExtractorAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -78,7 +79,7 @@ public record CubeMapElementRenderState(
                 dummyContext = new GuiGraphicsExtractor(Minecraft.getInstance(), new GuiRenderState(), 0, 0);
             }
 
-            dummyContext.guiRenderState.reset();
+            ((GuiGraphicsExtractorAccessor) dummyContext).owo$guiRenderState().reset();
 
             try {
                 CubeMapElementRenderState.outputOverride = new OutputOverride(

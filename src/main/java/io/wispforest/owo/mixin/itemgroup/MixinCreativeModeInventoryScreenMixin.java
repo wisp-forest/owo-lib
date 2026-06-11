@@ -2,9 +2,10 @@ package io.wispforest.owo.mixin.itemgroup;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.fabricmc.fabric.api.client.creativetab.v1.FabricCreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.world.item.CreativeModeTab;
+import net.neoforged.neoforge.client.gui.CreativeTabsScreenPage;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -13,23 +14,37 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.List;
+
 @SuppressWarnings({"MixinAnnotationTarget", "UnresolvedMixinReference"})
 @Mixin(value = CreativeModeInventoryScreen.class, priority = 1100)
-public abstract class MixinCreativeModeInventoryScreenMixin implements FabricCreativeModeInventoryScreen {
+public abstract class MixinCreativeModeInventoryScreenMixin {
 
     @Unique private static final Int2ObjectMap<CreativeModeTab> selectedTabForPage = new Int2ObjectOpenHashMap<>();
 
     @Shadow
     protected abstract void selectTab(CreativeModeTab group);
 
+    @Shadow
+    public abstract CreativeTabsScreenPage getCurrentPage();
+
+    @Shadow
+    @Final
+    private List<CreativeTabsScreenPage> pages;
+
+    @Unique
+    public int getCurrentPageIndex() {
+        return this.pages.indexOf(this.getCurrentPage());
+    }
+
     @Inject(method = "selectTab", at = @At("TAIL"))
     private void captureSetTab(CreativeModeTab group, CallbackInfo ci) {
-        selectedTabForPage.put(getCurrentPage(), group);
+        selectedTabForPage.put(this.getCurrentPageIndex(), group);
     }
 
     @Inject(method = "updateSelection", at = @At("HEAD"), cancellable = true, remap = false)
     private void yesThisMakesPerfectSenseAndIsVeryUsable(CallbackInfo ci) {
-        var selectedTab = selectedTabForPage.get(getCurrentPage());
+        var selectedTab = selectedTabForPage.get(this.getCurrentPageIndex());
         if (selectedTab == null) return;
         this.selectTab(selectedTab);
         ci.cancel();

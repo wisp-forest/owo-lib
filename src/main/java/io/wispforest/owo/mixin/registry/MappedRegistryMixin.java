@@ -5,7 +5,7 @@ import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.pond.OwoSimpleRegistryExtensions;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
-import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
+import io.wispforest.owo.neoforge.api.RegistryEntryAddedCallback;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.RegistrationInfo;

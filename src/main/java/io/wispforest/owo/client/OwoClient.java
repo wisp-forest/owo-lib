@@ -1,6 +1,8 @@
 package io.wispforest.owo.client;
 
+
 import io.wispforest.owo.Owo;
+import io.wispforest.owo.braid.core.BraidRenderPipelines;
 import io.wispforest.owo.braid.display.BraidDisplay;
 import io.wispforest.owo.client.screens.MenuNetworkingInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
@@ -8,22 +10,30 @@ import io.wispforest.owo.config.OwoConfigCommand;
 import io.wispforest.owo.itemgroup.json.OwoItemGroupLoader;
 import io.wispforest.owo.moddata.ModDataLoader;
 import io.wispforest.owo.ui.core.OwoUIPipelines;
+import io.wispforest.owo.ui.hud.Hud;
 import io.wispforest.owo.ui.parsing.UIModelLoader;
 import io.wispforest.owo.ui.renderstate.OwoSpecialGuiElementRenderers;
 import io.wispforest.owo.ui.util.NinePatchTexture;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+//import net.fabricmc.api.ClientModInitializer;
+import io.wispforest.owo.neoforge.env.EnvType;
+import io.wispforest.owo.neoforge.env.Environment;
+//import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+import net.neoforged.neoforge.client.event.RegisterPictureInPictureRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
+import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.server.packs.PackType;
+//import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public class OwoClient implements ClientModInitializer {
+public class OwoClient /*implements ClientModInitializer*/ {
 
     private static final String LINUX_RENDERDOC_WARNING = """
         
@@ -45,16 +55,24 @@ public class OwoClient implements ClientModInitializer {
         Ignored 'owo.renderdocPath' property as this Minecraft instance is not running on Windows.
         ========================================""";
 
-    @Override
-    public void onInitializeClient() {
+    public OwoClient(IEventBus modBus) {
+        modBus.<FMLClientSetupEvent>addListener((event) -> this.onInitializeClient(modBus));
+    }
+
+    /*@Override*/
+    public void onInitializeClient(IEventBus modBus) {
         ModDataLoader.load(OwoItemGroupLoader.INSTANCE);
 
-        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new UIModelLoader());
-        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new NinePatchTexture.MetadataLoader());
+        modBus.<AddClientReloadListenersEvent>addListener((event) -> {
+            event.addListener(UIModelLoader.getFabricId(), new UIModelLoader());
+            event.addListener(NinePatchTexture.MetadataLoader.getFabricId(), new NinePatchTexture.MetadataLoader());
+        });
 
-        OwoUIPipelines.register();
-        BraidRenderPipelines.register();
-        RenderPipelines.register(BraidDisplay.PIPELINE);
+        modBus.<RegisterRenderPipelinesEvent>addListener((event) -> {
+            OwoUIPipelines.register(event);
+            BraidRenderPipelines.register(event);
+            event.registerPipeline(BraidDisplay.PIPELINE);
+        });
 
         final var renderdocPath = System.getProperty("owo.renderdocPath");
         if (renderdocPath != null) {
@@ -69,14 +87,21 @@ public class OwoClient implements ClientModInitializer {
             }
         }
 
+        modBus.<RegisterClientPayloadHandlersEvent>addListener(event -> {
+            event.register();
+        });
         MenuNetworkingInternals.Client.init();
 
-        ClientCommandRegistrationCallback.EVENT.register(OwoConfigCommand::register);
+        NeoForge.EVENT_BUS.<RegisterClientCommandsEvent>addListener((event) -> {
+            var dispatcher = event.getDispatcher(); var access = event.getBuildContext();
+            OwoConfigCommand.register(dispatcher, access);
+        });
 
         if (Owo.DEBUG) {
             OwoDebugCommands.Client.register();
         }
 
-        OwoSpecialGuiElementRenderers.init();
+        modBus.addListener(OwoSpecialGuiElementRenderers::init);
+        Hud.init(modBus);
     }
 }

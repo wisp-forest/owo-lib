@@ -1,6 +1,7 @@
 package io.wispforest.owo.particles.systems;
 
 import io.wispforest.endec.Endec;
+import io.wispforest.endec.StructEndec;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.network.NetworkException;
@@ -11,13 +12,19 @@ import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ReflectionUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.loader.api.FabricLoader;
+import io.wispforest.owo.neoforge.env.EnvType;
+import io.wispforest.owo.neoforge.env.Environment;
+//import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+//import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+//import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+//import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.level.ChunkPos;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
@@ -53,6 +60,8 @@ public class ParticleSystemController {
 
     private final ReflectiveEndecBuilder builder;
 
+    private final StructEndec<ParticleSystemPayload> endec;
+
     /**
      * Creates a new controller with the given ID. Duplicate controller IDs
      * are not allowed - if there is a collision, the name of the
@@ -85,22 +94,22 @@ public class ParticleSystemController {
             instance -> instance.system.index,
             Endec.VAR_INT
         );
-        var endec = StructEndecBuilder.of(
+        this.endec = StructEndecBuilder.of(
             MinecraftEndecs.VEC3.fieldOf("pos", ParticleSystemPayload::pos),
             instanceEndec.fieldOf("instance", ParticleSystemPayload::instance),
             (pos, instance) -> new ParticleSystemPayload(payloadId, pos, instance)
         );
 
-        PayloadTypeRegistry.clientboundPlay().register(payloadId, CodecUtils.toPacketCodec(endec));
-
         OwoHandshake.enable();
         OwoHandshake.requireHandshake();
 
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            ClientPlayNetworking.registerGlobalReceiver(payloadId, new Client()::handler);
-        }
-
         REGISTERED_CONTROLLERS.put(channelId, this);
+    }
+
+    public static void init(PayloadRegistrar registrar) {
+        REGISTERED_CONTROLLERS.forEach((id, controller) -> {
+            registrar.playToClient(controller.payloadId, CodecUtils.toPacketCodec(controller.endec), new Client()::handler);
+        });
     }
 
     public ReflectiveEndecBuilder endecBuilder() {
@@ -161,13 +170,11 @@ public class ParticleSystemController {
     <T> void sendPacket(ParticleSystem<T> particleSystem, ServerLevel level, Vec3 pos, T data) {
         ParticleSystemPayload payload = new ParticleSystemPayload(payloadId, pos, new ParticleSystemInstance<>(particleSystem, data));
 
-        for (var player : PlayerLookup.tracking(level, BlockPos.containing(pos))) {
-            ServerPlayNetworking.send(player, payload);
-        }
+        PacketDistributor.sendToPlayersTrackingChunk(level, ChunkPos.containing(BlockPos.containing(pos)), payload);
     }
 
     private void verify() {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+        if (FMLEnvironment.getDist() == Dist.CLIENT) {
             for (ParticleSystem<?> system : systemsByIndex.values()) {
                 if (system.handler == null) {
                     throw new NetworkException("Some particle systems of " + channelId + " don't have handlers registered");
@@ -199,8 +206,8 @@ public class ParticleSystemController {
 
     @Environment(EnvType.CLIENT)
     private static class Client {
-        private void handler(ParticleSystemPayload payload, ClientPlayNetworking.Context context) {
-            payload.instance.execute(context.client().level, payload.pos);
+        private void handler(ParticleSystemPayload payload, IPayloadContext context) {
+            payload.instance.execute(Minecraft.getInstance().level, payload.pos);
         }
     }
 }

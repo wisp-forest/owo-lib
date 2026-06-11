@@ -28,7 +28,7 @@ public class BraidGraphics extends OwoUIGraphics {
     public static BraidGraphics create(GuiGraphicsExtractor graphics, Surface surface) {
         var braidContext = new BraidGraphics(
             Minecraft.getInstance(),
-            graphics.guiRenderState,
+            ((GuiGraphicsExtractorAccessor) graphics).owo$guiRenderState(),
             ((GuiGraphicsExtractorAccessor) graphics).owo$getMouseX(),
             ((GuiGraphicsExtractorAccessor) graphics).owo$getMouseY(),
             ((GuiGraphicsExtractorAccessor) graphics)::owo$setDeferredTooltip,
@@ -59,14 +59,14 @@ public class BraidGraphics extends OwoUIGraphics {
     }
 
     public void drawDashedLine(RenderPipeline pipeline, double x1, double y1, double x2, double y2, double thiccness, double segmentLength, Color color) {
-        this.guiRenderState.addGuiElement(new BraidDashedLineElement(
+        this.submitGuiElementRenderState(new BraidDashedLineElement(
             color,
             thiccness,
             segmentLength,
             pipeline,
             new Matrix3x2f(this.pose()),
             new ScreenRectangle((int) x1, (int) y1, (int) (x2 - x1), (int) (y2 - y1)),
-            this.scissorStack.peek()
+            this.peekScissorStack()
         ));
     }
 

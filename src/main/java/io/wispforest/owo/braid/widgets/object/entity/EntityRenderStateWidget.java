@@ -227,12 +227,12 @@ public class EntityRenderStateWidget extends LeafInstanceWidget {
                 state.nameTag = null;
             }
 
-            graphics.guiRenderState.addPicturesInPictureState(new BraidEntityElement(
+            graphics.submitPictureInPictureRenderState(new BraidEntityElement(
                 state,
                 new Matrix4f().mul(entitySpaceToWidgetSpace).mul(entityTransform),
                 new Matrix3x2f(graphics.pose()),
                 this.transform.width(), this.transform.height(),
-                graphics.scissorStack.peek()
+                graphics.peekScissorStack()
             ));
 
 //            if (state instanceof LivingEntity living) living.yHeadRotO = lastHeadYaw;

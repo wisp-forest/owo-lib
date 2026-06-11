@@ -27,7 +27,7 @@ public class LevelRendererMixin {
     private SubmitNodeStorage submitNodeStorage;
 
     @Inject(method = "lambda$addMainPass$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;submitBlockEntities(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/state/level/LevelRenderState;Lnet/minecraft/client/renderer/SubmitNodeStorage;)V", shift = At.Shift.AFTER))
-    private void renderBraidDisplays(GpuBufferSlice terrainFog, LevelRenderState levelRenderState, ProfilerFiller profiler, ChunkSectionsToRender chunkSectionsToRender, ResourceHandle<?> entityOutlineTarget, ResourceHandle<?> translucentTarget, ResourceHandle<?> mainTarget, ResourceHandle<?> itemEntityTarget, ResourceHandle<?> particleTarget, boolean renderOutline, Matrix4fc modelViewMatrix, CallbackInfo ci, @Local PoseStack matrixStack) {
+    private void renderBraidDisplays(GpuBufferSlice terrainFog, LevelRenderState levelRenderState, ProfilerFiller profiler, ChunkSectionsToRender chunkSectionsToRender, Matrix4fc modelViewMatrix, ResourceHandle entityOutlineTarget, ResourceHandle translucentTarget, ResourceHandle mainTarget, ResourceHandle itemEntityTarget, ResourceHandle particleTarget, boolean renderOutline, CallbackInfo ci, @Local PoseStack matrixStack) {
         BraidDisplayBinding.renderAutomaticDisplays(matrixStack, levelRenderState.cameraRenderState, submitNodeStorage);
     }
 }

@@ -1,8 +1,8 @@
 package io.wispforest.owo.particles;
 
 import io.wispforest.owo.util.VectorRandomUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import io.wispforest.owo.neoforge.env.EnvType;
+import io.wispforest.owo.neoforge.env.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
