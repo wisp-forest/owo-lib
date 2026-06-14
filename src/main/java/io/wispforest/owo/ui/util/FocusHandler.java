@@ -105,11 +105,11 @@ public class FocusHandler {
                 for (var child : allChildren) {
                     if (child == this.focused) continue;
                     if (child.y() < this.focused.y() + this.focused.height() ||
-                            child.y() + child.height() > closestY || Math.abs(child.x() - this.focused.x()) > closestX) continue;
+                            child.y() > closestY || Math.abs(child.x() - this.focused.x()) > closestX) continue;
 
                     closest = child;
                     closestX = Math.abs(child.x() - this.focused.x());
-                    closestY = child.y() + child.height();
+                    closestY = child.y();
                 }
             }
         }
