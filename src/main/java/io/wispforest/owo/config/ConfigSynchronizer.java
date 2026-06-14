@@ -169,7 +169,7 @@ public class ConfigSynchronizer {
         }
 
         Owo.LOGGER.info("Responding with client values");
-        context.handle(toPacket(Option.SyncMode.INFORM_SERVER));
+        context.reply(toPacket(Option.SyncMode.INFORM_SERVER));
     }
 
     private static void applyServer(ConfigSyncPacket payload, IPayloadContext context) {

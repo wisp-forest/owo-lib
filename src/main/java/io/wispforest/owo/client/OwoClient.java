@@ -9,6 +9,8 @@ import io.wispforest.owo.command.debug.OwoDebugCommands;
 import io.wispforest.owo.config.OwoConfigCommand;
 import io.wispforest.owo.itemgroup.json.OwoItemGroupLoader;
 import io.wispforest.owo.moddata.ModDataLoader;
+import io.wispforest.owo.network.OwoHandshake;
+import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.ui.core.OwoUIPipelines;
 import io.wispforest.owo.ui.hud.Hud;
 import io.wispforest.owo.ui.parsing.UIModelLoader;
@@ -18,7 +20,9 @@ import io.wispforest.owo.ui.util.NinePatchTexture;
 import io.wispforest.owo.neoforge.env.EnvType;
 import io.wispforest.owo.neoforge.env.Environment;
 //import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
@@ -33,6 +37,7 @@ import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
+@Mod(value = Owo.MOD_ID, dist = Dist.CLIENT)
 public class OwoClient /*implements ClientModInitializer*/ {
 
     private static final String LINUX_RENDERDOC_WARNING = """
@@ -87,7 +92,11 @@ public class OwoClient /*implements ClientModInitializer*/ {
             }
         }
 
-        modBus.addListener(MenuNetworkingInternals.Client::init);
+        modBus.<RegisterClientPayloadHandlersEvent>addListener(event -> {
+            MenuNetworkingInternals.Client.init(event);
+            ParticleSystemController.initClientHandler(event);
+            OwoHandshake.clientHandlerInit(event);
+        });
 
         NeoForge.EVENT_BUS.<RegisterClientCommandsEvent>addListener((event) -> {
             var dispatcher = event.getDispatcher(); var access = event.getBuildContext();

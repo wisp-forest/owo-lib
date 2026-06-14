@@ -28,7 +28,7 @@ public class MenuNetworkingInternals {
     public static void init(PayloadRegistrar registrar) {
         registrar.playToClient(SyncPropertiesPacket.ID, CodecUtils.toPacketCodec(SyncPropertiesPacket.ENDEC));
 
-        registrar.playToServer(LocalPacket.ID, CodecUtils.toPacketCodec(LocalPacket.ENDEC), (payload, context) -> {
+        registrar.playBidirectional(LocalPacket.ID, CodecUtils.toPacketCodec(LocalPacket.ENDEC), (payload, context) -> {
             var menu = context.player().containerMenu;
 
             if (menu == null) {
@@ -69,13 +69,13 @@ public class MenuNetworkingInternals {
 
     @Environment(EnvType.CLIENT)
     public static class Client {
-        public static void init(RegisterClientPayloadHandlersEvent registrar) {
+        public static void init(RegisterClientPayloadHandlersEvent event) {
             ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
                 if (screen instanceof MenuAccess<?> handled)
                     ((OwoAbstractContainerMenuExtension) handled.getMenu()).owo$attachToPlayer(client.player);
             });
 
-            registrar.register(LocalPacket.ID, (payload, context) -> {
+            event.register(LocalPacket.ID, (payload, context) -> {
                 var menu = context.player().containerMenu;
 
                 if (menu == null) {
@@ -86,7 +86,7 @@ public class MenuNetworkingInternals {
                 ((OwoAbstractContainerMenuExtension) menu).owo$handlePacket(payload, true);
             });
 
-            registrar.register(SyncPropertiesPacket.ID, (payload, context) -> {
+            event.register(SyncPropertiesPacket.ID, (payload, context) -> {
                 var menu = context.player().containerMenu;
 
                 if (menu == null) {

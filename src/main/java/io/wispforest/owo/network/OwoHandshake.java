@@ -3,8 +3,8 @@ package io.wispforest.owo.network;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.mixin.ClientCommonPacketListenerImplAccessor;
 import io.wispforest.owo.mixin.ServerCommonPacketListenerImplAccessor;
+import io.wispforest.owo.neoforge.api.SidedStreamCodec;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.serialization.CodecUtils;
@@ -19,22 +19,21 @@ import io.wispforest.owo.neoforge.env.Environment;
 //import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 //import net.fabricmc.fabric.api.networking.v1.ServerConfigurationConnectionEvents;
 //import net.fabricmc.fabric.api.networking.v1.ServerConfigurationNetworking;
-import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
 import net.minecraft.network.ConnectionProtocol;
+import net.minecraft.network.protocol.common.ClientCommonPacketListener;
 import net.minecraft.network.protocol.configuration.ServerConfigurationPacketListener;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.network.configuration.ICustomConfigurationTask;
 import net.neoforged.neoforge.network.event.RegisterConfigurationTasksEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.NetworkRegistry;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientConfigurationPacketListenerImpl;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.StreamCodec;
@@ -86,8 +85,11 @@ public final class OwoHandshake {
     }
 
     public static void init(IEventBus modBus, PayloadRegistrar registrar) {
-        registrar.configurationToClient(HandshakeRequest.ID, CodecUtils.toPacketCodec(HandshakeRequest.ENDEC));
-        registrar.configurationToServer(HandshakeResponse.ID, CodecUtils.toPacketCodec(HandshakeResponse.ENDEC), OwoHandshake::syncServer);
+        // TODO: FIX WITH SIDED CODEC
+        SidedStreamCodec.configurationBiDirectional(registrar, CHANNEL_ID,
+            HandshakeResponse.class, HandshakeRequest.class,
+            CodecUtils.toPacketCodec(HandshakeResponse.ENDEC), CodecUtils.toPacketCodec(HandshakeRequest.ENDEC),
+            OwoHandshake::syncServer);
 
         modBus.<RegisterConfigurationTasksEvent>addListener(event -> {
             event.register(new ICustomConfigurationTask() {
@@ -113,15 +115,18 @@ public final class OwoHandshake {
             registrar.configurationToClient(HandshakeOff.ID, StreamCodec.unit(new HandshakeOff()), (payload, context) -> {});
         }
 
-        registrar.configurationToClient(HandshakeRequest.ID, CodecUtils.toPacketCodec(HandshakeRequest.ENDEC), OwoHandshake::syncClient);
-        NeoForge.EVENT_BUS.<TagsUpdatedEvent.ClientPacketReceived>addListener((event) -> {
-            OwoHandshake.handleReadyClient(Minecraft.getInstance());
-        });
+        //registrar.configurationToClient(HandshakeRequest.ID, CodecUtils.toPacketCodec(HandshakeRequest.ENDEC)/*, OwoHandshake::syncClient*/);
+        //NeoForge.EVENT_BUS.<TagsUpdatedEvent.ClientPacketReceived>addListener((event) -> OwoHandshake.handleReadyClient(Minecraft.getInstance()));
 
         NeoForge.EVENT_BUS.<ClientPlayerNetworkEvent.LoggingOut>addListener((event) -> {
             QUERY_RECEIVED = false;
             QueuedChannelSet.channels = null;
         });
+    }
+
+    @Environment(EnvType.CLIENT)
+    public static void clientHandlerInit(RegisterClientPayloadHandlersEvent event) {
+        event.register(HandshakeRequest.ID, OwoHandshake::syncClient);
     }
 
     public static boolean isValidClient() {
@@ -164,7 +169,7 @@ public final class OwoHandshake {
         var requiredControllers = formatHashes(ParticleSystemController.REGISTERED_CONTROLLERS, OwoHandshake::hashController);
         var optionalChannels = formatHashes(OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel);
 
-        context.handle(new HandshakeResponse(requiredChannels, requiredControllers, optionalChannels));
+        context.reply(new HandshakeResponse(requiredChannels, requiredControllers, optionalChannels));
     }
 
     private static void syncServer(HandshakeResponse response, IPayloadContext context) {
@@ -185,8 +190,8 @@ public final class OwoHandshake {
     }
 
     @Environment(EnvType.CLIENT)
-    private static void handleReadyClient(Minecraft client) {
-        var handler = Minecraft.getInstance().getConnection();
+    @ApiStatus.Internal
+    public static void handleReadyClient(ClientCommonPacketListener handler, Minecraft client) {
         if (NetworkRegistry.hasChannel(handler.getConnection(), ConnectionProtocol.CONFIGURATION, CHANNEL_ID) || !HANDSHAKE_REQUIRED || !ENABLED) return;
 
         client.execute(() -> {

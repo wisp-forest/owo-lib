@@ -18,6 +18,7 @@ import io.wispforest.owo.neoforge.env.Environment;
 //import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 //import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 //import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -108,7 +109,14 @@ public class ParticleSystemController {
 
     public static void init(PayloadRegistrar registrar) {
         REGISTERED_CONTROLLERS.forEach((id, controller) -> {
-            registrar.playToClient(controller.payloadId, CodecUtils.toPacketCodec(controller.endec), new Client()::handler);
+            registrar.playToClient(controller.payloadId, CodecUtils.toPacketCodec(controller.endec));
+        });
+    }
+
+    @Environment(EnvType.CLIENT)
+    public static void initClientHandler(RegisterClientPayloadHandlersEvent event) {
+        REGISTERED_CONTROLLERS.forEach((id, controller) -> {
+            event.register(controller.payloadId, new Client()::handler);
         });
     }
 

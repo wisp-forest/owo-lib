@@ -100,7 +100,7 @@ class RegistryEntryAddedCallbackImpl {
 
             BuiltInRegistries.REGISTRY.get(key1.identifier())
                 .ifPresentOrElse(
-                    (registry) -> setupRegEvent((Registry<T>) registry, event),
+                    (registry) -> setupRegEvent((Registry<T>) registry.value(), event),
                     () -> unhookedRegistries.add(key1)
                 );
 

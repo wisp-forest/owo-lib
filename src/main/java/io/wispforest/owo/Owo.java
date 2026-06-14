@@ -3,17 +3,22 @@ package io.wispforest.owo;
 import io.wispforest.owo.client.screens.MenuNetworkingInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
 import io.wispforest.owo.config.ConfigSynchronizer;
+import io.wispforest.owo.neoforge.api.ArgumentTypeRegistry;
 import io.wispforest.owo.network.OwoHandshake;
 import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.ops.LootOps;
 import io.wispforest.owo.text.CustomTextRegistry;
 import io.wispforest.owo.text.InsertingTextContent;
+import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.Wisdom;
 //import net.fabricmc.api.ModInitializer;
 //import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 //import net.fabricmc.loader.api.FabricLoader;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
@@ -29,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import static io.wispforest.owo.ops.TextOps.withColor;
 
+@Mod(value = Owo.MOD_ID)
 public class Owo /*implements ModInitializer*/ {
 
     public static final String MOD_ID = "owo";
@@ -85,6 +91,11 @@ public class Owo /*implements ModInitializer*/ {
             OwoHandshake.init(modBus, registrar);
             OwoNetChannel.init(registrar);
         });
+
+        modBus.<FMLLoadCompleteEvent>addListener(EventPriority.LOW, event -> {
+            OwoFreezer.freeze();
+        });
+        ArgumentTypeRegistry.init(modBus);
     }
 
     @ApiStatus.Internal
