@@ -4,7 +4,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 
-public record ServerAccess(ServerPlayer player) implements
+public record ServerAccess(OwoNetChannel channel, ServerPlayer player) implements
         OwoNetChannel.EnvironmentAccess<ServerPlayer, MinecraftServer, ServerGamePacketListenerImpl> {
 
     @Override

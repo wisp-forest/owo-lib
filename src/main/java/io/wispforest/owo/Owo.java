@@ -2,7 +2,10 @@ package io.wispforest.owo;
 
 import io.wispforest.owo.client.screens.MenuNetworkingInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
+import io.wispforest.owo.config.ConfigSynchronizer;
+import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.ops.LootOps;
+import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.text.CustomTextRegistry;
 import io.wispforest.owo.text.InsertingTextContent;
 import io.wispforest.owo.util.Wisdom;
@@ -30,6 +33,9 @@ public class Owo implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     private static MinecraftServer SERVER;
 
+    @ApiStatus.Internal
+    public static final OwoNetChannel MAIN = OwoNetChannel.create(id("main"));
+
     public static final Component PREFIX = Component.empty().withStyle(ChatFormatting.GRAY)
         .append(withColor("o", 0x3955e5))
         .append(withColor("ω", 0x13a6f0))
@@ -52,7 +58,6 @@ public class Owo implements ModInitializer {
     public void onInitialize() {
         LootOps.registerListener();
         CustomTextRegistry.register("index", InsertingTextContent.CODEC);
-        MenuNetworkingInternals.init();
 
         ServerLifecycleEvents.SERVER_STARTING.register(server -> SERVER = server);
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> SERVER = null);
@@ -62,6 +67,10 @@ public class Owo implements ModInitializer {
         if (!DEBUG) return;
 
         OwoDebugCommands.register();
+
+        MenuNetworkingInternals.init();
+        ConfigSynchronizer.init();
+        ParticleSystemController.initNetworking();
     }
 
     @ApiStatus.Internal

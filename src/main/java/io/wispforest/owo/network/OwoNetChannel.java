@@ -29,6 +29,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.server.network.ServerPlayerConnection;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -138,14 +139,14 @@ public class OwoNetChannel {
 
         Endec<MessagePayload> serverEndec = Endec.<Record, Integer>dispatched(
             index -> this.endecsByIndex.get(index).endec,
-            msg -> this.endecsByClass.get(msg.getClass()).serverHandlerIndex,
+            msg -> this.getEndec(msg).serverHandlerIndex,
             Endec.VAR_INT
         )
             .xmap(x -> new MessagePayload(this.packetId, x), x -> x.message);
 
         Endec<MessagePayload> clientEndec = Endec.<Record, Integer>dispatched(
                 index -> this.endecsByIndex.get(-index).endec,
-                msg -> this.endecsByClass.get(msg.getClass()).clientHandlerIndex,
+                msg -> this.getEndec(msg).clientHandlerIndex,
                 Endec.VAR_INT
             )
             .xmap(x -> new MessagePayload(this.packetId, x), x -> x.message);
@@ -154,12 +155,12 @@ public class OwoNetChannel {
         PayloadTypeRegistry.clientboundPlay().register(this.packetId, CodecUtils.toPacketCodec(clientEndec));
 
         ServerPlayNetworking.registerGlobalReceiver(this.packetId, (payload, context) -> {
-            serverHandlers.get(endecsByClass.get(payload.message().getClass()).serverHandlerIndex).handle(payload.message, new ServerAccess(context.player()));
+            serverHandlers.get(endecsByClass.get(payload.message().getClass()).serverHandlerIndex).handle(payload.message, new ServerAccess(this, context.player()));
         });
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             ClientPlayNetworking.registerGlobalReceiver(this.packetId, (payload, context) -> {
-                clientHandlers.get(endecsByClass.get(payload.message.getClass()).clientHandlerIndex).handle(payload.message, new ClientAccess(context.player().connection));
+                clientHandlers.get(endecsByClass.get(payload.message.getClass()).clientHandlerIndex).handle(payload.message, new ClientAccess(this, context.player().connection));
             });
         }
 
@@ -172,6 +173,12 @@ public class OwoNetChannel {
         } else {
             OPTIONAL_CHANNELS.put(id, this);
         }
+    }
+
+    private IndexedEndec<?> getEndec(Record record) {
+        final var endec = this.endecsByClass.get(record.getClass());
+        if (endec == null) throw new IllegalStateException("Unable to locate Endec for '" + record.getClass().getName() + "' for channel: " + this.packetId.id());
+        return endec;
     }
 
     public OwoNetChannel addEndecs(Consumer<ReflectiveEndecBuilder> endecBuilder) {
@@ -374,6 +381,10 @@ public class OwoNetChannel {
         return handle;
     }
 
+    public ServerHandle serverHandle(ServerPlayerConnection listener) {
+        return serverHandle(listener.getPlayer());
+    }
+
     /**
      * Obtains a server handle used to send packets
      * <i>to the given player only</i>
@@ -523,6 +534,8 @@ public class OwoNetChannel {
      * @param <N> The network handler that received the packet
      */
     public interface EnvironmentAccess<P extends Player, R, N> {
+
+        OwoNetChannel channel();
 
         /**
          * @return The player that received the packet

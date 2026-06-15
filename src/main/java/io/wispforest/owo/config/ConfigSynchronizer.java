@@ -1,32 +1,26 @@
 package io.wispforest.owo.config;
 
 import com.google.common.collect.HashMultimap;
-import io.wispforest.endec.Endec;
-import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.mixin.ServerCommonPacketListenerImplAccessor;
+import io.wispforest.owo.network.ClientAccess;
+import io.wispforest.owo.network.ServerAccess;
 import io.wispforest.owo.ops.TextOps;
-import io.wispforest.owo.serialization.CodecUtils;
-import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.networking.v1.FriendlyByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Tuple;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -35,8 +29,6 @@ import java.util.WeakHashMap;
 import java.util.function.BiConsumer;
 
 public class ConfigSynchronizer {
-
-    public static final Identifier CONFIG_SYNC_CHANNEL = Owo.id("config_sync");
 
     private static final Map<Connection, Map<String, Map<Option.Key, Object>>> CLIENT_OPTION_STORAGE = new WeakHashMap<>();
 
@@ -117,11 +109,11 @@ public class ConfigSynchronizer {
     }
 
     @Environment(EnvType.CLIENT)
-    private static void applyClient(ConfigSyncPacket payload, ClientPlayNetworking.Context context) {
+    private static void applyClient(ConfigSyncPacket payload, ClientAccess context) {
         Owo.LOGGER.info("Applying server overrides");
         var mismatchedOptions = new HashMap<Option<?>, Object>();
 
-        if (!(context.client().hasSingleplayerServer() && context.client().getSingleplayerServer().isSingleplayer())) {
+        if (!(context.runtime().hasSingleplayerServer() && context.runtime().getSingleplayerServer().isSingleplayer())) {
             read(payload, (option, packetByteBuf) -> {
                 var mismatchedValue = option.read(packetByteBuf);
                 if (mismatchedValue != null) mismatchedOptions.put(option, mismatchedValue);
@@ -159,61 +151,45 @@ public class ConfigSynchronizer {
         }
 
         Owo.LOGGER.info("Responding with client values");
-        context.responseSender().sendPacket(toPacket(Option.SyncMode.INFORM_SERVER));
+        context.channel().clientHandle().send(toPacket(Option.SyncMode.INFORM_SERVER));
     }
 
-    private static void applyServer(ConfigSyncPacket payload, ServerPlayNetworking.Context context) {
+    private static void applyServer(ConfigSyncPacket payload, ServerAccess access) {
         Owo.LOGGER.info("Receiving client config");
-        var connection = ((ServerCommonPacketListenerImplAccessor) context.player().connection).owo$getConnection();
+        var connection = ((ServerCommonPacketListenerImplAccessor) access.player().connection).owo$getConnection();
 
         read(payload, (option, optionBuf) -> {
-            var config = CLIENT_OPTION_STORAGE.computeIfAbsent(connection, $ -> new HashMap<>()).computeIfAbsent(option.configName(), s -> new HashMap<>());
+            var config = CLIENT_OPTION_STORAGE.computeIfAbsent(connection, _ -> new HashMap<>()).computeIfAbsent(option.configName(), _ -> new HashMap<>());
             config.put(option.key(), optionBuf.read(option.endec()));
         });
     }
 
-    private record ConfigSyncPacket(Map<String, ConfigEntry> configs) implements CustomPacketPayload {
-        public static final Type<ConfigSyncPacket> ID = new Type<>(CONFIG_SYNC_CHANNEL);
-        public static final Endec<ConfigSyncPacket> ENDEC = StructEndecBuilder.of(
-                ConfigEntry.ENDEC.mapOf().fieldOf("configs", ConfigSyncPacket::configs),
-                ConfigSyncPacket::new
-        );
+    @ApiStatus.Internal
+    public record ConfigSyncPacket(Map<String, ConfigEntry> configs) { }
 
-        @Override
-        public Type<? extends CustomPacketPayload> type() {
-            return ID;
-        }
-    }
+    @ApiStatus.Internal
+    public record ConfigEntry(Map<String, FriendlyByteBuf> options) { }
 
-    private record ConfigEntry(Map<String, FriendlyByteBuf> options) {
-        public static final Endec<ConfigEntry> ENDEC = StructEndecBuilder.of(
-                MinecraftEndecs.FRIENDLY_BYTE_BUF.mapOf().fieldOf("options", ConfigEntry::options),
-                ConfigEntry::new
-        );
-    }
-
-    static {
-        var packetCodec = CodecUtils.toPacketCodec(ConfigSyncPacket.ENDEC);
-
-        PayloadTypeRegistry.clientboundPlay().register(ConfigSyncPacket.ID, packetCodec);
-        PayloadTypeRegistry.serverboundPlay().register(ConfigSyncPacket.ID, packetCodec);
-
+    @ApiStatus.Internal
+    public static void init() {
         var earlyPhase = Owo.id("early");
         ServerPlayConnectionEvents.JOIN.addPhaseOrdering(earlyPhase, Event.DEFAULT_PHASE);
         ServerPlayConnectionEvents.JOIN.register(earlyPhase, (handler, sender, server) -> {
             Owo.LOGGER.info("Sending server config values to client");
 
-            sender.sendPacket(toPacket(Option.SyncMode.OVERRIDE_CLIENT));
+            Owo.MAIN.serverHandle(handler).send(toPacket(Option.SyncMode.OVERRIDE_CLIENT));
         });
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            ClientPlayNetworking.registerGlobalReceiver(ConfigSyncPacket.ID, ConfigSynchronizer::applyClient);
+            Owo.MAIN.registerClientbound(ConfigSyncPacket.class, ConfigSynchronizer::applyClient);
 
-            ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
-                KNOWN_CONFIGS.forEach((name, config) -> config.forEachOption(Option::reattach));
+            ClientPlayConnectionEvents.DISCONNECT.register((_, _) -> {
+                KNOWN_CONFIGS.values().forEach((config) -> config.forEachOption(Option::reattach));
             });
+        } else {
+            Owo.MAIN.registerClientboundDeferred(ConfigSyncPacket.class);
         }
 
-        ServerPlayNetworking.registerGlobalReceiver(ConfigSyncPacket.ID, ConfigSynchronizer::applyServer);
+        Owo.MAIN.registerServerbound(ConfigSyncPacket.class, ConfigSynchronizer::applyServer);
     }
 }
