@@ -3,21 +3,16 @@ package io.wispforest.owo.mixin;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.SerializationContext;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.client.screens.OwoAbstractContainerMenu;
 import io.wispforest.owo.client.screens.MenuNetworkingInternals;
 import io.wispforest.owo.client.screens.ScreenhandlerMessageData;
 import io.wispforest.owo.client.screens.SyncedProperty;
-import io.wispforest.owo.neoforge.api.NetworkUtils;
+import io.wispforest.owo.neoforge.api.FriendlyByteBufs;
 import io.wispforest.owo.network.NetworkException;
 import io.wispforest.owo.serialization.RegistriesAttribute;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.pond.OwoAbstractContainerMenuExtension;
-//import io.wispforest.owo.neoforge.env.EnvType;
-//import io.wispforest.owo.neoforge.env.Environment;
-//import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import io.wispforest.owo.neoforge.api.FriendlyByteBufs;
-//import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -120,7 +115,7 @@ public abstract class AbstractContainerMenuMixin implements OwoAbstractContainer
                 throw new NetworkException("Tried to send clientbound message on the server");
             }
 
-            serverPlayer.connection.send(packet);
+            Owo.MAIN.serverHandle(serverPlayer).send(packet);
         } else {
             if (!this.player.level().isClientSide()) {
                 throw new NetworkException("Tried to send serverbound message on the client");
@@ -132,8 +127,8 @@ public abstract class AbstractContainerMenuMixin implements OwoAbstractContainer
 
     @Unique
     /*@Environment(EnvType.CLIENT)*/
-    private void owo$sendToServer(CustomPacketPayload payload) {
-        NetworkUtils.sendToServer(payload);
+    private void owo$sendToServer(Record payload) {
+        Owo.MAIN.clientHandle().send(payload);
     }
 
     @Override
@@ -197,7 +192,7 @@ public abstract class AbstractContainerMenuMixin implements OwoAbstractContainer
             prop.write(buf);
         }
 
-        player.connection.send(new MenuNetworkingInternals.SyncPropertiesPacket(buf));
+        Owo.MAIN.serverHandle(player).send(new MenuNetworkingInternals.SyncPropertiesPacket(buf));
     }
 
 }

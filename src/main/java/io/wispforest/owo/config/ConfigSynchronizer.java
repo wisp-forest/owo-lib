@@ -1,10 +1,10 @@
 package io.wispforest.owo.config;
 
 import com.google.common.collect.HashMultimap;
-import io.wispforest.endec.Endec;
-import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.mixin.ServerCommonPacketListenerImplAccessor;
+import io.wispforest.owo.network.ClientAccess;
+import io.wispforest.owo.network.ServerAccess;
 import io.wispforest.owo.ops.TextOps;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
@@ -32,10 +32,9 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Tuple;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -44,8 +43,6 @@ import java.util.WeakHashMap;
 import java.util.function.BiConsumer;
 
 public class ConfigSynchronizer {
-
-    public static final Identifier CONFIG_SYNC_CHANNEL = Owo.id("config_sync");
 
     private static final Map<Connection, Map<String, Map<Option.Key, Object>>> CLIENT_OPTION_STORAGE = new WeakHashMap<>();
 
@@ -126,12 +123,11 @@ public class ConfigSynchronizer {
     }
 
     @Environment(EnvType.CLIENT)
-    private static void applyClient(ConfigSyncPacket payload, IPayloadContext context) {
-        var client = Minecraft.getInstance();
+    private static void applyClient(ConfigSyncPacket payload, ClientAccess context) {
         Owo.LOGGER.info("Applying server overrides");
         var mismatchedOptions = new HashMap<Option<?>, Object>();
 
-        if (!(client.hasSingleplayerServer() && client.getSingleplayerServer().isSingleplayer())) {
+        if (!(context.runtime().hasSingleplayerServer() && context.runtime().getSingleplayerServer().isSingleplayer())) {
             read(payload, (option, packetByteBuf) -> {
                 var mismatchedValue = option.read(packetByteBuf);
                 if (mismatchedValue != null) mismatchedOptions.put(option, mismatchedValue);
@@ -169,48 +165,31 @@ public class ConfigSynchronizer {
         }
 
         Owo.LOGGER.info("Responding with client values");
-        context.reply(toPacket(Option.SyncMode.INFORM_SERVER));
+        context.channel().clientHandle().send(toPacket(Option.SyncMode.INFORM_SERVER));
     }
 
-    private static void applyServer(ConfigSyncPacket payload, IPayloadContext context) {
+    private static void applyServer(ConfigSyncPacket payload, ServerAccess access) {
         Owo.LOGGER.info("Receiving client config");
-        var connection = ((ServerCommonPacketListenerImplAccessor) ((ServerPlayer)context.player()).connection).owo$getConnection();
+        var connection = ((ServerCommonPacketListenerImplAccessor) access.player().connection).owo$getConnection();
 
         read(payload, (option, optionBuf) -> {
-            var config = CLIENT_OPTION_STORAGE.computeIfAbsent(connection, $ -> new HashMap<>()).computeIfAbsent(option.configName(), s -> new HashMap<>());
+            var config = CLIENT_OPTION_STORAGE.computeIfAbsent(connection, _ -> new HashMap<>()).computeIfAbsent(option.configName(), _ -> new HashMap<>());
             config.put(option.key(), optionBuf.read(option.endec()));
         });
     }
 
-    private record ConfigSyncPacket(Map<String, ConfigEntry> configs) implements CustomPacketPayload {
-        public static final Type<ConfigSyncPacket> ID = new Type<>(CONFIG_SYNC_CHANNEL);
-        public static final Endec<ConfigSyncPacket> ENDEC = StructEndecBuilder.of(
-                ConfigEntry.ENDEC.mapOf().fieldOf("configs", ConfigSyncPacket::configs),
-                ConfigSyncPacket::new
-        );
+    @ApiStatus.Internal
+    public record ConfigSyncPacket(Map<String, ConfigEntry> configs) { }
 
-        @Override
-        public Type<? extends CustomPacketPayload> type() {
-            return ID;
-        }
-    }
+    @ApiStatus.Internal
+    public record ConfigEntry(Map<String, FriendlyByteBuf> options) { }
 
-    private record ConfigEntry(Map<String, FriendlyByteBuf> options) {
-        public static final Endec<ConfigEntry> ENDEC = StructEndecBuilder.of(
-                MinecraftEndecs.FRIENDLY_BYTE_BUF.mapOf().fieldOf("options", ConfigEntry::options),
-                ConfigEntry::new
-        );
-    }
-
-    public static void init(PayloadRegistrar registrar) {
-        var packetCodec = CodecUtils.toPacketCodec(ConfigSyncPacket.ENDEC);
-
-        registrar.playBidirectional(ConfigSyncPacket.ID, packetCodec, ConfigSynchronizer::applyServer, ConfigSynchronizer::applyClient);
-
+    @ApiStatus.Internal
+    public static void init() {
         NeoForge.EVENT_BUS.<PlayerEvent.PlayerLoggedInEvent>addListener(EventPriority.HIGHEST, (event) -> {
             Owo.LOGGER.info("Sending server config values to client");
 
-            ((ServerPlayer) event.getEntity()).connection.send(toPacket(Option.SyncMode.OVERRIDE_CLIENT));
+            Owo.MAIN.serverHandle(event.getEntity()).send(toPacket(Option.SyncMode.OVERRIDE_CLIENT));
         });
 
         if (FMLEnvironment.getDist() == Dist.CLIENT) initClient();

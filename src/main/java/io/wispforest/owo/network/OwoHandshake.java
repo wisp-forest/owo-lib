@@ -166,10 +166,9 @@ public final class OwoHandshake {
         QueuedChannelSet.channels = filterOptionalServices(request.optionalChannels(), OwoNetChannel.REGISTERED_CHANNELS, OwoHandshake::hashChannel);
 
         var requiredChannels = formatHashes(OwoNetChannel.REQUIRED_CHANNELS, OwoHandshake::hashChannel);
-        var requiredControllers = formatHashes(ParticleSystemController.REGISTERED_CONTROLLERS, OwoHandshake::hashController);
         var optionalChannels = formatHashes(OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel);
 
-        context.reply(new HandshakeResponse(requiredChannels, requiredControllers, optionalChannels));
+        context.reply(new HandshakeResponse(requiredChannels, optionalChannels));
     }
 
     private static void syncServer(HandshakeResponse response, IPayloadContext context) {
@@ -178,7 +177,6 @@ public final class OwoHandshake {
         StringBuilder disconnectMessage = new StringBuilder();
 
         boolean isAllGood = verifyReceivedHashes("channels", response.requiredChannels(), OwoNetChannel.REQUIRED_CHANNELS, OwoHandshake::hashChannel, disconnectMessage);
-        isAllGood &= verifyReceivedHashes("controllers", response.requiredControllers(), ParticleSystemController.REGISTERED_CONTROLLERS, OwoHandshake::hashController, disconnectMessage);
 
         if (!isAllGood) {
             context.disconnect(TextOps.concat(PREFIX, Component.nullToEmpty(disconnectMessage.toString())));
@@ -294,14 +292,6 @@ public final class OwoHandshake {
         return 31 * channel.packetId.id().hashCode() + serializersHash;
     }
 
-    private static int hashController(ParticleSystemController controller) {
-        int serializersHash = 0;
-        for (var entry : controller.systemsByIndex.int2ObjectEntrySet()) {
-            serializersHash += entry.getIntKey();
-        }
-        return 31 * controller.channelId.hashCode() + serializersHash;
-    }
-
     public record HandshakeRequest(Map<Identifier, Integer> optionalChannels) implements CustomPacketPayload {
 
         public static final Type<HandshakeRequest> ID = new Type<>(OwoHandshake.CHANNEL_ID);
@@ -326,14 +316,11 @@ public final class OwoHandshake {
 
     }
 
-    private record HandshakeResponse(Map<Identifier, Integer> requiredChannels,
-                                     Map<Identifier, Integer> requiredControllers,
-                                     Map<Identifier, Integer> optionalChannels) implements CustomPacketPayload {
+    private record HandshakeResponse(Map<Identifier, Integer> requiredChannels, Map<Identifier, Integer> optionalChannels) implements CustomPacketPayload {
 
         public static final Type<HandshakeResponse> ID = new Type<>(OwoHandshake.CHANNEL_ID);
         public static final Endec<HandshakeResponse> ENDEC = StructEndecBuilder.of(
                 CHANNEL_HASHES_ENDEC.fieldOf("requiredChannels", HandshakeResponse::requiredChannels),
-                CHANNEL_HASHES_ENDEC.fieldOf("requiredControllers", HandshakeResponse::requiredControllers),
                 CHANNEL_HASHES_ENDEC.fieldOf("optionalChannels", HandshakeResponse::optionalChannels),
                 HandshakeResponse::new
         );

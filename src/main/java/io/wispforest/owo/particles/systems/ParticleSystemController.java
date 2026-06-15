@@ -4,8 +4,9 @@ import io.wispforest.endec.Endec;
 import io.wispforest.endec.StructEndec;
 import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.endec.impl.StructEndecBuilder;
+import io.wispforest.owo.Owo;
+import io.wispforest.owo.network.ClientAccess;
 import io.wispforest.owo.network.NetworkException;
-import io.wispforest.owo.network.OwoHandshake;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.OwoFreezer;
@@ -27,7 +28,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -55,13 +55,11 @@ public class ParticleSystemController {
     public final Int2ObjectMap<ParticleSystem<?>> systemsByIndex = new Int2ObjectOpenHashMap<>();
 
     public final Identifier channelId;
-    private final CustomPacketPayload.Type<ParticleSystemPayload> payloadId;
+    private final StructEndec<ParticleSystemPayload> payloadEndec;
     private int maxIndex = 0;
     private final String ownerClassName;
 
     private final ReflectiveEndecBuilder builder;
-
-    private final StructEndec<ParticleSystemPayload> endec;
 
     /**
      * Creates a new controller with the given ID. Duplicate controller IDs
@@ -83,7 +81,6 @@ public class ParticleSystemController {
         }
 
         this.channelId = channelId;
-        this.payloadId = new CustomPacketPayload.Type<>(channelId);
         this.ownerClassName = ReflectionUtils.getCallingClassName(2);
 
         var instanceEndec = Endec.<ParticleSystemInstance<?>, Integer>dispatched(
@@ -95,29 +92,22 @@ public class ParticleSystemController {
             instance -> instance.system.index,
             Endec.VAR_INT
         );
-        this.endec = StructEndecBuilder.of(
+        this.payloadEndec = StructEndecBuilder.of(
             MinecraftEndecs.VEC3.fieldOf("pos", ParticleSystemPayload::pos),
             instanceEndec.fieldOf("instance", ParticleSystemPayload::instance),
-            (pos, instance) -> new ParticleSystemPayload(payloadId, pos, instance)
+            (pos, instance) -> new ParticleSystemPayload(channelId, pos, instance)
         );
-
-        OwoHandshake.enable();
-        OwoHandshake.requireHandshake();
 
         REGISTERED_CONTROLLERS.put(channelId, this);
     }
 
-    public static void init(PayloadRegistrar registrar) {
-        REGISTERED_CONTROLLERS.forEach((id, controller) -> {
-            registrar.playToClient(controller.payloadId, CodecUtils.toPacketCodec(controller.endec));
-        });
-    }
-
-    @Environment(EnvType.CLIENT)
-    public static void initClientHandler(RegisterClientPayloadHandlersEvent event) {
-        REGISTERED_CONTROLLERS.forEach((id, controller) -> {
-            event.register(controller.payloadId, new Client()::handler);
-        });
+    @ApiStatus.Internal
+    public static void initNetworking() {
+        if (FMLEnvironment.getDist() == Dist.CLIENT) {
+            Owo.MAIN.registerClientbound(ParticleSystemPayload.class, ParticleSystemPayload.ENDEC, new Client()::handler);
+        } else {
+            Owo.MAIN.registerClientboundDeferred(ParticleSystemPayload.class, ParticleSystemPayload.ENDEC);
+        }
     }
 
     public ReflectiveEndecBuilder endecBuilder() {
@@ -176,9 +166,9 @@ public class ParticleSystemController {
     }
 
     <T> void sendPacket(ParticleSystem<T> particleSystem, ServerLevel level, Vec3 pos, T data) {
-        ParticleSystemPayload payload = new ParticleSystemPayload(payloadId, pos, new ParticleSystemInstance<>(particleSystem, data));
+        ParticleSystemPayload payload = new ParticleSystemPayload(channelId, pos, new ParticleSystemInstance<>(particleSystem, data));
 
-        PacketDistributor.sendToPlayersTrackingChunk(level, ChunkPos.containing(BlockPos.containing(pos)), payload);
+        Owo.MAIN.serverHandle(level, BlockPos.containing(pos)).send(payload);
     }
 
     private void verify() {
@@ -205,17 +195,18 @@ public class ParticleSystemController {
         }
     }
 
-    private record ParticleSystemPayload(CustomPacketPayload.Type<ParticleSystemPayload> id, Vec3 pos, ParticleSystemInstance<?> instance) implements CustomPacketPayload {
-        @Override
-        public Type<? extends CustomPacketPayload> type() {
-            return id;
-        }
+    private record ParticleSystemPayload(Identifier id, Vec3 pos, ParticleSystemInstance<?> instance) {
+        public static final StructEndec<ParticleSystemPayload> ENDEC = Endec.dispatchedStruct(
+            id -> REGISTERED_CONTROLLERS.get(id).payloadEndec,
+            ParticleSystemPayload::id,
+            MinecraftEndecs.IDENTIFIER
+        );
     }
 
     @Environment(EnvType.CLIENT)
     private static class Client {
-        private void handler(ParticleSystemPayload payload, IPayloadContext context) {
-            payload.instance.execute(Minecraft.getInstance().level, payload.pos);
+        private void handler(ParticleSystemPayload payload, ClientAccess context) {
+            payload.instance.execute(context.runtime().level, payload.pos);
         }
     }
 }

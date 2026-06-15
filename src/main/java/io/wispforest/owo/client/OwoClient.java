@@ -92,11 +92,9 @@ public class OwoClient /*implements ClientModInitializer*/ {
             }
         }
 
-        modBus.<RegisterClientPayloadHandlersEvent>addListener(event -> {
-            MenuNetworkingInternals.Client.init(event);
-            ParticleSystemController.initClientHandler(event);
-            OwoHandshake.clientHandlerInit(event);
-        });
+        MenuNetworkingInternals.Client.init();
+
+        modBus.<RegisterClientPayloadHandlersEvent>addListener(OwoHandshake::clientHandlerInit);
 
         NeoForge.EVENT_BUS.<RegisterClientCommandsEvent>addListener((event) -> {
             var dispatcher = event.getDispatcher(); var access = event.getBuildContext();

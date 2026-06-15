@@ -7,6 +7,7 @@ import io.wispforest.owo.neoforge.api.ArgumentTypeRegistry;
 import io.wispforest.owo.network.OwoHandshake;
 import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.ops.LootOps;
+import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.text.CustomTextRegistry;
 import io.wispforest.owo.text.InsertingTextContent;
 import io.wispforest.owo.util.OwoFreezer;
@@ -46,6 +47,9 @@ public class Owo /*implements ModInitializer*/ {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     private static MinecraftServer SERVER;
 
+    @ApiStatus.Internal
+    public static final OwoNetChannel MAIN = OwoNetChannel.create(id("main"));
+
     public static final Component PREFIX = Component.empty().withStyle(ChatFormatting.GRAY)
         .append(withColor("o", 0x3955e5))
         .append(withColor("ω", 0x13a6f0))
@@ -83,11 +87,13 @@ public class Owo /*implements ModInitializer*/ {
 
         OwoDebugCommands.register();
 
+        MenuNetworkingInternals.init();
+        ConfigSynchronizer.init();
+        ParticleSystemController.initNetworking();
+
         modBus.<RegisterPayloadHandlersEvent>addListener(event -> {
             var registrar = event.registrar("1.0.0");
 
-            MenuNetworkingInternals.init(registrar);
-            ConfigSynchronizer.init(registrar);
             OwoHandshake.init(modBus, registrar);
             OwoNetChannel.init(registrar);
         });

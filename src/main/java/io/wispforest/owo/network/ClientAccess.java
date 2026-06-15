@@ -5,14 +5,22 @@ import io.wispforest.owo.neoforge.env.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.player.Player;
 
 public class ClientAccess implements OwoNetChannel.EnvironmentAccess<LocalPlayer, Minecraft, ClientPacketListener> {
 
+    private final OwoNetChannel channel;
     @Environment(EnvType.CLIENT) private final ClientPacketListener packetListener;
     @Environment(EnvType.CLIENT) private final Minecraft instance = Minecraft.getInstance();
 
-    public ClientAccess(ClientPacketListener packetListener) {
-        this.packetListener = packetListener;
+    public ClientAccess(OwoNetChannel channel, Player player) {
+        this.channel = channel;
+        this.packetListener = ((LocalPlayer) player).connection;
+    }
+
+    @Override
+    public OwoNetChannel channel() {
+        return this.channel;
     }
 
     @Override

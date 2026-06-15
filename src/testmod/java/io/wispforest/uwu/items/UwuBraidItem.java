@@ -95,6 +95,7 @@ public class UwuBraidItem extends Item {
         return Optional.of(new Tooltip());
     }
 
+    @Environment(EnvType.CLIENT)
     public static void openTestSelector() {
         var settings = new BraidScreen.Settings();
         settings.shouldPause = false;

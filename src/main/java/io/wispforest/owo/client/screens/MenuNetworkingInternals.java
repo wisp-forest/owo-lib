@@ -1,10 +1,7 @@
 package io.wispforest.owo.client.screens;
 
-import io.wispforest.endec.Endec;
-import io.wispforest.endec.impl.StructEndecBuilder;
+import io.wispforest.endec.annotations.IsVarInt;
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.serialization.CodecUtils;
-import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.pond.OwoAbstractContainerMenuExtension;
 import io.wispforest.owo.neoforge.env.EnvType;
 import io.wispforest.owo.neoforge.env.Environment;
@@ -17,76 +14,43 @@ import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlers
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
 public class MenuNetworkingInternals {
-    public static final Identifier SYNC_PROPERTIES = Owo.id("sync_menu_properties");
-
-    public static void init(PayloadRegistrar registrar) {
-        registrar.playToClient(SyncPropertiesPacket.ID, CodecUtils.toPacketCodec(SyncPropertiesPacket.ENDEC));
-
-        registrar.playBidirectional(LocalPacket.ID, CodecUtils.toPacketCodec(LocalPacket.ENDEC), (payload, context) -> {
-            var menu = context.player().containerMenu;
-
-            if (menu == null) {
-                Owo.LOGGER.error("Received local packet for null ContainerMenu");
-                return;
-            }
-
-            ((OwoAbstractContainerMenuExtension) menu).owo$handlePacket(payload, false);
+    public static void init() {
+        Owo.MAIN.registerClientboundDeferred(SyncPropertiesPacket.class);
+        Owo.MAIN.registerServerbound(LocalPacket.class, (payload, context) -> {
+            handlePacket(payload, context.player(), false);
         });
     }
 
-    public record LocalPacket(int packetId, FriendlyByteBuf payload) implements CustomPacketPayload {
-        public static final Type<LocalPacket> ID = new Type<>(Owo.id("local_packet"));
-        public static final Endec<LocalPacket> ENDEC = StructEndecBuilder.of(
-            Endec.VAR_INT.fieldOf("packetId", LocalPacket::packetId),
-            MinecraftEndecs.FRIENDLY_BYTE_BUF.fieldOf("payload", LocalPacket::payload),
-            LocalPacket::new
-        );
+    private static void handlePacket(LocalPacket payload, Player player, boolean clientbound) {
+        var menu = player.containerMenu;
 
-        @Override
-        public Type<? extends CustomPacketPayload> type() {
-            return ID;
+        if (menu == null) {
+            Owo.LOGGER.error("Received local packet for null ContainerMenu");
+            return;
         }
+
+        ((OwoAbstractContainerMenuExtension) menu).owo$handlePacket(payload, clientbound);
     }
 
-    public record SyncPropertiesPacket(FriendlyByteBuf payload) implements CustomPacketPayload {
-        public static final Type<SyncPropertiesPacket> ID = new Type<>(SYNC_PROPERTIES);
-        public static final Endec<SyncPropertiesPacket> ENDEC = StructEndecBuilder.of(
-            MinecraftEndecs.FRIENDLY_BYTE_BUF.fieldOf("payload", SyncPropertiesPacket::payload),
-            SyncPropertiesPacket::new
-        );
+    public record LocalPacket(@IsVarInt int packetId, FriendlyByteBuf payload){ }
 
-        @Override
-        public Type<? extends CustomPacketPayload> type() {
-            return ID;
-        }
-    }
+    public record SyncPropertiesPacket(FriendlyByteBuf payload) { }
 
     @Environment(EnvType.CLIENT)
     public static class Client {
-        public static void init(RegisterClientPayloadHandlersEvent event) {
-            ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
+        public static void init() {
+            ScreenEvents.AFTER_INIT.register((client, screen, _, _) -> {
                 if (screen instanceof MenuAccess<?> handled)
                     ((OwoAbstractContainerMenuExtension) handled.getMenu()).owo$attachToPlayer(client.player);
             });
 
-            event.register(LocalPacket.ID, (payload, context) -> {
-                var menu = context.player().containerMenu;
-
-                if (menu == null) {
-                    Owo.LOGGER.error("Received local packet for null ContainerMenu");
-                    return;
-                }
-
-                ((OwoAbstractContainerMenuExtension) menu).owo$handlePacket(payload, true);
-            });
-
-            event.register(SyncPropertiesPacket.ID, (payload, context) -> {
+            Owo.MAIN.registerClientbound(SyncPropertiesPacket.class, (payload, context) -> {
                 var menu = context.player().containerMenu;
 
                 if (menu == null) {
@@ -95,6 +59,10 @@ public class MenuNetworkingInternals {
                 }
 
                 ((OwoAbstractContainerMenuExtension) menu).owo$readPropertySync(payload);
+            });
+
+            Owo.MAIN.registerClientbound(LocalPacket.class, (payload, context) -> {
+                handlePacket(payload, context.player(), true);
             });
         }
     }
