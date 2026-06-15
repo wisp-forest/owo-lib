@@ -153,11 +153,11 @@ public class UwuBraidItem extends Item {
                                         new Sized(
                                             16,
                                             16,
-                                            new ItemStackWidget(UwuItems.BRAID.getDefaultInstance())
+                                            new ItemStackWidget(UwuItems.BRAID.get().getDefaultInstance())
                                         )
                                     ),
                                     new Button(
-                                        () -> Minecraft.getInstance().player.handleCreativeModeItemDrop(UwuItems.BRAID.getDefaultInstance()),
+                                        () -> Minecraft.getInstance().player.handleCreativeModeItemDrop(UwuItems.BRAID.get().getDefaultInstance()),
                                         new Label(
                                             LabelStyle.SHADOW,
                                             true,

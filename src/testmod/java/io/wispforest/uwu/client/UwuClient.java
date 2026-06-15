@@ -50,10 +50,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.IModBusEvent;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.client.gui.ClientTooltipComponentManager;
+import net.neoforged.neoforge.common.NeoForge;
 import org.joml.Matrix3x2f;
 import org.lwjgl.glfw.GLFW;
 
@@ -63,6 +65,7 @@ import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+@Mod("uwu")
 public class UwuClient /*implements ClientModInitializer*/ {
 
     public UwuClient(IEventBus modBus) {
@@ -136,7 +139,7 @@ public class UwuClient /*implements ClientModInitializer*/ {
             );
         });
 
-        modBus.<ClientTickEvent.Post>addListener(event -> {
+        NeoForge.EVENT_BUS.<ClientTickEvent.Post>addListener(event -> {
             while (binding.consumeClick()) {
                 if (Hud.hasComponent(hudComponentId)) {
                     Hud.remove(hudComponentId);
@@ -219,7 +222,7 @@ public class UwuClient /*implements ClientModInitializer*/ {
             new LayersTestWidget()
         );
 
-        BlockEntityRenderers.register(Uwu.BRAID_DISPLAY_ENTITY, BraidDisplayBlockEntityRenderer::new);
+        BlockEntityRenderers.register(Uwu.BRAID_DISPLAY_ENTITY.get(), BraidDisplayBlockEntityRenderer::new);
     }
 
     public record WeirdMessage(int e) {}

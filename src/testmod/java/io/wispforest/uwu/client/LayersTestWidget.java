@@ -48,7 +48,7 @@ public class LayersTestWidget extends StatelessWidget {
             ),
             LayerAlignment.atContainerScreenCoordinates(
                 136, 63,
-                new ItemStackWidget(UwuItems.BRAID.getDefaultInstance())
+                new ItemStackWidget(UwuItems.BRAID.get().getDefaultInstance())
             )
         );
     }

@@ -3,7 +3,7 @@ package io.wispforest.owo;
 import io.wispforest.owo.client.screens.MenuNetworkingInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
 import io.wispforest.owo.config.ConfigSynchronizer;
-import io.wispforest.owo.neoforge.api.ArgumentTypeRegistry;
+import io.wispforest.owo.neoforge.api.RegistryUtils;
 import io.wispforest.owo.network.OwoHandshake;
 import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.ops.LootOps;
@@ -68,24 +68,21 @@ public class Owo /*implements ModInitializer*/ {
     }
 
     public Owo(IEventBus modBus) {
-        modBus.<FMLCommonSetupEvent>addListener((event) -> this.onInitialize(modBus));
-    }
+        RegistryUtils.init(modBus);
 
-    /*@Override*/
-    @ApiStatus.Internal
-    public void onInitialize(IEventBus modBus) {
+        if (!DEBUG) OwoDebugCommands.register();
+
+        modBus.<FMLLoadCompleteEvent>addListener(EventPriority.LOW, event -> {
+            OwoFreezer.freeze();
+        });
+
         LootOps.registerListener();
         CustomTextRegistry.register("index", InsertingTextContent.CODEC);
-
 
         NeoForge.EVENT_BUS.<ServerStartingEvent>addListener((event) -> SERVER = event.getServer());
         NeoForge.EVENT_BUS.<ServerStoppingEvent>addListener((_) -> SERVER = null);
 
         Wisdom.spread();
-
-        if (!DEBUG) return;
-
-        OwoDebugCommands.register();
 
         MenuNetworkingInternals.init();
         ConfigSynchronizer.init();
@@ -97,11 +94,6 @@ public class Owo /*implements ModInitializer*/ {
             OwoHandshake.init(modBus, registrar);
             OwoNetChannel.init(registrar);
         });
-
-        modBus.<FMLLoadCompleteEvent>addListener(EventPriority.LOW, event -> {
-            OwoFreezer.freeze();
-        });
-        ArgumentTypeRegistry.init(modBus);
     }
 
     @ApiStatus.Internal

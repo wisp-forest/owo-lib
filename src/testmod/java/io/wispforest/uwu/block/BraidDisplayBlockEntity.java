@@ -49,7 +49,7 @@ public class BraidDisplayBlockEntity extends BlockEntity {
     // ---
 
     public BraidDisplayBlockEntity(BlockPos pos, BlockState state) {
-        super(Uwu.BRAID_DISPLAY_ENTITY, pos, state);
+        super(Uwu.BRAID_DISPLAY_ENTITY.get(), pos, state);
     }
 
     public static BraidDisplayBlockEntity of(BuildContext context) {
@@ -92,7 +92,7 @@ public class BraidDisplayBlockEntity extends BlockEntity {
                             )
                         ),
                         new Button(
-                            () -> Minecraft.getInstance().player.handleCreativeModeItemDrop(UwuItems.BRAID.getDefaultInstance()),
+                            () -> Minecraft.getInstance().player.handleCreativeModeItemDrop(UwuItems.BRAID.get().getDefaultInstance()),
                             new Row(
                                 MainAxisAlignment.START,
                                 CrossAxisAlignment.CENTER,

@@ -5,16 +5,9 @@ import io.wispforest.owo.Owo;
 import io.wispforest.owo.util.pond.OwoAbstractContainerMenuExtension;
 import io.wispforest.owo.neoforge.env.EnvType;
 import io.wispforest.owo.neoforge.env.Environment;
-//import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import io.wispforest.owo.neoforge.api.screen.ScreenEvents;
-//import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-//import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.codec.StreamCodec;
-import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.ApiStatus;
 

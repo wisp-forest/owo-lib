@@ -163,7 +163,7 @@ public class ContributorsTest extends StatefulWidget {
         public static class MurderState extends ShareableState {
             public BigInteger murders = BigInteger.ZERO;
             public BigInteger eepies = BigInteger.ZERO;
-            private ItemStack bed = UwuItems.BRAID.getDefaultInstance();
+            private ItemStack bed = UwuItems.BRAID.get().getDefaultInstance();
         }
 
         public record Contributor(UUID uuid, String name, Component displayName) {}

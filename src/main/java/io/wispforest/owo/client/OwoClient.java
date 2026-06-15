@@ -61,11 +61,6 @@ public class OwoClient /*implements ClientModInitializer*/ {
         ========================================""";
 
     public OwoClient(IEventBus modBus) {
-        modBus.<FMLClientSetupEvent>addListener((event) -> this.onInitializeClient(modBus));
-    }
-
-    /*@Override*/
-    public void onInitializeClient(IEventBus modBus) {
         ModDataLoader.load(OwoItemGroupLoader.INSTANCE);
 
         modBus.<AddClientReloadListenersEvent>addListener((event) -> {

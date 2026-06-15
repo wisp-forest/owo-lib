@@ -42,12 +42,26 @@ public abstract class MixinCreativeModeInventoryScreenMixin {
         selectedTabForPage.put(this.getCurrentPageIndex(), group);
     }
 
-    @Inject(method = "updateSelection", at = @At("HEAD"), cancellable = true, remap = false)
+    @Unique
+    private boolean lockedOut = false;
+    @Unique
+    private boolean restoreTabSelection = false;
+
+    @Inject(method = "selectTab", at = @At("HEAD"), cancellable = true)
     private void yesThisMakesPerfectSenseAndIsVeryUsable(CallbackInfo ci) {
+        if (!this.restoreTabSelection || this.lockedOut) return;
         var selectedTab = selectedTabForPage.get(this.getCurrentPageIndex());
         if (selectedTab == null) return;
+        this.lockedOut = true;
         this.selectTab(selectedTab);
+        this.lockedOut = false;
+        this.restoreTabSelection = false;
         ci.cancel();
+    }
+
+    @Inject(method = "setCurrentPage", at = @At("HEAD"))
+    private void setSelectedTabRestoreFlag(CreativeTabsScreenPage currentPage, CallbackInfo ci) {
+        this.restoreTabSelection = true;
     }
 
     //---

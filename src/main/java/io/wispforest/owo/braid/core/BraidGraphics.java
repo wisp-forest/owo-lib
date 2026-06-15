@@ -2,7 +2,7 @@ package io.wispforest.owo.braid.core;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import io.wispforest.owo.braid.core.element.BraidDashedLineElement;
-import io.wispforest.owo.mixin.braid.Matrix3x2fStackAccessor;
+import io.wispforest.owo.neoforge.api.Matrix3x2fStackAccessor;
 import io.wispforest.owo.mixin.ui.access.GuiGraphicsExtractorAccessor;
 import io.wispforest.owo.ui.core.OwoUIGraphics;
 import net.minecraft.client.Minecraft;
@@ -85,7 +85,7 @@ public class BraidGraphics extends OwoUIGraphics {
 
         @Override
         public Matrix3x2fStack pushMatrix() {
-            var accessor = (Matrix3x2fStackAccessor) this;
+            var accessor = new Matrix3x2fStackAccessor(this);
 
             if (accessor.owo$getCurr() == accessor.owo$getMats().length) {
                 var newMats = new Matrix3x2f[accessor.owo$getMats().length * 2];

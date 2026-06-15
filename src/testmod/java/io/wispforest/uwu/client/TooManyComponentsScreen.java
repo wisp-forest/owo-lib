@@ -27,7 +27,7 @@ public class TooManyComponentsScreen extends BaseOwoScreen<FlowLayout> {
                                 flowLayout.child(
                                         UIContainers.collapsible(Sizing.content(), Sizing.content(), Component.nullToEmpty(String.valueOf(ThreadLocalRandom.current().nextInt(100000))), false)
                                                 .child(
-                                                        UIComponents.item(UwuItems.SCREEN_SHARD.getDefaultInstance()).sizing(Sizing.fixed(100))
+                                                        UIComponents.item(UwuItems.SCREEN_SHARD.get().getDefaultInstance()).sizing(Sizing.fixed(100))
                                                 )
                                 );
                             }

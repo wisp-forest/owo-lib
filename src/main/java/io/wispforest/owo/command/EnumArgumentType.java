@@ -8,7 +8,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.wispforest.owo.Owo;
-import io.wispforest.owo.neoforge.api.ArgumentTypeRegistry;
+import io.wispforest.owo.neoforge.api.RegistryUtils;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.network.chat.Component;
@@ -50,7 +50,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>
      */
     public static <T extends Enum<T>> EnumArgumentType<T> create(Class<T> enumClass) {
         final var type = new EnumArgumentType<>(enumClass, "Invalid enum value '{}'");
-        ArgumentTypeRegistry.registerArgumentType(Owo.id("enum_" + enumClass.getName().toLowerCase(Locale.ROOT)), type.getClass(), SingletonArgumentInfo.contextFree(() -> type));
+        RegistryUtils.registerArgumentType(Owo.id("enum_" + enumClass.getName().toLowerCase(Locale.ROOT)), type.getClass(), SingletonArgumentInfo.contextFree(() -> type));
         return type;
     }
 
@@ -70,7 +70,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<Enum<T>
      */
     public static <T extends Enum<T>> EnumArgumentType<T> create(Class<T> enumClass, String noElementMessage) {
         final var type = new EnumArgumentType<>(enumClass, noElementMessage);
-        ArgumentTypeRegistry.registerArgumentType(Owo.id("enum_" + enumClass.getName().toLowerCase(Locale.ROOT)), type.getClass(), SingletonArgumentInfo.contextFree(() -> type));
+        RegistryUtils.registerArgumentType(Owo.id("enum_" + enumClass.getName().toLowerCase(Locale.ROOT)), type.getClass(), SingletonArgumentInfo.contextFree(() -> type));
         return type;
     }
 

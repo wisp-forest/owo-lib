@@ -1,0 +1,38 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+#issueTrackerURL = ""
+license = "MIT"
+
+[[mods]]
+modId = "uwu"
+version = "0.0.0"
+displayName = "uωu"
+authors = "glisco, Blodhgarm, chyzman"
+credits = ""
+description = '''
+oωo testmod
+'''
+
+[[mixins]]
+config = 'uwu.mixins.json'
+
+[[dependencies.uwu]]
+modId = "neoforge"
+required = true
+versionRange = "[26.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.uwu]]
+modId = "minecraft"
+required = true
+versionRange = "[26.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+#[[dependencies.owo]]
+#modId = "fabric_api"
+#required = true
+#versionRange = "[0.104.0+2.0.14+1.21.1,)"
+#ordering = "NONE"
+#side = "BOTH"

@@ -6,18 +6,9 @@ import io.wispforest.owo.mixin.ServerCommonPacketListenerImplAccessor;
 import io.wispforest.owo.network.ClientAccess;
 import io.wispforest.owo.network.ServerAccess;
 import io.wispforest.owo.ops.TextOps;
-import io.wispforest.owo.serialization.CodecUtils;
-import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.neoforge.env.EnvType;
 import io.wispforest.owo.neoforge.env.Environment;
-//import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-//import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-//import net.fabricmc.fabric.api.event.Event;
 import io.wispforest.owo.neoforge.api.FriendlyByteBufs;
-//import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-//import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-//import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
@@ -25,8 +16,6 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
@@ -192,11 +181,18 @@ public class ConfigSynchronizer {
             Owo.MAIN.serverHandle(event.getEntity()).send(toPacket(Option.SyncMode.OVERRIDE_CLIENT));
         });
 
-        if (FMLEnvironment.getDist() == Dist.CLIENT) initClient();
+        if (FMLEnvironment.getDist() == Dist.CLIENT) {
+            initClient();
+        } else {
+            Owo.MAIN.registerClientboundDeferred(ConfigSyncPacket.class);
+        }
+
+        Owo.MAIN.registerServerbound(ConfigSyncPacket.class, ConfigSynchronizer::applyServer);
     }
 
     @Environment(EnvType.CLIENT)
     public static void initClient() {
+        Owo.MAIN.registerClientbound(ConfigSyncPacket.class, ConfigSynchronizer::applyClient);
         NeoForge.EVENT_BUS.<ClientPlayerNetworkEvent.LoggingOut>addListener((event) -> {
             KNOWN_CONFIGS.forEach((name, config) -> config.forEachOption(Option::reattach));
         });

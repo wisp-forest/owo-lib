@@ -1,5 +1,6 @@
 package io.wispforest.uwu;
 
+import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -19,6 +20,7 @@ import io.wispforest.owo.config.Option;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
+import io.wispforest.owo.neoforge.api.RegistryUtils;
 import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.particles.ClientParticles;
 import io.wispforest.owo.particles.systems.ParticleSystem;
@@ -69,7 +71,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -77,10 +81,12 @@ import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
+@Mod("uwu")
 public class Uwu /*implements ModInitializer*/ {
 
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -92,14 +98,14 @@ public class Uwu /*implements ModInitializer*/ {
     public static final Identifier OWO_ICON_TEXTURE = Identifier.fromNamespaceAndPath("uwu", "textures/gui/icon.png");
     public static final Identifier ANIMATED_BUTTON_TEXTURE = Identifier.fromNamespaceAndPath("uwu", "textures/gui/animated_icon_test.png");
 
-    public static final MenuType<EpicMenu> EPIC_SCREEN_HANDLER_TYPE = Registry.register(
+    public static final MenuType<EpicMenu> EPIC_SCREEN_HANDLER_TYPE = RegistryUtils.register(
         BuiltInRegistries.MENU,
         Identifier.fromNamespaceAndPath("uwu", "epic_screen_handler"),
         new MenuType<>(EpicMenu::new, FeatureFlags.VANILLA_SET)
     );
 
-    public static final Block BRAID_DISPLAY_BLOCK = new BraidDisplayBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).setId(ResourceKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("uwu", "braid_display"))));
-    public static final BlockEntityType<BraidDisplayBlockEntity> BRAID_DISPLAY_ENTITY = new BlockEntityType<>(BraidDisplayBlockEntity::new, BRAID_DISPLAY_BLOCK);
+    public static final Supplier<Block> BRAID_DISPLAY_BLOCK = Suppliers.memoize(() -> new BraidDisplayBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).setId(ResourceKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("uwu", "braid_display")))));
+    public static final Supplier<BlockEntityType<BraidDisplayBlockEntity>> BRAID_DISPLAY_ENTITY = Suppliers.memoize(() -> new BlockEntityType<>(BraidDisplayBlockEntity::new, BRAID_DISPLAY_BLOCK.get()));
 
     public static final OwoItemGroup FOUR_TAB_GROUP = OwoItemGroup.builder(Identifier.fromNamespaceAndPath("uwu", "four_tab_group"), () -> Icon.of(Items.AXOLOTL_BUCKET))
         .disableDynamicTitle()
@@ -131,9 +137,9 @@ public class Uwu /*implements ModInitializer*/ {
             group.addTab(Icon.of(Items.AMETHYST_SHARD), "tab_3", null, false);
             group.addTab(Icon.of(Items.GOLD_INGOT), "tab_4", null, false);
             group.addCustomTab(Icon.of(Items.IRON_INGOT), "tab_5", (context, entries) -> {
-                entries.accept(UwuItems.SCREEN_SHARD);
-                entries.accept(UwuItems.BRAID);
-                entries.accept(BRAID_DISPLAY_BLOCK);
+                entries.accept(UwuItems.SCREEN_SHARD.get());
+                entries.accept(UwuItems.BRAID.get());
+                entries.accept(BRAID_DISPLAY_BLOCK.get());
             }, false);
             group.addTab(Icon.of(Items.QUARTZ), "tab_6", null, false);
 
@@ -148,7 +154,7 @@ public class Uwu /*implements ModInitializer*/ {
         .initializer(group -> group.addTab(Icon.of(Items.SPONGE), "tab_1", null, true))
         .build();
 
-    public static final CreativeModeTab VANILLA_GROUP = Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, Identifier.fromNamespaceAndPath("uwu", "vanilla_group"), CreativeModeTab.builder()
+    public static final CreativeModeTab VANILLA_GROUP = RegistryUtils.register(BuiltInRegistries.CREATIVE_MODE_TAB, Identifier.fromNamespaceAndPath("uwu", "vanilla_group"), CreativeModeTab.builder()
         .title(Component.literal("who did this"))
         .icon(Items.ACACIA_BOAT::getDefaultInstance)
         .displayItems((context, entries) -> entries.accept(Items.MANGROVE_CHEST_BOAT))
@@ -182,14 +188,6 @@ public class Uwu /*implements ModInitializer*/ {
     });
 
     public Uwu(IEventBus modBus) {
-        modBus.<FMLCommonSetupEvent>addListener(event -> {
-            this.onInitialize();
-        });
-    }
-
-    /*@Override*/
-    public void onInitialize() {
-
 //        var stackEndec = CodecUtils.toEndec(ItemStack.CODEC);
 //        var stackData = """
 //                    {
@@ -215,9 +213,11 @@ public class Uwu /*implements ModInitializer*/ {
         TagInjector.inject(BuiltInRegistries.BLOCK, BlockTags.BASE_STONE_OVERWORLD.location(), Blocks.GLASS);
         TagInjector.injectTagReference(BuiltInRegistries.ITEM, ItemTags.COALS.location(), ItemTags.FOX_FOOD.location());
 
-        FOUR_TAB_GROUP.initialize();
-        SIX_TAB_GROUP.initialize();
-        SINGLE_TAB_GROUP.initialize();
+        modBus.<FMLLoadCompleteEvent>addListener((event) -> {
+            FOUR_TAB_GROUP.initialize();
+            SIX_TAB_GROUP.initialize();
+            SINGLE_TAB_GROUP.initialize();
+        });
 
         CHANNEL.registerClientbound(TestMessage.class, (message, access) -> {
             access.player().sendSystemMessage(Component.nullToEmpty(message.string));
@@ -238,9 +238,9 @@ public class Uwu /*implements ModInitializer*/ {
         System.out.println(BuiltInRegistries.ITEM.wrapAsHolder(Items.ACACIA_BOAT));
         System.out.println(BuiltInRegistries.ITEM.get(Identifier.parse("acacia_planks")));
 
-        Registry.register(BuiltInRegistries.BLOCK, Identifier.fromNamespaceAndPath("uwu", "braid_display"), BRAID_DISPLAY_BLOCK);
-        Registry.register(BuiltInRegistries.ITEM, Identifier.fromNamespaceAndPath("uwu", "braid_display"), new BlockItem(BRAID_DISPLAY_BLOCK, new Item.Properties().setId(ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("uwu", "braid_display"))).useBlockDescriptionPrefix()));
-        Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Identifier.fromNamespaceAndPath("uwu", "braid_display"), BRAID_DISPLAY_ENTITY);
+        RegistryUtils.registerDeferred(BuiltInRegistries.BLOCK, Identifier.fromNamespaceAndPath("uwu", "braid_display"), BRAID_DISPLAY_BLOCK);
+        RegistryUtils.registerDeferred(BuiltInRegistries.ITEM, Identifier.fromNamespaceAndPath("uwu", "braid_display"), () -> new BlockItem(BRAID_DISPLAY_BLOCK.get(), new Item.Properties().setId(ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("uwu", "braid_display"))).useBlockDescriptionPrefix()));
+        RegistryUtils.registerDeferred(BuiltInRegistries.BLOCK_ENTITY_TYPE, Identifier.fromNamespaceAndPath("uwu", "braid_display"), BRAID_DISPLAY_ENTITY);
 
 //        UwuShapedRecipe.init();
 

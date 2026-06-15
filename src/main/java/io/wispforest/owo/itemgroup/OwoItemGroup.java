@@ -4,6 +4,7 @@ import io.wispforest.owo.itemgroup.gui.ItemGroupButton;
 import io.wispforest.owo.itemgroup.gui.ItemGroupButtonWidget;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.mixin.itemgroup.CreativeModeTabAccessor;
+import io.wispforest.owo.neoforge.api.RegistryUtils;
 import io.wispforest.owo.util.pond.OwoItemExtensions;
 import it.unimi.dsi.fastutil.ints.IntAVLTreeSet;
 import it.unimi.dsi.fastutil.ints.IntComparators;
@@ -415,7 +416,7 @@ public abstract class OwoItemGroup extends CreativeModeTab {
 
         public OwoItemGroup build() {
             final var group = new OwoItemGroup(id, initializer, iconSupplier, tabStackHeight, buttonStackHeight, backgroundTexture, scrollerTextures, tabTextures, useDynamicTitle, displaySingleTab, allowMultiSelect) {};
-            Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, this.id, group);
+            RegistryUtils.register(BuiltInRegistries.CREATIVE_MODE_TAB, this.id, group);
             return group;
         }
     }

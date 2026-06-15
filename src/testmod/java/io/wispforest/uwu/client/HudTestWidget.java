@@ -43,7 +43,7 @@ public class HudTestWidget extends StatelessWidget {
                         ),
                         new Padding(
                             Insets.all(3),
-                            new ItemStackWidget(UwuItems.BRAID.getDefaultInstance())
+                            new ItemStackWidget(UwuItems.BRAID.get().getDefaultInstance())
                         ),
                         new Timer()
                     )
