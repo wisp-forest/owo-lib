@@ -33,9 +33,6 @@ public class Owo implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     private static MinecraftServer SERVER;
 
-    @ApiStatus.Internal
-    public static final OwoNetChannel MAIN = OwoNetChannel.create(id("main"));
-
     public static final Component PREFIX = Component.empty().withStyle(ChatFormatting.GRAY)
         .append(withColor("o", 0x3955e5))
         .append(withColor("ω", 0x13a6f0))
@@ -52,6 +49,9 @@ public class Owo implements ModInitializer {
 
         DEBUG = debug;
     }
+
+    @ApiStatus.Internal
+    public static final OwoNetChannel MAIN = OwoNetChannel.create(id("main"));
 
     @Override
     @ApiStatus.Internal
