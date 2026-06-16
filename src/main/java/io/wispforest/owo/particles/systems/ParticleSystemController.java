@@ -7,6 +7,7 @@ import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.network.ClientAccess;
 import io.wispforest.owo.network.NetworkException;
+import io.wispforest.owo.network.OwoHandshake;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.OwoFreezer;
 import io.wispforest.owo.util.ReflectionUtils;
@@ -86,6 +87,9 @@ public class ParticleSystemController {
             instanceEndec.fieldOf("instance", ParticleSystemPayload::instance),
             (pos, instance) -> new ParticleSystemPayload(channelId, pos, instance)
         );
+
+        OwoHandshake.enable();
+        OwoHandshake.requireHandshake();
 
         REGISTERED_CONTROLLERS.put(channelId, this);
     }
