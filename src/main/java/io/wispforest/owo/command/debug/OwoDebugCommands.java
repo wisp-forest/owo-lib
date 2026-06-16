@@ -156,7 +156,7 @@ public class OwoDebugCommands {
             ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
                 dispatcher.register(ClientCommands.literal("owo-hud-inspect")
                     .executes(context -> {
-                        Minecraft.getInstance().setScreen(new HudInspectorScreen());
+                        Minecraft.getInstance().setScreenAndShow(new HudInspectorScreen());
                         return 0;
                     }));
 
@@ -165,13 +165,13 @@ public class OwoDebugCommands {
                         var modelId = context.getArgument("model-id", Identifier.class);
                         if (UIModelLoader.getPreloaded(modelId) == null) throw NO_SUCH_UI_MODEL.create();
 
-                        Minecraft.getInstance().setScreen(new ConfigureHotReloadScreen(modelId, null));
+                        Minecraft.getInstance().setScreenAndShow(new ConfigureHotReloadScreen(modelId, null));
                         return 0;
                     })));
 
                 if (RenderDoc.isAvailable()) {
                     dispatcher.register(ClientCommands.literal("renderdoc").executes(context -> {
-                        Minecraft.getInstance().setScreen(new RenderdocScreen());
+                        Minecraft.getInstance().setScreenAndShow(new RenderdocScreen());
                         return 1;
                     }).then(ClientCommands.literal("comment")
                         .then(ClientCommands.argument("capture_index", IntegerArgumentType.integer(0))

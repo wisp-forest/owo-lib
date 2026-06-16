@@ -130,7 +130,7 @@ public class ContributorsTest extends StatefulWidget {
                                                                             .copy()
                                                                             .getStyle()
                                                                             .withHoverEvent(new HoverEvent.ShowEntity(new HoverEvent.EntityTooltipInfo(
-                                                                                EntityType.PLAYER,
+                                                                                BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("player")),
                                                                                 contributor.uuid,
                                                                                 contributor.displayName
                                                                             ))))

@@ -37,7 +37,7 @@ public class LabelComponent extends BaseUIComponent {
     protected int maxWidth;
 
     protected Function<@Nullable Style, Boolean> textClickHandler = style -> {
-        return style != null && OwoUIGraphics.utilityScreen().handleTextClick(style, Minecraft.getInstance().screen);
+        return style != null && OwoUIGraphics.utilityScreen().handleTextClick(style, Minecraft.getInstance().gui.screen());
     };
 
     protected LabelComponent(Component text) {

@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.core;
 
+import net.minecraft.network.chat.TextColor;
 import com.google.common.collect.ImmutableMap;
 import io.wispforest.endec.Endec;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
@@ -27,9 +28,9 @@ public record Color(float red, float green, float blue, float alpha) implements 
     public static final Color BLUE = Color.ofRgb(0x0000FF);
 
     private static final Map<String, Color> NAMED_TEXT_COLORS = Stream.of(ChatFormatting.values())
-            .filter(ChatFormatting::isColor)
+            .filter(formatting -> TextColor.fromLegacyFormat(formatting) != null)
             .collect(ImmutableMap.toImmutableMap(formatting -> {
-                return formatting.getName().toLowerCase(Locale.ROOT).replace("_", "-");
+                return formatting.name().toLowerCase(Locale.ROOT).replace("_", "-");
             }, Color::ofFormatting));
 
     public Color(float red, float green, float blue) {
@@ -65,8 +66,8 @@ public record Color(float red, float green, float blue, float alpha) implements 
     }
 
     public static Color ofFormatting(@NotNull ChatFormatting formatting) {
-        var colorValue = formatting.getColor();
-        return ofRgb(colorValue == null ? 0 : colorValue);
+        var color = TextColor.fromLegacyFormat(formatting);
+        return ofRgb(color == null ? 0 : color.getValue());
     }
 
     public static Color ofDye(@NotNull DyeColor dyeColor) {

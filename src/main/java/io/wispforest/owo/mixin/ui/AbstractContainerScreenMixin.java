@@ -1,6 +1,5 @@
 package io.wispforest.owo.mixin.ui;
 
-import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import io.wispforest.owo.ui.base.BaseOwoContainerScreen;
 import io.wispforest.owo.util.pond.OwoSlotExtension;
@@ -14,7 +13,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -58,11 +56,6 @@ public abstract class AbstractContainerScreenMixin extends Screen {
         if (scissorArea == null) return;
 
         GlStateManager._disableScissorTest();
-    }
-
-    @ModifyVariable(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/OptionInstance;get()Ljava/lang/Object;", ordinal = 0), ordinal = 2)
-    private int doNoThrow(int slotId, @Local() Slot slot) {
-        return (((Object) this instanceof BaseOwoContainerScreen<?, ?>) && slot != null) ? slot.index : slotId;
     }
 
     @Inject(method = "keyPressed", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;checkHotbarKeyPressed(Lnet/minecraft/client/input/KeyEvent;)Z"), cancellable = true)

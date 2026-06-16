@@ -32,7 +32,7 @@ public class OwoConfigCommand {
                 .then(ClientCommands.argument("config_id", new ConfigScreenArgumentType())
                         .executes(context -> {
                             var screen = context.getArgument("config_id", ConfigScreen.class);
-                            Minecraft.getInstance().schedule(() -> Minecraft.getInstance().setScreen(screen));
+                            Minecraft.getInstance().schedule(() -> Minecraft.getInstance().setScreenAndShow(screen));
                             return 0;
                         })));
     }

@@ -1,5 +1,6 @@
 package io.wispforest.owo.config.ui;
 
+import net.minecraft.locale.Language;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.ConfigWrapper;
 import io.wispforest.owo.config.Option;
@@ -228,7 +229,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                     expanded
                 ).<CollapsibleContainer>configure(nestedContainer -> {
                     final var categoryKey = "text.config." + this.config.name() + ".category." + parentKey.asString();
-                    if (I18n.exists(categoryKey + ".tooltip")) {
+                    if (Language.getInstance().has(categoryKey + ".tooltip")) {
                         nestedContainer.titleLayout().tooltip(Component.translatable(categoryKey + ".tooltip"));
                     }
 
@@ -261,7 +262,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 var tooltipText = new ArrayList<FormattedCharSequence>();
                 var tooltipTranslationKey = option.translationKey() + ".tooltip";
 
-                if (I18n.exists(tooltipTranslationKey)) {
+                if (Language.getInstance().has(tooltipTranslationKey)) {
                     tooltipText.addAll(this.minecraft.font.split(Component.translatable(tooltipTranslationKey), Integer.MAX_VALUE));
                 }
 
@@ -386,7 +387,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             shouldRestart.setTrue();
         });
 
-        this.minecraft.setScreen(shouldRestart.booleanValue() ? new RestartRequiredScreen(this.parent) : this.parent);
+        this.minecraft.setScreenAndShow(shouldRestart.booleanValue() ? new RestartRequiredScreen(this.parent) : this.parent);
     }
 
     @Override

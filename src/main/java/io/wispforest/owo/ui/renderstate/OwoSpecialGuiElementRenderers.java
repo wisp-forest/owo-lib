@@ -7,13 +7,13 @@ import net.fabricmc.fabric.api.client.rendering.v1.PictureInPictureRendererRegis
 
 public class OwoSpecialGuiElementRenderers {
     public static void init() {
-        PictureInPictureRendererRegistry.register(ctx -> new CubeMapElementRenderState.Renderer(ctx.bufferSource()));
-        PictureInPictureRendererRegistry.register(ctx -> new EntityElementRenderState.Renderer(ctx.bufferSource()));
-        PictureInPictureRendererRegistry.register(ctx -> new BlockElementRenderState.Renderer(ctx.bufferSource()));
-        PictureInPictureRendererRegistry.register(ctx -> new OwoItemElementRenderState.Renderer(ctx.bufferSource()));
+        PictureInPictureRendererRegistry.register(ctx -> new CubeMapElementRenderState.Renderer());
+        PictureInPictureRendererRegistry.register(ctx -> new EntityElementRenderState.Renderer());
+        PictureInPictureRendererRegistry.register(ctx -> new BlockElementRenderState.Renderer());
+        PictureInPictureRendererRegistry.register(ctx -> new OwoItemElementRenderState.Renderer());
 
-        PictureInPictureRendererRegistry.register(ctx -> new BraidEntityElement.Renderer(ctx.bufferSource()));
-        PictureInPictureRendererRegistry.register(ctx -> new BraidBlockElement.Renderer(ctx.bufferSource()));
-        PictureInPictureRendererRegistry.register(ctx -> new BraidItemElement.Renderer(ctx.bufferSource()));
+        PictureInPictureRendererRegistry.register(ctx -> new BraidEntityElement.Renderer());
+        PictureInPictureRendererRegistry.register(ctx -> new BraidBlockElement.Renderer());
+        PictureInPictureRendererRegistry.register(ctx -> new BraidItemElement.Renderer());
     }
 }

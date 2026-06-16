@@ -14,7 +14,7 @@ public abstract class MinecraftMixin {
     @Shadow
     protected abstract Thread getRunningThread();
 
-    @Inject(method = "setScreen", at = @At(value = "HEAD"))
+    @Inject(method = "setScreenAndShow", at = @At(value = "HEAD"))
     private void preventOffThreadScreenSet(Screen screen, CallbackInfo ci) {
         if (Thread.currentThread() != this.getRunningThread()) {
             if (Owo.DEBUG) {

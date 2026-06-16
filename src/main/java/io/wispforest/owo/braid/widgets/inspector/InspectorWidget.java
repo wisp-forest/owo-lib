@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.inspector;
 
+import net.minecraft.resources.Identifier;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.Alignment;
 import io.wispforest.owo.braid.core.Color;
@@ -91,7 +92,7 @@ public class InspectorWidget extends StatefulWidget {
                         return new Box(
                             Color.rgb(0x1d2026),
                             new DefaultLabelStyle(
-                                new LabelStyle(null, null, Style.EMPTY.withFont(new FontDescription.Resource(Minecraft.UNIFORM_FONT)), null),
+                                new LabelStyle(null, null, Style.EMPTY.withFont(new FontDescription.Resource(Identifier.withDefaultNamespace("uniform"))), null),
                                 new SplitPane(
                                     LayoutAxis.HORIZONTAL,
                                     new SplitPaneStyle(1d, null, null, null, null, null),

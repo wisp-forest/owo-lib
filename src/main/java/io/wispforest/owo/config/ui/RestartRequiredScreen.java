@@ -21,7 +21,7 @@ public class RestartRequiredScreen extends BaseUIModelScreen<FlowLayout> {
 
     @Override
     public void onClose() {
-        this.minecraft.setScreen(parent);
+        this.minecraft.setScreenAndShow(parent);
     }
 
     @Override

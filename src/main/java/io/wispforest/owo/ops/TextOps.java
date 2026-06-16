@@ -1,5 +1,6 @@
 package io.wispforest.owo.ops;
 
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
@@ -136,7 +137,8 @@ public final class TextOps {
      * in {@code RRGGBB} format, or {@code 0} if there is none
      */
     public static int color(ChatFormatting formatting) {
-        return formatting.getColor() == null ? 0 : formatting.getColor();
+        var color = TextColor.fromLegacyFormat(formatting);
+        return color == null ? 0 : color.getValue();
     }
 
 }

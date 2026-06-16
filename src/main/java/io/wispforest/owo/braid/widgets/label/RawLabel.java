@@ -56,7 +56,7 @@ public class RawLabel extends LeafInstanceWidget {
         private int renderTextHeight = 0;
 
         protected Function<Style, Boolean> textClickHandler = style -> {
-            return style != null && OwoUIGraphics.utilityScreen().handleTextClick(style, Minecraft.getInstance().screen);
+            return style != null && OwoUIGraphics.utilityScreen().handleTextClick(style, Minecraft.getInstance().gui.screen());
         };
 
         public Instance(RawLabel widget) {

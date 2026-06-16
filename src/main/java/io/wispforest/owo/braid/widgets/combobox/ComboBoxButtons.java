@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.combobox;
 
+import net.minecraft.network.chat.TextColor;
 import io.wispforest.owo.braid.core.*;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.proxy.WidgetState;
@@ -130,7 +131,7 @@ class ComboBoxButtons<T> extends StatelessWidget {
                                     Insets.all(2).withLeft(3),
                                     new Label(
                                         new LabelStyle(Alignment.LEFT, highlighted
-                                            ? Color.rgb(ChatFormatting.YELLOW.getColor()) : null, null, highlighted),
+                                            ? Color.rgb(TextColor.fromLegacyFormat(ChatFormatting.YELLOW).getValue()) : null, null, highlighted),
                                         true,
                                         this.widget().optionToName.apply(this.widget().option)
                                     )

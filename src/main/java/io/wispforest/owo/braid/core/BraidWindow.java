@@ -1,5 +1,7 @@
 package io.wispforest.owo.braid.core;
 
+import org.joml.Vector4f;
+import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.opengl.GlDebug;
 import com.mojang.blaze3d.opengl.GlTexture;
 import com.mojang.blaze3d.pipeline.TextureTarget;
@@ -62,7 +64,7 @@ public class BraidWindow implements Surface {
 
         this.framebufferWidth = framebufferWidthOut[0];
         this.framebufferHeight = framebufferHeightOut[0];
-        this.remoteTarget = new TextureTarget("braid window", this.framebufferWidth, this.framebufferHeight, true);
+        this.remoteTarget = new TextureTarget("braid window", this.framebufferWidth, this.framebufferHeight, true, GpuFormat.RGBA8_UNORM);
         this.recreateLocalFbo();
 
         GLFW.glfwSetWindowCloseCallback(this.handle, this.storeNativeResource(GLFWWindowCloseCallback.create(window -> {
@@ -75,7 +77,7 @@ public class BraidWindow implements Surface {
 
             withContext(Minecraft.getInstance().getWindow().handle(), () -> {
                 this.remoteTarget.destroyBuffers();
-                this.remoteTarget = new TextureTarget("braid window", this.framebufferWidth, this.framebufferHeight, true);
+                this.remoteTarget = new TextureTarget("braid window", this.framebufferWidth, this.framebufferHeight, true, GpuFormat.RGBA8_UNORM);
             });
 
             this.recreateLocalFbo();
@@ -276,7 +278,7 @@ public class BraidWindow implements Surface {
     public void beginRendering() {
         RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
             this.remoteTarget.getColorTexture(),
-            0xFF000000,
+            new Vector4f(0, 0, 0, 1),
             this.remoteTarget.getDepthTexture(),
             1
         );

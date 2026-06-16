@@ -1,5 +1,7 @@
 package io.wispforest.uwu.client.braid.test;
 
+import net.minecraft.resources.Identifier;
+import net.minecraft.core.registries.BuiltInRegistries;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.core.Size;
@@ -45,14 +47,14 @@ public class SpinnyGhastTest extends StatefulWidget {
         @Override
         public void init() {
             this.entities = Stream.of(
-                EntityType.HAPPY_GHAST,
-                EntityType.ALLAY,
-                EntityType.COW,
-                EntityType.CREAKING,
-                EntityType.BREEZE,
-                EntityType.COPPER_GOLEM,
-                EntityType.BAMBOO_RAFT,
-                EntityType.ITEM_FRAME
+                BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("happy_ghast")),
+                BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("allay")),
+                BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("cow")),
+                BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("creaking")),
+                BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("breeze")),
+                BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("copper_golem")),
+                BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("bamboo_raft")),
+                BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("item_frame"))
             ).<Entity>map(
                 entityType -> entityType.create(Minecraft.getInstance().level, EntitySpawnReason.MOB_SUMMONED)
             ).toList();

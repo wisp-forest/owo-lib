@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.BlockModelRenderState;
 import net.minecraft.client.renderer.block.model.BlockDisplayContext;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
@@ -75,10 +75,6 @@ public record BraidBlockElement(
 
     public static class Renderer extends PictureInPictureRenderer<BraidBlockElement> {
 
-        public Renderer(MultiBufferSource.BufferSource vertexConsumers) {
-            super(vertexConsumers);
-        }
-
         @Override
         public Class<BraidBlockElement> getRenderStateClass() {
             return BraidBlockElement.class;
@@ -86,9 +82,8 @@ public record BraidBlockElement(
 
         @Override
         @SuppressWarnings("NonAsciiCharacters")
-        protected void renderToTexture(BraidBlockElement state, PoseStack matrices) {
-            Minecraft.getInstance().gameRenderer.getLighting().setupFor(Lighting.Entry.ENTITY_IN_UI);
-            var dispatcher = Minecraft.getInstance().gameRenderer.getFeatureRenderDispatcher();
+        protected void renderToTexture(BraidBlockElement state, PoseStack matrices, SubmitNodeCollector collector) {
+            Minecraft.getInstance().gameRenderer.lighting().setupFor(Lighting.Entry.ENTITY_IN_UI);
 
             matrices.mulPose(state.transform);
 
@@ -101,17 +96,15 @@ public record BraidBlockElement(
                     67
                 );
 
-                blockModelRenderState.submit(matrices, dispatcher.getSubmitNodeStorage(), LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
+                blockModelRenderState.submit(matrices, collector, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
             }
 
             if (state.entity != null) {
                 var медведь = Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(state.entity);
                 if (медведь != null) {
-                    медведь.submit(state.entity, matrices, dispatcher.getSubmitNodeStorage(), new CameraRenderState());
+                    медведь.submit(state.entity, matrices, collector, new CameraRenderState());
                 }
             }
-
-            dispatcher.renderAllFeatures();
         }
 
         @Override

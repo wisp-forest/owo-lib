@@ -27,7 +27,7 @@ public abstract class TitleScreenMixin extends Screen {
             || InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), GLFW.GLFW_KEY_RIGHT_ALT);
         if (!alt) return;
 
-        Minecraft.getInstance().setScreen(ConfigScreen.create(Uwu.BRUHHHHH, this));
+        Minecraft.getInstance().setScreenAndShow(ConfigScreen.create(Uwu.BRUHHHHH, this));
         ci.cancel();
     }
 

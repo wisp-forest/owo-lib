@@ -12,9 +12,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ChatScreen.class)
 public class ChatScreenMixin {
 
-    @Inject(method = "keyPressed", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V"), cancellable = true)
+    @Inject(method = "keyPressed", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V"), cancellable = true)
     private void cancelClose(KeyEvent input, CallbackInfoReturnable<Boolean> cir) {
-        if (Minecraft.getInstance().screen instanceof CommandOpenedScreen) {
+        if (Minecraft.getInstance().gui.screen() instanceof CommandOpenedScreen) {
             cir.setReturnValue(true);
         }
     }

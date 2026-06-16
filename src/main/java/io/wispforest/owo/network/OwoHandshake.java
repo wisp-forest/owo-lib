@@ -29,7 +29,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
@@ -197,14 +197,14 @@ public final class OwoHandshake {
 
             var leftovers = findCollisions(clientMap.keySet(), serverMap.keySet());
 
-            if (!leftovers.getA().isEmpty()) {
+            if (!leftovers.getFirst().isEmpty()) {
                 disconnectMessage.append("server is missing ").append(serviceNamePlural).append(":\n");
-                leftovers.getA().forEach(identifier -> disconnectMessage.append("§7").append(identifier).append("§r\n"));
+                leftovers.getFirst().forEach(identifier -> disconnectMessage.append("§7").append(identifier).append("§r\n"));
             }
 
-            if (!leftovers.getB().isEmpty()) {
+            if (!leftovers.getSecond().isEmpty()) {
                 disconnectMessage.append("client is missing ").append(serviceNamePlural).append(":\n");
-                leftovers.getB().forEach(identifier -> disconnectMessage.append("§7").append(identifier).append("§r\n"));
+                leftovers.getSecond().forEach(identifier -> disconnectMessage.append("§7").append(identifier).append("§r\n"));
             }
         }
 
@@ -240,7 +240,7 @@ public final class OwoHandshake {
         return hashes;
     }
 
-    private static Tuple<Set<Identifier>, Set<Identifier>> findCollisions(Set<Identifier> first, Set<Identifier> second) {
+    private static Pair<Set<Identifier>, Set<Identifier>> findCollisions(Set<Identifier> first, Set<Identifier> second) {
         var firstLeftovers = new HashSet<Identifier>();
         var secondLeftovers = new HashSet<Identifier>();
 
@@ -252,7 +252,7 @@ public final class OwoHandshake {
             if (!first.contains(identifier)) secondLeftovers.add(identifier);
         });
 
-        return new Tuple<>(firstLeftovers, secondLeftovers);
+        return Pair.of(firstLeftovers, secondLeftovers);
     }
 
     private static int hashChannel(OwoNetChannel channel) {

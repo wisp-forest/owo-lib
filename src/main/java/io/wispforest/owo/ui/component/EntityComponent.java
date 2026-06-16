@@ -21,7 +21,6 @@ import net.minecraft.client.multiplayer.LevelLoadTracker;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.multiplayer.chat.ChatAbilities;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.telemetry.TelemetryEventSender;
@@ -50,7 +49,6 @@ import java.util.function.Consumer;
 public class EntityComponent<E extends Entity> extends BaseUIComponent {
 
     protected final EntityRenderDispatcher manager;
-    protected final MultiBufferSource.BufferSource entityBuffers;
     protected final E entity;
 
     protected float mouseRotation = 0;
@@ -64,9 +62,9 @@ public class EntityComponent<E extends Entity> extends BaseUIComponent {
     protected EntityComponent(Sizing sizing, E entity) {
         final var client = Minecraft.getInstance();
         this.manager = client.getEntityRenderDispatcher();
-        this.entityBuffers = client.renderBuffers().bufferSource();
 
         this.entity = entity;
+        this.entity.setId(-1);
 
         this.sizing(sizing);
     }
@@ -75,9 +73,9 @@ public class EntityComponent<E extends Entity> extends BaseUIComponent {
     protected EntityComponent(Sizing sizing, EntityType<E> type, @Nullable CompoundTag nbt) {
         final var client = Minecraft.getInstance();
         this.manager = client.getEntityRenderDispatcher();
-        this.entityBuffers = client.renderBuffers().bufferSource();
 
         this.entity = type.create(client.level, EntitySpawnReason.BREEDING);
+        this.entity.setId(-1);
         if (nbt != null) entity.load(TagValueInput.create(new ProblemReporter.ScopedCollector(Owo.LOGGER), client.level.registryAccess(), nbt));
         entity.absSnapTo(client.player.getX(), client.player.getY(), client.player.getZ());
 
@@ -258,7 +256,7 @@ public class EntityComponent<E extends Entity> extends BaseUIComponent {
                     new net.minecraft.network.Connection(PacketFlow.CLIENTBOUND),
                     new CommonListenerCookie(
                         new LevelLoadTracker(0),
-                        profile, new WorldSessionTelemetryManager(TelemetryEventSender.DISABLED, false, Duration.ZERO, ""),
+                        profile, new WorldSessionTelemetryManager(TelemetryEventSender.DISABLED, false, Duration.ZERO, "", null),
                         Minecraft.getInstance().level.registryAccess().freeze(),
                         Minecraft.getInstance().level.enabledFeatures(),
                         "Wisp Forest Enterprises", null, null, Map.of(), null, Map.of(), ServerLinks.EMPTY, Map.of(),

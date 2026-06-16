@@ -1,5 +1,6 @@
 package io.wispforest.uwu.client.braid.test;
 
+import net.minecraft.resources.Identifier;
 import com.google.gson.GsonBuilder;
 import dev.kdl.KdlNode;
 import dev.kdl.parse.Kdl2Parser;
@@ -103,7 +104,7 @@ public class KdlWidgetsTest extends StatefulWidget {
                     new Padding(
                         Insets.all(5),
                         new Label(
-                            new LabelStyle(Alignment.TOP_LEFT, null, Style.EMPTY.withFont(new FontDescription.Resource(Minecraft.UNIFORM_FONT)), false),
+                            new LabelStyle(Alignment.TOP_LEFT, null, Style.EMPTY.withFont(new FontDescription.Resource(Identifier.withDefaultNamespace("uniform"))), false),
                             true,
                             Component.literal(jsonText)
                         )

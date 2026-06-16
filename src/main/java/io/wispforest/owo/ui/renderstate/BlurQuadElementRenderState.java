@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.renderstate;
 
+import com.mojang.blaze3d.GpuFormat;
 import com.google.common.collect.MapMaker;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.buffers.Std140Builder;
@@ -46,7 +47,7 @@ public record BlurQuadElementRenderState(
 
         var window = client.getWindow();
 
-        input = new TextureTarget("owo_blur_input", window.getWidth(), window.getHeight(), false);
+        input = new TextureTarget("owo_blur_input", window.getWidth(), window.getHeight(), false, GpuFormat.RGBA8_UNORM);
         inputView = RenderSystem.getDevice().createTextureView(input.getColorTexture());
 
         WindowResizeCallback.EVENT.register((innerClient, innerWindow) -> {

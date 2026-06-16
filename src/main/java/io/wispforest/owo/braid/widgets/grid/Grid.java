@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.grid;
 
+import net.minecraft.resources.Identifier;
 import io.wispforest.owo.braid.core.*;
 import io.wispforest.owo.braid.framework.instance.InspectorProperty;
 import io.wispforest.owo.braid.framework.instance.MultiChildWidgetInstance;
@@ -210,7 +211,7 @@ public class Grid extends MultiChildInstanceWidget {
                 }
 
                 graphics.drawText(
-                    Component.literal(verticalSizes[i] + "px").withStyle(style -> style.withFont(new FontDescription.Resource(Minecraft.UNIFORM_FONT))),
+                    Component.literal(verticalSizes[i] + "px").withStyle(style -> style.withFont(new FontDescription.Resource(Identifier.withDefaultNamespace("uniform")))),
                     0, (float) verticalPos, 1f, Color.WHITE.argb(),
                     OwoUIGraphics.TextAnchor.TOP_RIGHT
                 );
@@ -229,7 +230,7 @@ public class Grid extends MultiChildInstanceWidget {
                 }
 
                 graphics.drawText(
-                    Component.literal(horizontalSizes[i] + "px").withStyle(style -> style.withFont(new FontDescription.Resource(Minecraft.UNIFORM_FONT))),
+                    Component.literal(horizontalSizes[i] + "px").withStyle(style -> style.withFont(new FontDescription.Resource(Identifier.withDefaultNamespace("uniform")))),
                     (float) horizontalPos, 0, 1f, Color.WHITE.argb(),
                     OwoUIGraphics.TextAnchor.BOTTOM_LEFT
                 );

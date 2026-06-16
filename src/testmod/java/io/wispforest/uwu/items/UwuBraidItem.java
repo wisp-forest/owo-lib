@@ -1,5 +1,7 @@
 package io.wispforest.uwu.items;
 
+import net.minecraft.resources.Identifier;
+import net.minecraft.core.registries.BuiltInRegistries;
 import io.wispforest.owo.braid.core.*;
 import io.wispforest.owo.braid.display.BraidDisplay;
 import io.wispforest.owo.braid.display.BraidDisplayBinding;
@@ -99,7 +101,7 @@ public class UwuBraidItem extends Item {
         var settings = new BraidScreen.Settings();
         settings.shouldPause = false;
 
-        Minecraft.getInstance().setScreen(new BraidScreen(settings, new TestSelector()));
+        Minecraft.getInstance().setScreenAndShow(new BraidScreen(settings, new TestSelector()));
     }
 
     public record Tooltip() implements TooltipComponent {}
@@ -231,7 +233,7 @@ public class UwuBraidItem extends Item {
 
             @Override
             public void init() {
-                this.cow = new net.minecraft.world.entity.animal.cow.Cow(EntityType.COW, Minecraft.getInstance().level);
+                this.cow = new net.minecraft.world.entity.animal.cow.Cow((EntityType<? extends net.minecraft.world.entity.animal.cow.Cow>) BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("cow")), Minecraft.getInstance().level);
             }
 
             @Override

@@ -2,12 +2,11 @@ package io.wispforest.owo.mixin.ui;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import io.wispforest.owo.mixin.ui.access.GlCommandEncoderAccessor;
+import io.wispforest.owo.mixin.ui.access.StagedVertexBufferDrawAccessor;
 import io.wispforest.owo.ui.renderstate.BlurQuadElementRenderState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.render.GuiRenderer;
@@ -31,42 +30,40 @@ public class GuiRendererMixin {
     private TextureSetup previousTextureSetup;
 
     @ModifyArgs(
-        method = "executeDraw(Lnet/minecraft/client/gui/render/GuiRenderer$Draw;Lcom/mojang/blaze3d/systems/RenderPass;Lcom/mojang/blaze3d/buffers/GpuBuffer;Lcom/mojang/blaze3d/vertex/VertexFormat$IndexType;)V",
-        at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderPass;setIndexBuffer(Lcom/mojang/blaze3d/buffers/GpuBuffer;Lcom/mojang/blaze3d/vertex/VertexFormat$IndexType;)V")
+        method = "executeDraw(Lnet/minecraft/client/gui/render/GuiRenderer$Draw;Lcom/mojang/blaze3d/systems/RenderPass;)V",
+        at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderPass;setIndexBuffer(Lcom/mojang/blaze3d/buffers/GpuBuffer;Lcom/mojang/blaze3d/IndexType;)V")
     )
     private void fixNonQuadIndexing(Args args, @Local(argsOnly = true) GuiRenderer.Draw draw) {
         var pipeline = draw.pipeline();
         if (!pipeline.getLocation().getNamespace().equals("owo")) return;
 
-        if (pipeline.getVertexFormatMode() != VertexFormat.Mode.QUADS) {
-            var shapeIndexBuffer = RenderSystem.getSequentialBuffer(pipeline.getVertexFormatMode());
-            args.set(0, shapeIndexBuffer.getBuffer(draw.indexCount()));
+        if (pipeline.getPrimitiveTopology() != PrimitiveTopology.QUADS) {
+            var shapeIndexBuffer = RenderSystem.getSequentialBuffer(pipeline.getPrimitiveTopology());
+            args.set(0, shapeIndexBuffer.getBuffer(((StagedVertexBufferDrawAccessor) draw.draw()).owo$getIndexCount()));
             args.set(1, shapeIndexBuffer.type());
         }
     }
 
     @Inject(
-        method = "executeDraw(Lnet/minecraft/client/gui/render/GuiRenderer$Draw;Lcom/mojang/blaze3d/systems/RenderPass;Lcom/mojang/blaze3d/buffers/GpuBuffer;Lcom/mojang/blaze3d/vertex/VertexFormat$IndexType;)V",
-        at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderPass;drawIndexed(IIII)V")
+        method = "executeDraw(Lnet/minecraft/client/gui/render/GuiRenderer$Draw;Lcom/mojang/blaze3d/systems/RenderPass;)V",
+        at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderPass;drawIndexed(IIIII)V")
     )
-    private void drawBlur(GuiRenderer.Draw draw, RenderPass pass, GpuBuffer indexBuffer, VertexFormat.IndexType indexType, CallbackInfo ci) {
+    private void drawBlur(GuiRenderer.Draw draw, RenderPass pass, CallbackInfo ci) {
         var blurSetup = BlurQuadElementRenderState.getBlurSetupOf(draw.textureSetup());
         if (blurSetup == null) return;
 
-        var mainBuffer = Minecraft.getInstance().getMainRenderTarget();
+        var mainBuffer = Minecraft.getInstance().gameRenderer.mainRenderTarget();
         var inputSize = new Vector2i(mainBuffer.width, mainBuffer.height);
 
         var encoder = RenderSystem.getDevice().createCommandEncoder();
 
-        ((GlCommandEncoderAccessor) ((CommandEncoderAccessor) encoder).owo$getBackend()).owo$setInRenderPass(false);
         encoder.copyTextureToTexture(
-            Minecraft.getInstance().getMainRenderTarget().getColorTexture(),
+            Minecraft.getInstance().gameRenderer.mainRenderTarget().getColorTexture(),
             BlurQuadElementRenderState.input.getColorTexture(),
             0, 0, 0, 0, 0, inputSize.x, inputSize.y
         );
 
         var uniforms = BlurQuadElementRenderState.uniforms.write(inputSize, blurSetup.directions(), blurSetup.quality(), blurSetup.size());
-        ((GlCommandEncoderAccessor) ((CommandEncoderAccessor) encoder).owo$getBackend()).owo$setInRenderPass(true);
 
         pass.setUniform("BlurSettings", uniforms);
         pass.bindTexture("InputSampler", BlurQuadElementRenderState.inputView, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST));

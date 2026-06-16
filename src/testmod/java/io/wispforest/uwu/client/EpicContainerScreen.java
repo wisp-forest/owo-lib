@@ -1,5 +1,6 @@
 package io.wispforest.uwu.client;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import io.wispforest.owo.mixin.ui.SlotAccessor;
 import io.wispforest.owo.ui.base.BaseOwoContainerScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
@@ -49,7 +50,7 @@ public class EpicContainerScreen extends BaseOwoContainerScreen<FlowLayout, Epic
                                         .horizontalTextAlignment(HorizontalAlignment.CENTER)
                                         .positioning(Positioning.absolute(0, -9))
                                         .horizontalSizing(Sizing.fixed(100)))
-                                .child(UIComponents.entity(Sizing.fixed(100), EntityType.FROG, frogeNbt).scale(.75f).allowMouseRotation(true).tooltip(Component.literal(":)")))
+                                .child(UIComponents.entity(Sizing.fixed(100), BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("frog")), frogeNbt).scale(.75f).allowMouseRotation(true).tooltip(Component.literal(":)")))
                                 .child(UIContainers.horizontalFlow(Sizing.fixed(100), Sizing.content())
                                         .child(UIComponents.button(Component.nullToEmpty("✔"), (ButtonComponent button) -> {
                                             var text = selectBox.getValue();

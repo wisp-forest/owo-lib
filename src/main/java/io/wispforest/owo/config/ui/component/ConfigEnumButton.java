@@ -1,5 +1,6 @@
 package io.wispforest.owo.config.ui.component;
 
+import net.minecraft.locale.Language;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.core.Sizing;
@@ -64,7 +65,7 @@ public class ConfigEnumButton extends ButtonComponent implements OptionValueProv
 
         var optionValueKey = this.backingOption.translationKey() + ".value." + valueName;
 
-        this.setMessage(I18n.exists(optionValueKey)
+        this.setMessage(Language.getInstance().has(optionValueKey)
                 ? Component.translatable(optionValueKey)
                 : Component.translatable("text.config." + this.backingOption.configName() + ".enum." + enumName + "." + valueName)
         );

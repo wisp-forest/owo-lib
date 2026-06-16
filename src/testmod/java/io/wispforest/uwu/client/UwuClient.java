@@ -1,5 +1,6 @@
 package io.wispforest.uwu.client;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.util.BraidHudElement;
 import io.wispforest.owo.braid.util.layers.BraidLayersBinding;
@@ -79,7 +80,7 @@ public class UwuClient implements ClientModInitializer {
             UIContainers.verticalFlow(Sizing.content(), Sizing.content())
                 .child(UIComponents.item(Items.DIAMOND.getDefaultInstance()).margins(Insets.of(3)))
                 .child(UIComponents.label(Component.literal("epic stuff in hud")))
-                .child(UIComponents.entity(Sizing.fixed(50), EntityType.ALLAY, null))
+                .child(UIComponents.entity(Sizing.fixed(50), BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("allay")), null))
                 .alignment(HorizontalAlignment.CENTER, VerticalAlignment.CENTER)
                 .padding(Insets.of(5))
                 .surface(Surface.PANEL)
@@ -169,7 +170,7 @@ public class UwuClient implements ClientModInitializer {
 
             instance.adapter.rootComponent.child(
                 UIContainers.horizontalFlow(Sizing.content(), Sizing.content())
-                    .child(UIComponents.entity(Sizing.fixed(20), EntityType.ALLAY, null).<EntityComponent<Allay>>configure(component -> {
+                    .child(UIComponents.entity(Sizing.fixed(20), BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("allay")), null).<EntityComponent<Allay>>configure(component -> {
                         component.allowMouseRotation(true)
                             .scale(.75f);
 
