@@ -191,87 +191,120 @@ public class OwoNetChannel {
         return this.builder;
     }
 
-    /**
-     * Registers a handler <i>on the client</i> for the specified message class.
-     * This also ensures the required endec is available. If an exception
-     * about a missing endec is thrown, register one
-     *
-     * @param messageClass The type of packet data to send and serialize
-     * @param handler      The handler that will receive the deserialized
-     * @see #serverHandle(Player)
-     * @see #serverHandle(MinecraftServer)
-     * @see #serverHandle(ServerLevel, BlockPos)
-     */
+    /// Registers a handler _on the client_ for the specified message class.
+    ///
+    /// This also ensures the required endec is available. If an exception occurs, either use
+    /// [#registerClientbound(Class, StructEndec)] with a custom StructEndec or add
+    /// to the channels [#builder()] with the required [Endec]'s.
+    ///
+    /// @param messageClass The type of packet data to send and serialize
+    /// @param handler      The handler that will receive the deserialized
+    /// @see #serverHandle(Player)
+    /// @see #serverHandle(MinecraftServer)
+    /// @see #serverHandle(ServerLevel, BlockPos)
     public <R extends Record> void registerClientbound(Class<R> messageClass, ChannelHandler<R, ClientAccess> handler) {
         registerClientbound(messageClass, handler, () -> RecordEndec.create(this.builder, messageClass));
     }
 
-    /**
-     * Registers a message class <i>on the client</i> with deferred handler registration.
-     * This also ensures the required endec is available. If an exception
-     * about a missing endec is thrown, register one
-     *
-     * @param messageClass The type of packet data to send and serialize
-     * @see #serverHandle(Player)
-     * @see #serverHandle(MinecraftServer)
-     * @see #serverHandle(ServerLevel, BlockPos)
-     */
+    /// Registers a message class _on the server_ with deferred handler registration
+    /// to _on the client_.
+    ///
+    /// This also ensures the required endec is available. If an exception occurs, either use
+    /// [#registerClientboundDeferred(Class, StructEndec)] with a custom StructEndec or add
+    /// to the channels [#builder()] with the required [Endec]'s.
+    ///
+    /// Don't forget to call [#registerClientbound(Class, ChannelHandler)]
+    /// _on the client_ to set up the handling for the message class.
+    ///
+    /// @param messageClass The type of packet data to send and serialize
+    /// @see #serverHandle(Player)
+    /// @see #serverHandle(MinecraftServer)
+    /// @see #serverHandle(ServerLevel, BlockPos)
     public <R extends Record> void registerClientboundDeferred(Class<R> messageClass) {
         registerClientboundDeferred(messageClass, () -> RecordEndec.create(this.builder, messageClass));
     }
 
-    /**
-     * Registers a handler <i>on the server</i> for the specified message class.
-     * This also ensures the required endec is available. If an exception
-     * about a missing endec is thrown, register one
-     *
-     * @param messageClass The type of packet data to send and serialize
-     * @param handler      The handler that will receive the deserialized
-     * @see #clientHandle()
-     */
+    /// Registers a handler _on the server_ for the specified message class.
+    ///
+    /// This also ensures the required endec is available. If an exception occurs, either use
+    /// [#registerServerbound(Class, StructEndec)] with a custom StructEndec or add
+    /// to the channels [#builder()] with the required [Endec]'s.
+    ///
+    /// @param messageClass The type of packet data to send and serialize
+    /// @param handler      The handler that will receive the deserialized
+    /// @see #clientHandle()
     public <R extends Record> void registerServerbound(Class<R> messageClass, ChannelHandler<R, ServerAccess> handler) {
         registerServerbound(messageClass, handler, () -> RecordEndec.create(this.builder, messageClass));
     }
 
+    /// Registers a message class _on the server and client_ using the handler _for the server_ and
+    /// with deferred handler registration _for the client_.
+    ///
+    /// This also ensures the required endec is available. If an exception occurs, either use
+    /// [#registerBidirectional(Class, StructEndec)] with a custom StructEndec or add
+    /// to the channels [#builder()] with the required [Endec]'s.
+    ///
+    /// Don't forget to call [#registerClientbound(Class, ChannelHandler)]
+    /// _on the client_ to set up the handling for the message class.
+    ///
+    /// @param messageClass  The type of packet data to send and serialize
+    /// @param serverHandler The handler that will receive the deserialized
+    public <R extends Record> void registerBidirectionalDeferred(Class<R> messageClass, ChannelHandler<R, ServerAccess> serverHandler) {
+        registerServerbound(messageClass, serverHandler, () -> RecordEndec.create(this.builder, messageClass));
+        registerClientboundDeferred(messageClass);
+    }
+
     //--
 
-    /**
-     * Registers a handler <i>on the client</i> for the specified message class
-     *
-     * @param messageClass The type of packet data to send and serialize
-     * @param endec        The endec to serialize messages with
-     * @param handler      The handler that will receive the deserialized
-     * @see #serverHandle(Player)
-     * @see #serverHandle(MinecraftServer)
-     * @see #serverHandle(ServerLevel, BlockPos)
-     */
+    /// Registers a handler _on the client_ for the specified message class
+    ///
+    /// @param messageClass The type of packet data to send and serialize
+    /// @param endec        The endec to serialize messages with
+    /// @param handler      The handler that will receive the deserialized
+    /// @see #serverHandle(Player)
+    /// @see #serverHandle(MinecraftServer)
+    /// @see #serverHandle(ServerLevel, BlockPos)
     public <R extends Record> void registerClientbound(Class<R> messageClass, StructEndec<R> endec, ChannelHandler<R, ClientAccess> handler) {
         registerClientbound(messageClass, handler, () -> endec);
     }
 
-    /**
-     * Registers a message class <i>on the client</i> with deferred handler registration
-     *
-     * @param messageClass The type of packet data to send and serialize
-     * @param endec        The endec to serialize messages with
-     * @see #serverHandle(Player)
-     * @see #serverHandle(MinecraftServer)
-     * @see #serverHandle(ServerLevel, BlockPos)
-     */
+    /// Registers a message class _on the server_ with deferred handler registration
+    /// _on the client_.
+    ///
+    /// Don't forget to call [#registerClientbound(Class, ChannelHandler)]
+    /// _on the client_ to set up the handling for the message class.
+    ///
+    /// @param messageClass The type of packet data to send and serialize
+    /// @param endec        The endec to serialize messages with
+    /// @see #serverHandle(Player)
+    /// @see #serverHandle(MinecraftServer)
+    /// @see #serverHandle(ServerLevel, BlockPos)
     public <R extends Record> void registerClientboundDeferred(Class<R> messageClass, StructEndec<R> endec) {
         registerClientboundDeferred(messageClass, () -> endec);
     }
 
-    /**
-     * Registers a handler <i>on the server</i> for the specified message class
-     *
-     * @param messageClass The type of packet data to send and serialize
-     * @param endec        The endec to serialize messages with
-     * @param handler      The handler that will receive the deserialized
-     * @see #clientHandle()
-     */
+    /// Registers a handler _on the server_ for the specified message class
+    ///
+    /// @param messageClass The type of packet data to send and serialize
+    /// @param endec        The endec to serialize messages with
+    /// @param handler      The handler that will receive the deserialized
+    /// @see #clientHandle()
     public <R extends Record> void registerServerbound(Class<R> messageClass, StructEndec<R> endec, ChannelHandler<R, ServerAccess> handler) {
         registerServerbound(messageClass, handler, () -> endec);
+    }
+
+    /// Registers a message class _on the server and client_ using the handler _for the server_ and
+    /// with deferred handler registration _for the client_.
+    ///
+    /// Don't forget to call [#registerClientbound(Class, ChannelHandler)]
+    /// _on the client_ to set up the handling for the message class.
+    ///
+    /// @param messageClass  The type of packet data to send and serialize
+    /// @param endec         The endec to serialize messages with
+    /// @param serverHandler The handler that will receive the deserialized
+    public <R extends Record> void registerBidirectionalDeferred(Class<R> messageClass, StructEndec<R> endec, ChannelHandler<R, ServerAccess> serverHandler) {
+        registerServerbound(messageClass, serverHandler, () -> endec);
+        registerClientboundDeferred(messageClass, endec);
     }
 
     //--

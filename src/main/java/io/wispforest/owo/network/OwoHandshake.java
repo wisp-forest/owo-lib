@@ -150,11 +150,13 @@ public final class OwoHandshake {
 
         if (!isAllGood) {
             context.responseSender().disconnect(TextOps.concat(PREFIX, Component.nullToEmpty(disconnectMessage.toString())));
+
+            Owo.LOGGER.info("[Handshake] Handshake completed with mismatches!");
+        } else {
+            ((OwoClientConnectionExtension) ((ServerCommonPacketListenerImplAccessor) context.packetListener()).owo$getConnection()).owo$setChannelSet(filterOptionalServices(response.optionalChannels(), OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
+
+            Owo.LOGGER.info("[Handshake] Handshake completed successfully");
         }
-
-        ((OwoClientConnectionExtension) ((ServerCommonPacketListenerImplAccessor) context.packetListener()).owo$getConnection()).owo$setChannelSet(filterOptionalServices(response.optionalChannels(), OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
-
-        Owo.LOGGER.info("[Handshake] Handshake completed successfully");
     }
 
     @Environment(EnvType.CLIENT)

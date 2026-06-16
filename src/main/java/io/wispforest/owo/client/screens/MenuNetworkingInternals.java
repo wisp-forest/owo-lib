@@ -16,7 +16,7 @@ import org.jetbrains.annotations.ApiStatus;
 public class MenuNetworkingInternals {
     public static void init() {
         Owo.MAIN.registerClientboundDeferred(SyncPropertiesPacket.class);
-        Owo.MAIN.registerServerbound(LocalPacket.class, (payload, context) -> {
+        Owo.MAIN.registerBidirectionalDeferred(LocalPacket.class, (payload, context) -> {
             handlePacket(payload, context.player(), false);
         });
     }

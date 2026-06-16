@@ -180,16 +180,14 @@ public class ConfigSynchronizer {
             Owo.MAIN.serverHandle(handler).send(toPacket(Option.SyncMode.OVERRIDE_CLIENT));
         });
 
+        Owo.MAIN.registerBidirectionalDeferred(ConfigSyncPacket.class, ConfigSynchronizer::applyServer);
+
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             Owo.MAIN.registerClientbound(ConfigSyncPacket.class, ConfigSynchronizer::applyClient);
 
             ClientPlayConnectionEvents.DISCONNECT.register((_, _) -> {
                 KNOWN_CONFIGS.values().forEach((config) -> config.forEachOption(Option::reattach));
             });
-        } else {
-            Owo.MAIN.registerClientboundDeferred(ConfigSyncPacket.class);
         }
-
-        Owo.MAIN.registerServerbound(ConfigSyncPacket.class, ConfigSynchronizer::applyServer);
     }
 }
