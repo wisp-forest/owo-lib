@@ -239,12 +239,18 @@ public class Uwu implements ModInitializer {
             dispatcher.register(literal("get_option")
                 .then(argument("config", StringArgumentType.string())
                     .then(argument("option", StringArgumentType.string()).executes(context -> {
-                        var value = ConfigSynchronizer.getClientOptions(
-                            context.getSource().getPlayer(),
-                            StringArgumentType.getString(context, "config")
-                        ).get(new Option.Key(StringArgumentType.getString(context, "option")));
+                        var source = context.getSource();
 
-                        context.getSource().sendSuccess(() -> Component.literal(String.valueOf(value)), false);
+                        var configId = StringArgumentType.getString(context, "config");
+                        var optionKey = StringArgumentType.getString(context, "option");
+
+                        var option = ConfigSynchronizer.getClientOption(source.getPlayer(),configId, new Option.Key(optionKey));
+
+                        if (option != null) {
+                            source.sendSuccess(() -> Component.literal(String.valueOf(option.get())), false);
+                        } else {
+                            source.sendFailure(Component.literal("Unable to find option '" + configId + "' for '" + optionKey + "' from ConfigSynchronizer"));
+                        }
 
                         return 0;
                     }))));
