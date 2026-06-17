@@ -183,10 +183,11 @@ public class OwoNetChannel {
             .filter(entry -> entry.getValue().required == required)
             .gather(Gatherer.<Map.Entry<Identifier, OwoNetChannel>, Map<Identifier, OwoNetChannel>, Map<Identifier, OwoNetChannel>>ofSequential(
                 HashMap::new,
-                (stateMap, entry, downstream) -> {
+                (stateMap, entry, _) -> {
                     stateMap.put(entry.getKey(), entry.getValue());
                     return true; // Keep reading the stream
-                }
+                },
+                (map, downstream) -> downstream.push(map)
             ))
             .findFirst()
             .orElseThrow();
