@@ -3,8 +3,7 @@ package io.wispforest.owo.config;
 import com.google.common.collect.HashMultimap;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.mixin.ServerCommonPacketListenerImplAccessor;
-import io.wispforest.owo.network.ClientAccess;
-import io.wispforest.owo.network.ServerAccess;
+import io.wispforest.owo.network.CommonAccess;
 import io.wispforest.owo.ops.TextOps;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -14,6 +13,7 @@ import net.fabricmc.fabric.api.networking.v1.FriendlyByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -35,8 +35,10 @@ public class ConfigSynchronizer {
     private static final Map<String, ConfigWrapper<?>> KNOWN_CONFIGS = new HashMap<>();
     private static final MutableComponent PREFIX = TextOps.concat(Owo.PREFIX, Component.nullToEmpty("§cunrecoverable config mismatch\n\n"));
 
-    static void register(ConfigWrapper<?> config) {
+    static void register(ConfigWrapper<?> config, boolean isRequired) {
         KNOWN_CONFIGS.put(config.name(), config);
+
+        if (isRequired) Owo.MAIN.isRequired(true);
     }
 
     /**
@@ -109,11 +111,15 @@ public class ConfigSynchronizer {
     }
 
     @Environment(EnvType.CLIENT)
-    private static void applyClient(ConfigSyncPacket payload, ClientAccess context) {
+    private static boolean isSingleplayer(CommonAccess<?, ?, ?> access) {
+        return access.runtime() instanceof Minecraft client && client.hasSingleplayerServer() && client.getSingleplayerServer().isSingleplayer();
+    }
+
+    private static void applyClient(ConfigSyncPacket payload, CommonAccess<?, ?, ?> access) {
         Owo.LOGGER.info("Applying server overrides");
         var mismatchedOptions = new HashMap<Option<?>, Object>();
 
-        if (!(context.runtime().hasSingleplayerServer() && context.runtime().getSingleplayerServer().isSingleplayer())) {
+        if (!isSingleplayer(access)) {
             read(payload, (option, packetByteBuf) -> {
                 var mismatchedValue = option.read(packetByteBuf);
                 if (mismatchedValue != null) mismatchedOptions.put(option, mismatchedValue);
@@ -145,18 +151,18 @@ public class ConfigSynchronizer {
                 errorMessage.append(TextOps.withFormatting("they require your client to be restarted\n", ChatFormatting.GRAY));
                 errorMessage.append(TextOps.withFormatting("change them manually and restart if you want to join this server", ChatFormatting.GRAY));
 
-                context.player().connection.getConnection().disconnect(TextOps.concat(PREFIX, errorMessage));
+                access.connection().disconnect(TextOps.concat(PREFIX, errorMessage));
                 return;
             }
         }
 
         Owo.LOGGER.info("Responding with client values");
-        context.channel().clientHandle().send(toPacket(Option.SyncMode.INFORM_SERVER));
+        access.responseHandle().send(toPacket(Option.SyncMode.INFORM_SERVER));
     }
 
-    private static void applyServer(ConfigSyncPacket payload, ServerAccess access) {
+    private static void applyServer(ConfigSyncPacket payload, CommonAccess<?, ?, ?> access) {
         Owo.LOGGER.info("Receiving client config");
-        var connection = ((ServerCommonPacketListenerImplAccessor) access.player().connection).owo$getConnection();
+        var connection = access.connection();
 
         read(payload, (option, optionBuf) -> {
             var config = CLIENT_OPTION_STORAGE.computeIfAbsent(connection, _ -> new HashMap<>()).computeIfAbsent(option.configName(), _ -> new HashMap<>());
@@ -180,11 +186,9 @@ public class ConfigSynchronizer {
             Owo.MAIN.serverHandle(handler).send(toPacket(Option.SyncMode.OVERRIDE_CLIENT));
         });
 
-        Owo.MAIN.registerBidirectionalDeferred(ConfigSyncPacket.class, ConfigSynchronizer::applyServer);
+        Owo.MAIN.registerBidirectional(ConfigSyncPacket.class, ConfigSynchronizer::applyServer, ConfigSynchronizer::applyClient);
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            Owo.MAIN.registerClientbound(ConfigSyncPacket.class, ConfigSynchronizer::applyClient);
-
             ClientPlayConnectionEvents.DISCONNECT.register((_, _) -> {
                 KNOWN_CONFIGS.values().forEach((config) -> config.forEachOption(Option::reattach));
             });

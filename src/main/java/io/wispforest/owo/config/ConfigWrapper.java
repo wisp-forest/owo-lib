@@ -114,7 +114,7 @@ public abstract class ConfigWrapper<C> {
             for (var option : this.options.values()) {
                 if (option.syncMode().isNone()) continue;
 
-                ConfigSynchronizer.register(this);
+                ConfigSynchronizer.register(this, option.syncMode().isRequired());
                 break;
             }
         } catch (IllegalAccessException | NoSuchMethodException e) {

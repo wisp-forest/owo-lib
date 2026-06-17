@@ -6,6 +6,7 @@ import io.wispforest.endec.impl.ReflectiveEndecBuilder;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.network.ClientAccess;
+import io.wispforest.owo.network.CommonAccess;
 import io.wispforest.owo.network.NetworkException;
 import io.wispforest.owo.network.OwoHandshake;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
@@ -92,15 +93,13 @@ public class ParticleSystemController {
         OwoHandshake.requireHandshake();
 
         REGISTERED_CONTROLLERS.put(channelId, this);
+
+        Owo.MAIN.isRequired(true);
     }
 
     @ApiStatus.Internal
     public static void initNetworking() {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            Owo.MAIN.registerClientbound(ParticleSystemPayload.class, ParticleSystemPayload.ENDEC, new Client()::handler);
-        } else {
-            Owo.MAIN.registerClientboundDeferred(ParticleSystemPayload.class, ParticleSystemPayload.ENDEC);
-        }
+        Owo.MAIN.registerClientboundCommon(ParticleSystemPayload.class, ParticleSystemPayload.ENDEC, ParticleSystemPayload::handle);
     }
 
     public ReflectiveEndecBuilder endecBuilder() {
@@ -194,12 +193,9 @@ public class ParticleSystemController {
             ParticleSystemPayload::id,
             MinecraftEndecs.IDENTIFIER
         );
-    }
 
-    @Environment(EnvType.CLIENT)
-    private static class Client {
-        private void handler(ParticleSystemPayload payload, ClientAccess context) {
-            payload.instance.execute(context.runtime().level, payload.pos);
+        private void handle(CommonAccess access) {
+            this.instance.execute(access.player().level(), this.pos);
         }
     }
 }

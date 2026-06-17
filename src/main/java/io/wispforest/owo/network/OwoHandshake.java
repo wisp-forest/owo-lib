@@ -81,18 +81,18 @@ public final class OwoHandshake {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             if (!ENABLED) {
                 PayloadTypeRegistry.clientboundConfiguration().register(HandshakeOff.ID, StreamCodec.unit(new HandshakeOff()));
-                ClientConfigurationNetworking.registerGlobalReceiver(HandshakeOff.ID, (payload, context) -> {});
+                ClientConfigurationNetworking.registerGlobalReceiver(HandshakeOff.ID, (_, _) -> {});
             }
 
             ClientConfigurationNetworking.registerGlobalReceiver(HandshakeRequest.ID, OwoHandshake::syncClient);
             ClientConfigurationConnectionEvents.READY.register(OwoHandshake::handleReadyClient);
 
-            ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            ClientPlayConnectionEvents.DISCONNECT.register((_, _) -> {
                 QUERY_RECEIVED = false;
                 QueuedChannelSet.channels = null;
             });
 
-            ClientConfigurationConnectionEvents.DISCONNECT.register((handler, client) -> {
+            ClientConfigurationConnectionEvents.DISCONNECT.register((_, _) -> {
                 QUERY_RECEIVED = false;
                 QueuedChannelSet.channels = null;
             });
@@ -123,7 +123,7 @@ public final class OwoHandshake {
             return;
         }
 
-        var optionalChannels = formatHashes(OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel);
+        var optionalChannels = formatHashes(OwoNetChannel.getChannels(false), OwoHandshake::hashChannel);
         ServerConfigurationNetworking.send(handler, new HandshakeRequest(optionalChannels));
         Owo.LOGGER.info("[Handshake] Sending channel packet");
     }
@@ -135,9 +135,9 @@ public final class OwoHandshake {
 
         QueuedChannelSet.channels = filterOptionalServices(request.optionalChannels(), OwoNetChannel.REGISTERED_CHANNELS, OwoHandshake::hashChannel);
 
-        var requiredChannels = formatHashes(OwoNetChannel.REQUIRED_CHANNELS, OwoHandshake::hashChannel);
+        var requiredChannels = formatHashes(OwoNetChannel.getChannels(true), OwoHandshake::hashChannel);
         var requiredControllers = formatHashes(ParticleSystemController.REGISTERED_CONTROLLERS, OwoHandshake::hashController);
-        var optionalChannels = formatHashes(OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel);
+        var optionalChannels = formatHashes(OwoNetChannel.getChannels(false), OwoHandshake::hashChannel);
 
         context.responseSender().sendPacket(new HandshakeResponse(requiredChannels, requiredControllers, optionalChannels));
     }
@@ -147,7 +147,7 @@ public final class OwoHandshake {
 
         StringBuilder disconnectMessage = new StringBuilder();
 
-        boolean isAllGood = verifyReceivedHashes("channels", response.requiredChannels(), OwoNetChannel.REQUIRED_CHANNELS, OwoHandshake::hashChannel, disconnectMessage);
+        boolean isAllGood = verifyReceivedHashes("channels", response.requiredChannels(), OwoNetChannel.getChannels(true), OwoHandshake::hashChannel, disconnectMessage);
         isAllGood &= verifyReceivedHashes("controllers", response.requiredControllers(), ParticleSystemController.REGISTERED_CONTROLLERS, OwoHandshake::hashController, disconnectMessage);
 
         if (!isAllGood) {
@@ -155,7 +155,7 @@ public final class OwoHandshake {
 
             Owo.LOGGER.info("[Handshake] Handshake completed with mismatches!");
         } else {
-            ((OwoClientConnectionExtension) ((ServerCommonPacketListenerImplAccessor) context.packetListener()).owo$getConnection()).owo$setChannelSet(filterOptionalServices(response.optionalChannels(), OwoNetChannel.OPTIONAL_CHANNELS, OwoHandshake::hashChannel));
+            ((OwoClientConnectionExtension) ((ServerCommonPacketListenerImplAccessor) context.packetListener()).owo$getConnection()).owo$setChannelSet(filterOptionalServices(response.optionalChannels(), OwoNetChannel.getChannels(false), OwoHandshake::hashChannel));
 
             Owo.LOGGER.info("[Handshake] Handshake completed successfully");
         }

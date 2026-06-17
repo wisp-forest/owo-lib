@@ -51,7 +51,7 @@ public class Owo implements ModInitializer {
     }
 
     @ApiStatus.Internal
-    public static final OwoNetChannel MAIN = OwoNetChannel.create(id("main"));
+    public static final OwoNetChannel MAIN = OwoNetChannel.createOptional(id("main"));
 
     @Override
     @ApiStatus.Internal
