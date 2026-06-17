@@ -281,7 +281,7 @@ public class OwoNetChannel {
     ///
     /// @param messageClass  The type of packet data to send and serialize
     /// @param serverHandler The handler that will receive the deserialized
-    public <R extends Record> void registerBidirectional(Class<R> messageClass, ChannelHandler<R, CommonAccess<?, ?, ?>> serverHandler, ChannelHandler<R, CommonAccess<?, ?, ?>> clientHandler) {
+    public <R extends Record> void registerBidirectional(Class<R> messageClass, ChannelHandler<R, ServerAccess> serverHandler, ChannelHandler<R, CommonAccess<?, ?, ?>> clientHandler) {
         registerServerbound(messageClass, serverHandler::handle, () -> RecordEndec.create(this.builder, messageClass));
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
@@ -300,7 +300,7 @@ public class OwoNetChannel {
     /// @param messageClass  The type of packet data to send and serialize
     /// @param handler The handler that will receive the deserialized
     public <R extends Record> void registerBidirectional(Class<R> messageClass, ChannelHandler<R, CommonAccess<?, ?, ?>> handler) {
-        registerBidirectional(messageClass, handler, handler);
+        registerBidirectional(messageClass, handler::handle, handler);
     }
 
     /// Registers a handler _on the client_ for the specified message class using the {@link CommonAccess}.
@@ -398,7 +398,7 @@ public class OwoNetChannel {
     /// @param messageClass  The type of packet data to send and serialize
     /// @param endec         The endec to serialize messages with
     /// @param serverHandler The handler that will receive the deserialized
-    public <R extends Record> void registerBidirectional(Class<R> messageClass, StructEndec<R> endec, ChannelHandler<R, CommonAccess<?, ?, ?>> serverHandler, ChannelHandler<R, CommonAccess<?, ?, ?>> clientHandler) {
+    public <R extends Record> void registerBidirectional(Class<R> messageClass, StructEndec<R> endec, ChannelHandler<R, ServerAccess> serverHandler, ChannelHandler<R, CommonAccess<?, ?, ?>> clientHandler) {
         registerServerbound(messageClass, serverHandler::handle, () -> endec);
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
@@ -414,7 +414,7 @@ public class OwoNetChannel {
     /// @param endec         The endec to serialize messages with
     /// @param handler The handler that will receive the deserialized
     public <R extends Record> void registerBidirectional(Class<R> messageClass, StructEndec<R> endec, ChannelHandler<R, CommonAccess<?, ?, ?>> handler) {
-        registerBidirectional(messageClass, endec, handler, handler);
+        registerBidirectional(messageClass, endec, handler::handle, handler);
     }
 
     //--
