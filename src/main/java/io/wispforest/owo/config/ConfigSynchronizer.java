@@ -14,6 +14,7 @@ import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.fabricmc.fabric.api.networking.v1.FriendlyByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -269,10 +270,13 @@ public class ConfigSynchronizer {
     public static void init() {
         var earlyPhase = Owo.id("early");
         ServerPlayConnectionEvents.JOIN.addPhaseOrdering(earlyPhase, Event.DEFAULT_PHASE);
-        ServerPlayConnectionEvents.JOIN.register(earlyPhase, (handler, sender, server) -> {
+        ServerPlayConnectionEvents.JOIN.register(earlyPhase, (handler, _, _) -> {
             Owo.LOGGER.info("Sending server config values to client");
 
             Owo.MAIN.serverHandle(handler).send(toPacket(Option.SyncMode.OVERRIDE_CLIENT));
+        });
+        ServerPlayConnectionEvents.DISCONNECT.register((listener, _) -> {
+            CLIENT_OPTION_STORAGE.remove(listener.getPacketContext().get(PacketContext.CONNECTION));
         });
 
         Owo.MAIN.registerBidirectional(ConfigsSyncPacket.class, ConfigSynchronizer::applyServer, ConfigSynchronizer::applyClient);
