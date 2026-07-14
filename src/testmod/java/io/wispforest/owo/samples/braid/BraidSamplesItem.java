@@ -41,7 +41,7 @@ public class BraidSamplesItem extends Item {
             return InteractionResult.SUCCESS;
         }
 
-        Minecraft.getInstance().setScreen(new BraidScreen(SCREEN_SETTINGS, new SampleSelector()));
+        Minecraft.getInstance().gui.setScreen(new BraidScreen(SCREEN_SETTINGS, new SampleSelector()));
         return InteractionResult.SUCCESS;
     }
 

@@ -46,32 +46,32 @@ public class SelectUwuScreenScreen extends BaseOwoScreen<FlowLayout> {
 
         panel.children(List.of(leftColumn, rightColumn));
 
-        leftColumn.child(UIComponents.button(Component.literal("code demo"), button -> this.minecraft.setScreen(new ComponentTestScreen())));
-        leftColumn.child(UIComponents.button(Component.literal("xml demo"), button -> this.minecraft.setScreen(new TestParseScreen())));
-        leftColumn.child(UIComponents.button(Component.literal("code config"), button -> this.minecraft.setScreen(new TestConfigScreen())));
-        leftColumn.child(UIComponents.button(Component.literal("xml config"), button -> this.minecraft.setScreen(ConfigScreen.create(Uwu.CONFIG, null))));
-        leftColumn.child(UIComponents.button(Component.literal("optimization test"), button -> this.minecraft.setScreen(new TooManyComponentsScreen())));
-        leftColumn.child(UIComponents.button(Component.literal("focus cycle test"), button -> this.minecraft.setScreen(new BaseUIModelScreen<>(FlowLayout.class, Identifier.fromNamespaceAndPath("uwu", "focus_cycle_test")) {
+        leftColumn.child(UIComponents.button(Component.literal("code demo"), button -> this.minecraft.gui.setScreen(new ComponentTestScreen())));
+        leftColumn.child(UIComponents.button(Component.literal("xml demo"), button -> this.minecraft.gui.setScreen(new TestParseScreen())));
+        leftColumn.child(UIComponents.button(Component.literal("code config"), button -> this.minecraft.gui.setScreen(new TestConfigScreen())));
+        leftColumn.child(UIComponents.button(Component.literal("xml config"), button -> this.minecraft.gui.setScreen(ConfigScreen.create(Uwu.CONFIG, null))));
+        leftColumn.child(UIComponents.button(Component.literal("optimization test"), button -> this.minecraft.gui.setScreen(new TooManyComponentsScreen())));
+        leftColumn.child(UIComponents.button(Component.literal("focus cycle test"), button -> this.minecraft.gui.setScreen(new BaseUIModelScreen<>(FlowLayout.class, Identifier.fromNamespaceAndPath("uwu", "focus_cycle_test")) {
             @Override
             protected void build(FlowLayout rootComponent) {}
         })));
-        leftColumn.child(UIComponents.button(Component.literal("expand gap test"), button -> this.minecraft.setScreen(new BaseUIModelScreen<>(FlowLayout.class, Identifier.fromNamespaceAndPath("uwu", "expand_gap_test")) {
+        leftColumn.child(UIComponents.button(Component.literal("expand gap test"), button -> this.minecraft.gui.setScreen(new BaseUIModelScreen<>(FlowLayout.class, Identifier.fromNamespaceAndPath("uwu", "expand_gap_test")) {
             @Override
             protected void build(FlowLayout rootComponent) {}
         })));
-        rightColumn.child(UIComponents.button(Component.literal("smolnite"), button -> this.minecraft.setScreen(new SmolComponentTestScreen())));
-        rightColumn.child(UIComponents.button(Component.literal("sizenite"), button -> this.minecraft.setScreen(new SizingTestScreen())));
-        rightColumn.child(UIComponents.button(Component.literal("parse fail"), button -> this.minecraft.setScreen(new ParseFailScreen())));
+        rightColumn.child(UIComponents.button(Component.literal("smolnite"), button -> this.minecraft.gui.setScreen(new SmolComponentTestScreen())));
+        rightColumn.child(UIComponents.button(Component.literal("sizenite"), button -> this.minecraft.gui.setScreen(new SizingTestScreen())));
+        rightColumn.child(UIComponents.button(Component.literal("parse fail"), button -> this.minecraft.gui.setScreen(new ParseFailScreen())));
         rightColumn.child(UIComponents.button(Component.literal("braid"), button -> {
             var settings = new BraidScreen.Settings();
             settings.shouldPause = false;
 
-            this.minecraft.setScreen(new BraidScreen(settings, new TestSelector()));
+            this.minecraft.gui.setScreen(new BraidScreen(settings, new TestSelector()));
         }));
-        panel.child(UIComponents.button(Component.literal("smolnite"), button -> this.minecraft.setScreen(new SmolComponentTestScreen())));
-        panel.child(UIComponents.button(Component.literal("sizenite"), button -> this.minecraft.setScreen(new SizingTestScreen())));
-        panel.child(UIComponents.button(Component.literal("parse fail"), button -> this.minecraft.setScreen(new ParseFailScreen())));
-        panel.child(UIComponents.button(Component.literal("scissor test"), button -> this.minecraft.setScreen(new ScissorTestScreen())));
+        panel.child(UIComponents.button(Component.literal("smolnite"), button -> this.minecraft.gui.setScreen(new SmolComponentTestScreen())));
+        panel.child(UIComponents.button(Component.literal("sizenite"), button -> this.minecraft.gui.setScreen(new SizingTestScreen())));
+        panel.child(UIComponents.button(Component.literal("parse fail"), button -> this.minecraft.gui.setScreen(new ParseFailScreen())));
+        panel.child(UIComponents.button(Component.literal("scissor test"), button -> this.minecraft.gui.setScreen(new ScissorTestScreen())));
 
         this.uiAdapter.rootComponent.child(panel);
     }

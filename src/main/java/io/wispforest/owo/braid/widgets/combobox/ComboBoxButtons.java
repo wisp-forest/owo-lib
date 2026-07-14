@@ -130,7 +130,7 @@ class ComboBoxButtons<T> extends StatelessWidget {
                                     Insets.all(2).withLeft(3),
                                     new Label(
                                         new LabelStyle(Alignment.LEFT, highlighted
-                                            ? Color.rgb(ChatFormatting.YELLOW.getColor()) : null, null, highlighted),
+                                            ? Color.rgb(0xFFFF55) : null, null, highlighted),
                                         true,
                                         this.widget().optionToName.apply(this.widget().option)
                                     )

@@ -210,7 +210,7 @@ public class Grid extends MultiChildInstanceWidget {
                 }
 
                 graphics.drawText(
-                    Component.literal(verticalSizes[i] + "px").withStyle(style -> style.withFont(new FontDescription.Resource(Minecraft.UNIFORM_FONT))),
+                    Component.literal(verticalSizes[i] + "px").withStyle(style -> style.withFont(new FontDescription.Resource(Minecraft.DEFAULT_FONT))),
                     0, (float) verticalPos, 1f, Color.WHITE.argb(),
                     OwoUIGraphics.TextAnchor.TOP_RIGHT
                 );
@@ -229,7 +229,7 @@ public class Grid extends MultiChildInstanceWidget {
                 }
 
                 graphics.drawText(
-                    Component.literal(horizontalSizes[i] + "px").withStyle(style -> style.withFont(new FontDescription.Resource(Minecraft.UNIFORM_FONT))),
+                    Component.literal(horizontalSizes[i] + "px").withStyle(style -> style.withFont(new FontDescription.Resource(Minecraft.DEFAULT_FONT))),
                     (float) horizontalPos, 0, 1f, Color.WHITE.argb(),
                     OwoUIGraphics.TextAnchor.BOTTOM_LEFT
                 );

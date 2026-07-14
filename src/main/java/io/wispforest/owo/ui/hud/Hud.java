@@ -107,7 +107,7 @@ public class Hud {
         });
 
         HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("owo", "owo_ui_hud"), (context, tickCounter) -> {
-            if (adapter == null || suppress || Minecraft.getInstance().options.hideGui) return;
+            if (adapter == null || suppress) return;
             adapter.extractRenderState(context, -69, -69, tickCounter.getGameTimeDeltaPartialTick(false));
         });
     }

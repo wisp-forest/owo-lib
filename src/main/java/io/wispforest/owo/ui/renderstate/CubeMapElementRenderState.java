@@ -8,7 +8,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.renderer.CubeMap;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
 import net.minecraft.util.Mth;
@@ -63,9 +63,7 @@ public record CubeMapElementRenderState(
         private static GuiGraphicsExtractor dummyContext;
         private float spin;
 
-        protected Renderer(MultiBufferSource.BufferSource vertexConsumers) {
-            super(vertexConsumers);
-        }
+        protected Renderer() {}
 
         @Override
         public Class<CubeMapElementRenderState> getRenderStateClass() {
@@ -73,7 +71,7 @@ public record CubeMapElementRenderState(
         }
 
         @Override
-        protected void renderToTexture(CubeMapElementRenderState state, PoseStack matrices) {
+        protected void renderToTexture(CubeMapElementRenderState state, PoseStack matrices, SubmitNodeCollector submitNodeCollector) {
             if (dummyContext == null) {
                 dummyContext = new GuiGraphicsExtractor(Minecraft.getInstance(), new GuiRenderState(), 0, 0);
             }
@@ -93,7 +91,7 @@ public record CubeMapElementRenderState(
                 Minecraft minecraft = Minecraft.getInstance();
                 if (state.rotate()) {
                     float a = minecraft.getDeltaTracker().getRealtimeDeltaTicks();
-                    float delta = (float) (a * minecraft.gameRenderer.getGameRenderState().optionsRenderState.panoramaSpeed);
+                    float delta = (float) (a * minecraft.gameRenderer.gameRenderState().optionsRenderState.panoramaSpeed);
                     this.spin = Mth.wrapDegrees(this.spin + delta * 0.1F);
                 }
 

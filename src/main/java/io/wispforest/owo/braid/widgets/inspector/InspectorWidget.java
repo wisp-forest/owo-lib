@@ -91,7 +91,7 @@ public class InspectorWidget extends StatefulWidget {
                         return new Box(
                             Color.rgb(0x1d2026),
                             new DefaultLabelStyle(
-                                new LabelStyle(null, null, Style.EMPTY.withFont(new FontDescription.Resource(Minecraft.UNIFORM_FONT)), null),
+                                new LabelStyle(null, null, Style.EMPTY.withFont(new FontDescription.Resource(Minecraft.DEFAULT_FONT)), null),
                                 new SplitPane(
                                     LayoutAxis.HORIZONTAL,
                                     new SplitPaneStyle(1d, null, null, null, null, null),

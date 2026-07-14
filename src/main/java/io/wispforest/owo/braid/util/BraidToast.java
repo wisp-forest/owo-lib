@@ -53,11 +53,11 @@ public class BraidToast implements Toast {
     }
 
     public static void show(@Nullable Duration timeout, @Nullable Object token, Widget widget) {
-        Minecraft.getInstance().getToastManager().addToast(new BraidToast(timeout, token, widget));
+        Minecraft.getInstance().gui.toastManager().addToast(new BraidToast(timeout, token, widget));
     }
 
     public static void hideWithToken(Object token) {
-        var toast = Minecraft.getInstance().getToastManager().getToast(BraidToast.class, token);
+        var toast = Minecraft.getInstance().gui.toastManager().getToast(BraidToast.class, token);
         if (toast != null) {
             toast.visibility = Visibility.HIDE;
         }

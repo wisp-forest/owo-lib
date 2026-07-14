@@ -23,7 +23,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import org.joml.Matrix3x2f;
 
 import java.util.ArrayList;
@@ -45,14 +45,14 @@ public class SpinnyGhastTest extends StatefulWidget {
         @Override
         public void init() {
             this.entities = Stream.of(
-                EntityType.HAPPY_GHAST,
-                EntityType.ALLAY,
-                EntityType.COW,
-                EntityType.CREAKING,
-                EntityType.BREEZE,
-                EntityType.COPPER_GOLEM,
-                EntityType.BAMBOO_RAFT,
-                EntityType.ITEM_FRAME
+                EntityTypes.HAPPY_GHAST,
+                EntityTypes.ALLAY,
+                EntityTypes.COW,
+                EntityTypes.CREAKING,
+                EntityTypes.BREEZE,
+                EntityTypes.COPPER_GOLEM,
+                EntityTypes.BAMBOO_RAFT,
+                EntityTypes.ITEM_FRAME
             ).<Entity>map(
                 entityType -> entityType.create(Minecraft.getInstance().level, EntitySpawnReason.MOB_SUMMONED)
             ).toList();

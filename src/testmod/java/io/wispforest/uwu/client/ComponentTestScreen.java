@@ -68,7 +68,7 @@ public class ComponentTestScreen extends Screen {
         var verticalAnimation = innerLayout.verticalSizing().animate(350, Easing.SINE, Sizing.content(50));
 
         verticalAnimation.finished().subscribe((direction, looping) -> {
-            minecraft.gui.getChat().addClientSystemMessage(Component.literal("vertical animation finished in direction " + direction.name()));
+            minecraft.gui.hud.getChat().addClientSystemMessage(Component.literal("vertical animation finished in direction " + direction.name()));
         });
 
         final var bruh = UIComponents.box(Sizing.fixed(150), Sizing.fixed(20));
@@ -120,7 +120,7 @@ public class ComponentTestScreen extends Screen {
         );
 
         rootComponent.child(UIContainers.verticalFlow(Sizing.content(), Sizing.content())
-                .child(UIComponents.label(Component.literal("A profound vertical Flow Layout, as well as a leally long text to demonstrate wrapping").withStyle(style -> style.withFont(new FontDescription.Resource(Minecraft.UNIFORM_FONT)))
+                .child(UIComponents.label(Component.literal("A profound vertical Flow Layout, as well as a leally long text to demonstrate wrapping").withStyle(style -> style.withFont(new FontDescription.Resource(Minecraft.DEFAULT_FONT)))
                                 .withStyle(style -> {
                                     return style.withClickEvent(new ClickEvent.CopyToClipboard("yes"))
                                             .withHoverEvent(new HoverEvent.ShowItem(new ItemStackTemplate(Items.SCULK_SHRIEKER)));

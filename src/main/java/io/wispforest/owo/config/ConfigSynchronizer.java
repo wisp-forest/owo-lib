@@ -26,7 +26,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Tuple;
+import io.wispforest.owo.util.Pair;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -135,9 +135,9 @@ public class ConfigSynchronizer {
                 });
 
                 var errorMessage = Component.empty();
-                var optionsByConfig = HashMultimap.<String, Tuple<Option<?>, Object>>create();
+                var optionsByConfig = HashMultimap.<String, Pair<Option<?>, Object>>create();
 
-                mismatchedOptions.forEach((option, serverValue) -> optionsByConfig.put(option.configName(), new Tuple<>(option, serverValue)));
+                mismatchedOptions.forEach((option, serverValue) -> optionsByConfig.put(option.configName(), new Pair<>(option, serverValue)));
                 for (var configName : optionsByConfig.keys()) {
                     errorMessage.append(TextOps.withFormatting("in config ", ChatFormatting.GRAY)).append(configName).append("\n");
                     for (var option : optionsByConfig.get(configName)) {

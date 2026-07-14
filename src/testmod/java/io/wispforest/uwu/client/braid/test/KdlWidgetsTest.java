@@ -103,7 +103,7 @@ public class KdlWidgetsTest extends StatefulWidget {
                     new Padding(
                         Insets.all(5),
                         new Label(
-                            new LabelStyle(Alignment.TOP_LEFT, null, Style.EMPTY.withFont(new FontDescription.Resource(Minecraft.UNIFORM_FONT)), false),
+                            new LabelStyle(Alignment.TOP_LEFT, null, Style.EMPTY.withFont(new FontDescription.Resource(Minecraft.DEFAULT_FONT)), false),
                             true,
                             Component.literal(jsonText)
                         )

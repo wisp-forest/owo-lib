@@ -52,12 +52,12 @@ public class UIErrorToast implements Toast {
 
     public static void report(String message) {
         logErrorsDuringInitialLoad();
-        Minecraft.getInstance().getToastManager().addToast(new UIErrorToast(message));
+        Minecraft.getInstance().gui.toastManager().addToast(new UIErrorToast(message));
     }
 
     public static void report(Throwable error) {
         logErrorsDuringInitialLoad();
-        Minecraft.getInstance().getToastManager().addToast(new UIErrorToast(error));
+        Minecraft.getInstance().gui.toastManager().addToast(new UIErrorToast(error));
     }
 
     private static void logErrorsDuringInitialLoad() {

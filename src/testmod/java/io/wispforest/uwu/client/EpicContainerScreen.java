@@ -10,7 +10,7 @@ import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.uwu.EpicMenu;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -49,7 +49,7 @@ public class EpicContainerScreen extends BaseOwoContainerScreen<FlowLayout, Epic
                                         .horizontalTextAlignment(HorizontalAlignment.CENTER)
                                         .positioning(Positioning.absolute(0, -9))
                                         .horizontalSizing(Sizing.fixed(100)))
-                                .child(UIComponents.entity(Sizing.fixed(100), EntityType.FROG, frogeNbt).scale(.75f).allowMouseRotation(true).tooltip(Component.literal(":)")))
+                                .child(UIComponents.entity(Sizing.fixed(100), EntityTypes.FROG, frogeNbt).scale(.75f).allowMouseRotation(true).tooltip(Component.literal(":)")))
                                 .child(UIContainers.horizontalFlow(Sizing.fixed(100), Sizing.content())
                                         .child(UIComponents.button(Component.nullToEmpty("✔"), (ButtonComponent button) -> {
                                             var text = selectBox.getValue();

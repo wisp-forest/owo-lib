@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -55,9 +55,7 @@ public record OwoItemElementRenderState(
 
     public static class Renderer extends PictureInPictureRenderer<OwoItemElementRenderState> {
 
-        public Renderer(MultiBufferSource.BufferSource vertexConsumers) {
-            super(vertexConsumers);
-        }
+        public Renderer() {}
 
         @Override
         public Class<OwoItemElementRenderState> getRenderStateClass() {
@@ -65,19 +63,17 @@ public record OwoItemElementRenderState(
         }
 
         @Override
-        protected void renderToTexture(OwoItemElementRenderState state, PoseStack matrices) {
+        protected void renderToTexture(OwoItemElementRenderState state, PoseStack matrices, SubmitNodeCollector submitNodeCollector) {
             matrices.scale(state.bounds.width(), -state.bounds.height(), -Math.min(state.bounds.width(), state.bounds.height()));
 
             var notSideLit = !state.item.usesBlockLight();
             if (notSideLit) {
-                Minecraft.getInstance().gameRenderer.getLighting().setupFor(Lighting.Entry.ITEMS_FLAT);
+                Minecraft.getInstance().gameRenderer.lighting().setupFor(Lighting.Entry.ITEMS_FLAT);
             } else {
-                Minecraft.getInstance().gameRenderer.getLighting().setupFor(Lighting.Entry.ITEMS_3D);
+                Minecraft.getInstance().gameRenderer.lighting().setupFor(Lighting.Entry.ITEMS_3D);
             }
 
-            var dispatcher = Minecraft.getInstance().gameRenderer.getFeatureRenderDispatcher();
-            state.item.submit(matrices, dispatcher.getSubmitNodeStorage(), LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
-            dispatcher.renderAllFeatures();
+            state.item.submit(matrices, submitNodeCollector, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
         }
 
         @Override

@@ -227,8 +227,8 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                     Component.translatable("text.config." + this.config.name() + ".category." + parentKey.asString()),
                     expanded
                 ).<CollapsibleContainer>configure(nestedContainer -> {
-                    final var categoryKey = "text.config." + this.config.name() + ".category." + parentKey.asString();
-                    if (I18n.exists(categoryKey + ".tooltip")) {
+                    final                     var categoryKey = "text.config." + this.config.name() + ".category." + parentKey.asString();
+                    if (!I18n.get(categoryKey + ".tooltip").equals(categoryKey + ".tooltip")) {
                         nestedContainer.titleLayout().tooltip(Component.translatable(categoryKey + ".tooltip"));
                     }
 
@@ -261,7 +261,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 var tooltipText = new ArrayList<FormattedCharSequence>();
                 var tooltipTranslationKey = option.translationKey() + ".tooltip";
 
-                if (I18n.exists(tooltipTranslationKey)) {
+                if (!I18n.get(tooltipTranslationKey).equals(tooltipTranslationKey)) {
                     tooltipText.addAll(this.minecraft.font.split(Component.translatable(tooltipTranslationKey), Integer.MAX_VALUE));
                 }
 
@@ -386,7 +386,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             shouldRestart.setTrue();
         });
 
-        this.minecraft.setScreen(shouldRestart.booleanValue() ? new RestartRequiredScreen(this.parent) : this.parent);
+        this.minecraft.gui.setScreen(shouldRestart.booleanValue() ? new RestartRequiredScreen(this.parent) : this.parent);
     }
 
     @Override

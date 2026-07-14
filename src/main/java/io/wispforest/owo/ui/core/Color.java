@@ -11,6 +11,7 @@ import org.w3c.dom.Node;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public record Color(float red, float green, float blue, float alpha) implements Animatable<Color> {
@@ -26,10 +27,17 @@ public record Color(float red, float green, float blue, float alpha) implements 
     public static final Color GREEN = Color.ofRgb(0x00FF00);
     public static final Color BLUE = Color.ofRgb(0x0000FF);
 
+    private static final Predicate<ChatFormatting> IS_COLOR = formatting -> {
+        return switch (formatting) {
+            case OBFUSCATED, BOLD, STRIKETHROUGH, UNDERLINE, ITALIC, RESET -> false;
+            default -> true;
+        };
+    };
+
     private static final Map<String, Color> NAMED_TEXT_COLORS = Stream.of(ChatFormatting.values())
-            .filter(ChatFormatting::isColor)
+            .filter(IS_COLOR)
             .collect(ImmutableMap.toImmutableMap(formatting -> {
-                return formatting.getName().toLowerCase(Locale.ROOT).replace("_", "-");
+                return formatting.name().toLowerCase(Locale.ROOT).replace("_", "-");
             }, Color::ofFormatting));
 
     public Color(float red, float green, float blue) {
@@ -65,8 +73,30 @@ public record Color(float red, float green, float blue, float alpha) implements 
     }
 
     public static Color ofFormatting(@NotNull ChatFormatting formatting) {
-        var colorValue = formatting.getColor();
+        var colorValue = colorFromFormatting(formatting);
         return ofRgb(colorValue == null ? 0 : colorValue);
+    }
+
+    private static @org.jetbrains.annotations.Nullable Integer colorFromFormatting(ChatFormatting formatting) {
+        return switch (formatting) {
+            case BLACK -> 0x000000;
+            case DARK_BLUE -> 0x0000AA;
+            case DARK_GREEN -> 0x00AA00;
+            case DARK_AQUA -> 0x00AAAA;
+            case DARK_RED -> 0xAA0000;
+            case DARK_PURPLE -> 0xAA00AA;
+            case GOLD -> 0xFFAA00;
+            case GRAY -> 0xAAAAAA;
+            case DARK_GRAY -> 0x555555;
+            case BLUE -> 0x5555FF;
+            case GREEN -> 0x55FF55;
+            case AQUA -> 0x55FFFF;
+            case RED -> 0xFF5555;
+            case LIGHT_PURPLE -> 0xFF55FF;
+            case YELLOW -> 0xFFFF55;
+            case WHITE -> 0xFFFFFF;
+            default -> null;
+        };
     }
 
     public static Color ofDye(@NotNull DyeColor dyeColor) {

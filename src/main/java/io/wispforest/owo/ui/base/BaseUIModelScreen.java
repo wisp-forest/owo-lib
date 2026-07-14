@@ -65,7 +65,7 @@ public abstract class BaseUIModelScreen<R extends ParentUIComponent> extends Bas
     @Override
     public boolean keyPressed(KeyEvent input) {
         if (Owo.DEBUG && this.modelId != null && input.key() == GLFW.GLFW_KEY_F5 && input.hasControlDown()) {
-            this.minecraft.setScreen(new ConfigureHotReloadScreen(this.modelId, this));
+            this.minecraft.gui.setScreen(new ConfigureHotReloadScreen(this.modelId, this));
             return true;
         }
 

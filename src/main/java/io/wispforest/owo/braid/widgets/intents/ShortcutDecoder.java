@@ -11,7 +11,7 @@ import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.braid.framework.widget.WidgetSetupCallback;
 import io.wispforest.owo.braid.widgets.basic.MouseArea;
 import io.wispforest.owo.braid.widgets.focus.Focusable;
-import net.minecraft.util.Tuple;
+import io.wispforest.owo.util.Pair;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
@@ -214,7 +214,7 @@ public class ShortcutDecoder extends StatefulWidget {
             //   - negative (poisoned) trigger index:
             //     will not step
             var steppedSequences = sequences.stream()
-                .map(sequence -> new Tuple<>(sequence, sequence.step(test)))
+                .map(sequence -> new Pair<>(sequence, sequence.step(test)))
                 .filter(pair -> pair.getB() != ShortcutSequenceStep.IGNORE)
                 .toList();
 
@@ -226,7 +226,7 @@ public class ShortcutDecoder extends StatefulWidget {
             //   singular one (this would be an artifact)
             var completed = BraidUtils.fold(
                 Iterables.filter(steppedSequences, pair -> pair.getB() == ShortcutSequenceStep.COMPLETE),
-                (Tuple<ShortcutSequence, ShortcutSequenceStep>) null,
+                (Pair<ShortcutSequence, ShortcutSequenceStep>) null,
                 (acc, element) -> {
                     if (acc == null) return element;
                     if (!element.getA().isSingular && acc.getA().isSingular) return element;

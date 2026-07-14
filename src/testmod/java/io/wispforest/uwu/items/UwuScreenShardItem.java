@@ -28,7 +28,7 @@ public class UwuScreenShardItem extends Item {
     @Environment(EnvType.CLIENT)
     public InteractionResult use(Level world, Player user, InteractionHand hand) {
         if (user.isShiftKeyDown()) {
-            if (world.isClientSide()) Minecraft.getInstance().setScreen(new SelectUwuScreenScreen());
+            if (world.isClientSide()) Minecraft.getInstance().gui.setScreen(new SelectUwuScreenScreen());
         } else if (!world.isClientSide()) {
             user.openMenu(new MenuProvider() {
                 @Override

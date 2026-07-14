@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.core;
 
+import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
@@ -28,7 +29,7 @@ public class TextureSurface implements Surface {
     public final BraidGuiRenderer guiRenderer;
 
     public TextureSurface(int width, int height) {
-        this.target = new TextureTarget("texture surface", width, height, true);
+        this.target = new TextureTarget("texture surface", width, height, true, GpuFormat.RGBA8_UNORM);
         this.guiRenderer = new BraidGuiRenderer(Minecraft.getInstance());
 
         this.registeredTexture = new TextureSurfaceTexture();
@@ -84,7 +85,7 @@ public class TextureSurface implements Surface {
     public void beginRendering() {
         RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
             this.target.getColorTexture(),
-            0x00000000,
+            new org.joml.Vector4f(0, 0, 0, 0),
             this.target.getDepthTexture(),
             1
         );

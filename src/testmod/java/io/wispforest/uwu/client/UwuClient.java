@@ -42,7 +42,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.item.Items;
 import net.minecraft.core.particles.ParticleTypes;
@@ -79,7 +79,7 @@ public class UwuClient implements ClientModInitializer {
             UIContainers.verticalFlow(Sizing.content(), Sizing.content())
                 .child(UIComponents.item(Items.DIAMOND.getDefaultInstance()).margins(Insets.of(3)))
                 .child(UIComponents.label(Component.literal("epic stuff in hud")))
-                .child(UIComponents.entity(Sizing.fixed(50), EntityType.ALLAY, null))
+                .child(UIComponents.entity(Sizing.fixed(50), EntityTypes.ALLAY, null))
                 .alignment(HorizontalAlignment.CENTER, VerticalAlignment.CENTER)
                 .padding(Insets.of(5))
                 .surface(Surface.PANEL)
@@ -169,7 +169,7 @@ public class UwuClient implements ClientModInitializer {
 
             instance.adapter.rootComponent.child(
                 UIContainers.horizontalFlow(Sizing.content(), Sizing.content())
-                    .child(UIComponents.entity(Sizing.fixed(20), EntityType.ALLAY, null).<EntityComponent<Allay>>configure(component -> {
+                    .child(UIComponents.entity(Sizing.fixed(20), EntityTypes.ALLAY, null).<EntityComponent<Allay>>configure(component -> {
                         component.allowMouseRotation(true)
                             .scale(.75f);
 

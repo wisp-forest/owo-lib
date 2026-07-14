@@ -29,7 +29,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
-import net.minecraft.util.Tuple;
+import io.wispforest.owo.util.Pair;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
@@ -240,7 +240,7 @@ public final class OwoHandshake {
         return hashes;
     }
 
-    private static Tuple<Set<Identifier>, Set<Identifier>> findCollisions(Set<Identifier> first, Set<Identifier> second) {
+    private static Pair<Set<Identifier>, Set<Identifier>> findCollisions(Set<Identifier> first, Set<Identifier> second) {
         var firstLeftovers = new HashSet<Identifier>();
         var secondLeftovers = new HashSet<Identifier>();
 
@@ -252,7 +252,7 @@ public final class OwoHandshake {
             if (!first.contains(identifier)) secondLeftovers.add(identifier);
         });
 
-        return new Tuple<>(firstLeftovers, secondLeftovers);
+        return new Pair<>(firstLeftovers, secondLeftovers);
     }
 
     private static int hashChannel(OwoNetChannel channel) {

@@ -64,7 +64,7 @@ public class ConfigEnumButton extends ButtonComponent implements OptionValueProv
 
         var optionValueKey = this.backingOption.translationKey() + ".value." + valueName;
 
-        this.setMessage(I18n.exists(optionValueKey)
+        this.setMessage(!I18n.get(optionValueKey).equals(optionValueKey)
                 ? Component.translatable(optionValueKey)
                 : Component.translatable("text.config." + this.backingOption.configName() + ".enum." + enumName + "." + valueName)
         );
