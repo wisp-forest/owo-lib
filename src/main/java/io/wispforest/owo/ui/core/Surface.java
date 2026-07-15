@@ -14,7 +14,7 @@ import net.minecraft.client.renderer.CubeMap;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix3x2f;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -51,12 +51,7 @@ public interface Surface {
 
     static Surface blur(float quality, float size) {
         return (context, component) -> {
-            context.guiRenderState.addGuiElement(new BlurQuadElementRenderState(
-                new Matrix3x2f(context.pose()),
-                new ScreenRectangle(component.x(), component.y(), component.width(), component.height()),
-                context.scissorStack.peek(),
-                16, quality, size
-            ));
+            BlurQuadElementRenderState.blurBackground(context.guiRenderState, (int) quality, size);
         };
     }
 

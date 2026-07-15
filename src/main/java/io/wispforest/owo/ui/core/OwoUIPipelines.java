@@ -29,14 +29,6 @@ public final class OwoUIPipelines {
         .withLocation(Identifier.fromNamespaceAndPath("owo", "pipeline/gui_hsv"))
         .build();
 
-    public static final RenderPipeline GUI_BLUR = RenderPipeline.builder(MATRICES_PROJECTION_SNIPPET)
-        .withLocation(Identifier.fromNamespaceAndPath("owo", "pipeline/gui_blur"))
-        .withVertexBinding(0, DefaultVertexFormat.POSITION)
-        .withPrimitiveTopology(PrimitiveTopology.QUADS)
-        .withVertexShader(Identifier.fromNamespaceAndPath("owo", "core/blur"))
-        .withFragmentShader(Identifier.fromNamespaceAndPath("owo", "core/blur"))
-        .build();
-
     private static final RenderPipeline.Snippet GUI_SNIPPET = RenderPipeline.builder(new RenderPipeline.Snippet[0])
         .withBindGroupLayout(BindGroupLayouts.GLOBALS)
         .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
@@ -76,7 +68,6 @@ public final class OwoUIPipelines {
     @ApiStatus.Internal
     public static void register() {
         RenderPipelines.register(GUI_HSV);
-        RenderPipelines.register(GUI_BLUR);
         RenderPipelines.register(GUI_TRIANGLE_FAN);
         RenderPipelines.register(GUI_TRIANGLE_STRIP);
         RenderPipelines.register(GUI_TEXTURED_NO_BLEND);

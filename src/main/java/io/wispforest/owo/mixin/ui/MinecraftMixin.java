@@ -3,14 +3,12 @@ package io.wispforest.owo.mixin.ui;
 import com.mojang.blaze3d.platform.Window;
 import io.wispforest.owo.ui.event.ClientRenderCallback;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
-import io.wispforest.owo.ui.renderstate.BlurQuadElementRenderState;
 import io.wispforest.owo.ui.util.DisposableScreen;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.main.GameConfig;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
@@ -84,10 +82,5 @@ public class MinecraftMixin {
 
             this.screensToDispose.clear();
         }
-    }
-
-    @Inject(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;window:Lcom/mojang/blaze3d/platform/Window;", opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER))
-    private void initBlurRenderer(GameConfig args, CallbackInfo ci) {
-        BlurQuadElementRenderState.initialize((Minecraft) (Object) this);
     }
 }

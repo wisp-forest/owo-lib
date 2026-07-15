@@ -36,7 +36,7 @@ public class DropdownComponent extends FlowLayout {
         this.entries = UIContainers.verticalFlow(horizontalSizing, Sizing.content());
         this.entries.padding(Insets.of(1));
         this.entries.allowOverflow(true);
-        this.entries.surface(Surface.flat(0xC7000000).and(Surface.blur(3, 5)).and(Surface.outline(0xFF121212)));
+        this.entries.surface(Surface.blur(3, 5).and(Surface.flat(0xC7000000)).and(Surface.outline(0xFF121212)));
 
         this.child(this.entries);
     }

@@ -5,8 +5,6 @@ import io.wispforest.owo.braid.framework.instance.SingleChildWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.SingleChildInstanceWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
 import io.wispforest.owo.ui.renderstate.BlurQuadElementRenderState;
-import net.minecraft.client.gui.navigation.ScreenRectangle;
-import org.joml.Matrix3x2f;
 
 public class Blur extends SingleChildInstanceWidget {
 
@@ -35,23 +33,14 @@ public class Blur extends SingleChildInstanceWidget {
         @Override
         public void draw(BraidGraphics graphics) {
             if (!this.widget.blurChild) {
-                this.drawBlur(graphics);
+                BlurQuadElementRenderState.blurBackground(graphics.guiRenderState, (int) this.widget.quality, this.widget.size);
             }
 
             super.draw(graphics);
 
             if (this.widget.blurChild) {
-                this.drawBlur(graphics);
+                BlurQuadElementRenderState.blurBackground(graphics.guiRenderState, (int) this.widget.quality, this.widget.size);
             }
-        }
-
-        private void drawBlur(BraidGraphics ctx) {
-            ctx.guiRenderState.addGuiElement(new BlurQuadElementRenderState(
-                new Matrix3x2f(ctx.pose()),
-                new ScreenRectangle(0, 0, (int) this.transform.width(), (int) this.transform.height()),
-                ctx.scissorStack.peek(),
-                16, this.widget.quality, this.widget.size
-            ));
         }
     }
 }
