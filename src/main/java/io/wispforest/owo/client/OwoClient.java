@@ -1,8 +1,10 @@
 package io.wispforest.owo.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.braid.core.BraidRenderPipelines;
 import io.wispforest.owo.braid.display.BraidDisplay;
+import io.wispforest.owo.braid.display.BraidDisplayBinding;
 import io.wispforest.owo.client.screens.MenuNetworkingInternals;
 import io.wispforest.owo.command.debug.OwoDebugCommands;
 import io.wispforest.owo.config.OwoConfigCommand;
@@ -16,6 +18,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.server.packs.PackType;
@@ -56,6 +59,9 @@ public class OwoClient implements ClientModInitializer {
         OwoUIPipelines.register();
         BraidRenderPipelines.register();
         RenderPipelines.register(BraidDisplay.PIPELINE);
+
+        LevelRenderEvents.COLLECT_SUBMITS.register(context ->
+            BraidDisplayBinding.renderAutomaticDisplays(new PoseStack(), context.levelState().cameraRenderState, context.submitNodeCollector()));
 
         final var renderdocPath = System.getProperty("owo.renderdocPath");
         if (renderdocPath != null) {

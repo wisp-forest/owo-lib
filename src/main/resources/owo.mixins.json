@@ -65,7 +65,6 @@
     "braid.GuiRendererAccessor",
     "braid.GuiRendererMixin",
     "braid.KeyboardHandlerMixin",
-    "braid.LevelRendererMixin",
     "braid.Matrix3x2fStackAccessor",
     "braid.ScreenMixin",
     "braid.ToastManagerMixin",

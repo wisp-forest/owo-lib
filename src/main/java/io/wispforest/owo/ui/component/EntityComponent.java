@@ -64,6 +64,7 @@ public class EntityComponent<E extends Entity> extends BaseUIComponent {
         this.manager = client.getEntityRenderDispatcher();
 
         this.entity = entity;
+        assignClientEntityId(this.entity);
 
         this.sizing(sizing);
     }
@@ -74,10 +75,21 @@ public class EntityComponent<E extends Entity> extends BaseUIComponent {
         this.manager = client.getEntityRenderDispatcher();
 
         this.entity = type.create(client.level, EntitySpawnReason.BREEDING);
+        assignClientEntityId(this.entity);
         if (nbt != null) entity.load(TagValueInput.create(new ProblemReporter.ScopedCollector(Owo.LOGGER), client.level.registryAccess(), nbt));
         entity.absSnapTo(client.player.getX(), client.player.getY(), client.player.getZ());
 
         this.sizing(sizing);
+    }
+
+    private static void assignClientEntityId(net.minecraft.world.entity.Entity entity) {
+        try {
+            var idField = net.minecraft.world.entity.Entity.class.getDeclaredField("id");
+            idField.setAccessible(true);
+            if ((int) idField.get(entity) == 0) {
+                idField.set(entity, -1);
+            }
+        } catch (Exception ignored) {}
     }
 
     @Override
