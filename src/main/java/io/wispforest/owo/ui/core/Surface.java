@@ -51,7 +51,7 @@ public interface Surface {
 
     static Surface blur(float quality, float size) {
         return (context, component) -> {
-            BlurQuadElementRenderState.blurBackground(context.guiRenderState, (int) quality, size);
+            BlurQuadElementRenderState.blurBackground(context.guiRenderState, quality, size);
         };
     }
 

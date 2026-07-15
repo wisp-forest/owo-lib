@@ -33,13 +33,13 @@ public class Blur extends SingleChildInstanceWidget {
         @Override
         public void draw(BraidGraphics graphics) {
             if (!this.widget.blurChild) {
-                BlurQuadElementRenderState.blurBackground(graphics.guiRenderState, (int) this.widget.quality, this.widget.size);
+                BlurQuadElementRenderState.blurBackground(graphics.guiRenderState, this.widget.quality, this.widget.size);
             }
 
             super.draw(graphics);
 
             if (this.widget.blurChild) {
-                BlurQuadElementRenderState.blurBackground(graphics.guiRenderState, (int) this.widget.quality, this.widget.size);
+                BlurQuadElementRenderState.blurBackground(graphics.guiRenderState, this.widget.quality, this.widget.size);
             }
         }
     }

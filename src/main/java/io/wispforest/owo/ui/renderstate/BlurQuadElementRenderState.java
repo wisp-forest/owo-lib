@@ -5,9 +5,9 @@ import net.minecraft.client.renderer.state.gui.GuiRenderState;
 
 public final class BlurQuadElementRenderState {
 
-    public static void blurBackground(GuiRenderState renderState, int quality, float size) {
+    public static void blurBackground(GuiRenderState renderState, float quality, float size) {
         var options = Minecraft.getInstance().options;
-        var blurriness = Math.clamp(Math.round(quality * 2L), 0, 10);
+        var blurriness = Math.clamp(Math.round(quality * size / 5.0f), 0, 10);
         options.menuBackgroundBlurriness().set(blurriness);
 
         try {

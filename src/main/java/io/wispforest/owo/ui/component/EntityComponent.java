@@ -42,6 +42,7 @@ import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 
+import java.lang.reflect.Field;
 import java.time.Duration;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -57,6 +58,17 @@ public class EntityComponent<E extends Entity> extends BaseUIComponent {
     protected boolean allowMouseRotation = false;
     protected boolean scaleToFit = false;
     protected boolean showNametag = false;
+    private static final Field ENTITY_ID_FIELD;
+
+    static {
+        Field f = null;
+        try {
+            f = net.minecraft.world.entity.Entity.class.getDeclaredField("id");
+            f.setAccessible(true);
+        } catch (Exception ignored) {}
+        ENTITY_ID_FIELD = f;
+    }
+
     protected Consumer<Matrix4f> transform = matrixStack -> {};
 
     protected EntityComponent(Sizing sizing, E entity) {
@@ -83,11 +95,10 @@ public class EntityComponent<E extends Entity> extends BaseUIComponent {
     }
 
     private static void assignClientEntityId(net.minecraft.world.entity.Entity entity) {
+        if (ENTITY_ID_FIELD == null) return;
         try {
-            var idField = net.minecraft.world.entity.Entity.class.getDeclaredField("id");
-            idField.setAccessible(true);
-            if ((int) idField.get(entity) == 0) {
-                idField.set(entity, -1);
+            if ((int) ENTITY_ID_FIELD.get(entity) == 0) {
+                ENTITY_ID_FIELD.set(entity, -1);
             }
         } catch (Exception ignored) {}
     }
