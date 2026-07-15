@@ -60,11 +60,10 @@ public abstract class AbstractContainerScreenMixin extends Screen {
         GlStateManager._disableScissorTest();
     }
 
-    // FIXME 26.2: mouseClicked signature changed, needs new injection point
-    // @ModifyVariable(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/OptionInstance;get()Ljava/lang/Object;", ordinal = 0), ordinal = 2)
-    // private int doNoThrow(int slotId, @Local() Slot slot) {
-    //     return (((Object) this instanceof BaseOwoContainerScreen<?, ?>) && slot != null) ? slot.index : slotId;
-    // }
+    @ModifyVariable(method = "mouseClicked", at = @At(value = "STORE", ordinal = 2), ordinal = 2)
+    private int doNoThrow(int slotId, @Local() Slot slot) {
+        return (((Object) this instanceof BaseOwoContainerScreen<?, ?>) && slot != null) ? slot.index : slotId;
+    }
 
     @Inject(method = "keyPressed", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;checkHotbarKeyPressed(Lnet/minecraft/client/input/KeyEvent;)Z"), cancellable = true)
     private void closeIt(KeyEvent input, CallbackInfoReturnable<Boolean> cir) {
