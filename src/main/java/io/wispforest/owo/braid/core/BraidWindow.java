@@ -19,6 +19,8 @@ import org.joml.Vector4f;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL32;
 import org.lwjgl.system.NativeResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -31,6 +33,8 @@ import java.util.List;
 //       for changes in the gui scale option so we can react
 //       instantly when it changes rather than on next resize
 public class BraidWindow implements Surface {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger("owo-braid-window");
 
     public final EventBinding eventBinding = new WindowEventBinding(this);
 
@@ -195,7 +199,7 @@ public class BraidWindow implements Surface {
             var handle = GLFW.glfwCreateWindow(width, height, title, 0, Minecraft.getInstance().getWindow().handle());
 
             if (handle == 0) {
-                throw new UnsupportedOperationException("Failed to create a GLFW window");
+                throw new UnsupportedOperationException("Failed to create a GLFW window - glfwCreateWindow returned 0. Check game log for GLFW errors.");
             }
 
             GLFW.glfwMakeContextCurrent(handle);
@@ -210,18 +214,23 @@ public class BraidWindow implements Surface {
     }
 
     public static OpenResult open(String title, int width, int height, Widget widget) {
-        var window = create(title, width, height);
-        var app = new AppState(
-            Owo.LOGGER,
-            AppState.formatName("BraidWindow", widget, title),
-            Minecraft.getInstance(),
-            window,
-            window.eventBinding,
-            widget
-        );
+        try {
+            var window = create(title, width, height);
+            var app = new AppState(
+                Owo.LOGGER,
+                AppState.formatName("BraidWindow", widget, title),
+                Minecraft.getInstance(),
+                window,
+                window.eventBinding,
+                widget
+            );
 
-        BraidWindowScheduler.add(window, app);
-        return new OpenResult(app, window);
+            BraidWindowScheduler.add(window, app);
+            return new OpenResult(app, window);
+        } catch (Exception e) {
+            LOGGER.error("Failed to open BraidWindow", e);
+            return null;
+        }
     }
 
     // ---
