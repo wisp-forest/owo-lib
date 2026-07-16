@@ -189,6 +189,7 @@ public class BraidWindow implements Surface {
     public static BraidWindow create(String title, int width, int height) {
         var handleOut = new MutableLong();
         withContext(0, () -> {
+            GLFW.glfwDefaultWindowHints();
             GLFW.glfwWindowHint(GLFW.GLFW_CLIENT_API, GLFW.GLFW_OPENGL_API);
             GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_CREATION_API, GLFW.GLFW_NATIVE_CONTEXT_API);
             GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -196,7 +197,17 @@ public class BraidWindow implements Surface {
             GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE);
             GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GLFW.GLFW_TRUE);
 
+            if (RenderSystem.getDevice().getDeviceInfo().backendName().equals("Vulkan")) {
+                throw new UnsupportedOperationException("BraidWindow requires OpenGL backend. Current backend is Vulkan. Secondary OS windows are not supported with the Vulkan renderer.");
+            }
+
+            var previousErrorCallback = GLFW.glfwSetErrorCallback((error, description) ->
+                LOGGER.error("GLFW error [0x{}]: {}", Integer.toHexString(error), GLFWErrorCallback.getDescription(description))
+            );
+
             var handle = GLFW.glfwCreateWindow(width, height, title, 0, Minecraft.getInstance().getWindow().handle());
+
+            GLFW.glfwSetErrorCallback(previousErrorCallback);
 
             if (handle == 0) {
                 throw new UnsupportedOperationException("Failed to create a GLFW window - glfwCreateWindow returned 0. Check game log for GLFW errors.");
