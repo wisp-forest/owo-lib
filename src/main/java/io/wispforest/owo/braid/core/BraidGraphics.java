@@ -42,12 +42,12 @@ public class BraidGraphics extends OwoUIGraphics {
 
     @Override
     public int guiWidth() {
-        return this.surface != null ? this.surface.width() : super.guiWidth();
+        return this.surface.width();
     }
 
     @Override
     public int guiHeight() {
-        return this.surface != null ? this.surface.height() : super.guiHeight();
+        return this.surface.height();
     }
 
     public void buildRectOutline(double x, double y, double width, double height, RectEdgeBuilder builder) {

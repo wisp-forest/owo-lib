@@ -13,6 +13,7 @@ import io.wispforest.owo.util.EventStream;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.Identifier;
+import org.joml.Vector4f;
 
 import java.util.UUID;
 
@@ -85,7 +86,7 @@ public class TextureSurface implements Surface {
     public void beginRendering() {
         RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
             this.target.getColorTexture(),
-            new org.joml.Vector4f(0, 0, 0, 0),
+            new Vector4f(0, 0, 0, 0),
             this.target.getDepthTexture(),
             1
         );

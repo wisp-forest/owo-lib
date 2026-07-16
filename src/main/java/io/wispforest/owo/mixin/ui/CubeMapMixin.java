@@ -2,7 +2,6 @@ package io.wispforest.owo.mixin.ui;
 
 import io.wispforest.owo.ui.renderstate.CubeMapElementRenderState;
 import net.minecraft.client.renderer.CubeMap;
-import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;

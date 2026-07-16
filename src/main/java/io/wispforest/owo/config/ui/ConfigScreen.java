@@ -28,6 +28,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
@@ -227,8 +228,8 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                     Component.translatable("text.config." + this.config.name() + ".category." + parentKey.asString()),
                     expanded
                 ).<CollapsibleContainer>configure(nestedContainer -> {
-                    final                     var categoryKey = "text.config." + this.config.name() + ".category." + parentKey.asString();
-                    if (!I18n.get(categoryKey + ".tooltip").equals(categoryKey + ".tooltip")) {
+                    final var categoryKey = "text.config." + this.config.name() + ".category." + parentKey.asString();
+                    if (Language.getInstance().has(categoryKey + ".tooltip")) {
                         nestedContainer.titleLayout().tooltip(Component.translatable(categoryKey + ".tooltip"));
                     }
 
@@ -261,7 +262,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
                 var tooltipText = new ArrayList<FormattedCharSequence>();
                 var tooltipTranslationKey = option.translationKey() + ".tooltip";
 
-                if (!I18n.get(tooltipTranslationKey).equals(tooltipTranslationKey)) {
+                if (Language.getInstance().has(tooltipTranslationKey)) {
                     tooltipText.addAll(this.minecraft.font.split(Component.translatable(tooltipTranslationKey), Integer.MAX_VALUE));
                 }
 

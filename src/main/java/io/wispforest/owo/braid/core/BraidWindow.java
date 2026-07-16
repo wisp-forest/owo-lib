@@ -15,6 +15,7 @@ import io.wispforest.owo.util.EventSource;
 import io.wispforest.owo.util.EventStream;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.joml.Vector4f;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL32;
 import org.lwjgl.system.NativeResource;
@@ -277,7 +278,7 @@ public class BraidWindow implements Surface {
     public void beginRendering() {
         RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(
             this.remoteTarget.getColorTexture(),
-            new org.joml.Vector4f(0, 0, 0, 1),
+            new Vector4f(0, 0, 0, 1),
             this.remoteTarget.getDepthTexture(),
             1
         );
