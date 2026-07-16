@@ -24,9 +24,6 @@
     "main": [
       "io.wispforest.owo.Owo"
     ],
-    "rei_client": [
-      "io.wispforest.owo.compat.rei.OwoReiPlugin"
-    ],
     "emi": [
       "io.wispforest.owo.compat.emi.OwoEmiPlugin"
     ],
