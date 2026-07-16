@@ -16,10 +16,14 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import org.jetbrains.annotations.ApiStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.function.Function;
 
 public class BraidDisplay {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger("owo-braid-display");
 
     public DisplayQuad quad;
 
@@ -32,6 +36,7 @@ public class BraidDisplay {
     public boolean secondaryPressed = false;
 
     boolean renderAutomatically = false;
+    boolean failed = false;
 
     public BraidDisplay(DisplayQuad quad, int surfaceWidth, int surfaceHeight, Widget widget) {
         this.quad = quad;
@@ -58,7 +63,12 @@ public class BraidDisplay {
             client.getDeltaTracker().getGameTimeDeltaTicks()
         );
 
-        this.app.draw(this.surface.guiRenderer.newGraphics(this.app.cursorPosition().x(), this.app.cursorPosition().y()));
+        try {
+            this.app.draw(this.surface.guiRenderer.newGraphics(this.app.cursorPosition().x(), this.app.cursorPosition().y()));
+        } catch (Exception e) {
+            LOGGER.error("BraidDisplay draw failed, disabling display", e);
+            this.failed = true;
+        }
     }
 
     public void render(PoseStack matrices, SubmitNodeCollector queue, int light) {

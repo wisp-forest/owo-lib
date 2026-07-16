@@ -59,8 +59,13 @@ public class BraidDisplayBinding {
 
     @ApiStatus.Internal
     public static void updateAndDrawDisplays() {
+        var failedDisplays = new ArrayList<BraidDisplay>();
         for (var display : ACTIVE_DISPLAYS) {
             display.updateAndDrawApp();
+            if (display.failed) failedDisplays.add(display);
+        }
+        for (var display : failedDisplays) {
+            deactivate(display);
         }
     }
 

@@ -9,7 +9,20 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
+
 public class EntityWidget extends StatelessWidget {
+
+    private static final Field ENTITY_ID_FIELD;
+
+    static {
+        Field f = null;
+        try {
+            f = net.minecraft.world.entity.Entity.class.getDeclaredField("id");
+            f.setAccessible(true);
+        } catch (Exception ignored) {}
+        ENTITY_ID_FIELD = f;
+    }
 
     public final double scale;
     public final Entity entity;
@@ -28,11 +41,21 @@ public class EntityWidget extends StatelessWidget {
 
     @Override
     public Widget build(BuildContext context) {
+        assignClientEntityId(this.entity);
         return new EntityRenderStateWidget(
             this.scale,
             //TODO: can we get the client from the appstate?
             () -> Minecraft.getInstance().getEntityRenderDispatcher().extractEntity(this.entity, 0),
             this.setupCallback
         );
+    }
+
+    private static void assignClientEntityId(Entity entity) {
+        if (ENTITY_ID_FIELD == null) return;
+        try {
+            if ((int) ENTITY_ID_FIELD.get(entity) == 0) {
+                ENTITY_ID_FIELD.set(entity, -1);
+            }
+        } catch (Exception ignored) {}
     }
 }

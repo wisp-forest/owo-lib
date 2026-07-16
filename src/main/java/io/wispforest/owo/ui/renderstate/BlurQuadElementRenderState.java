@@ -9,10 +9,5 @@ public final class BlurQuadElementRenderState {
         var options = Minecraft.getInstance().options;
         var blurriness = Math.clamp(Math.round(quality * size / 5.0f), 0, 10);
         options.menuBackgroundBlurriness().set(blurriness);
-
-        try {
-            renderState.blurBeforeThisStratum();
-        } catch (IllegalStateException ignored) {
-        }
     }
 }
