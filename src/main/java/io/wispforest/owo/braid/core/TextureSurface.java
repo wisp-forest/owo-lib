@@ -50,6 +50,10 @@ public class TextureSurface implements Surface {
         return this.target.getColorTextureView();
     }
 
+    public void syncTexture() {
+        this.registeredTexture.sync();
+    }
+
     @Override
     public int width() {
         return this.target.width;

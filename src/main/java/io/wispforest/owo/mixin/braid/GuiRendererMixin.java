@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.AddressMode;
 import com.mojang.blaze3d.textures.FilterMode;
@@ -61,10 +62,28 @@ public class GuiRendererMixin implements BraidGuiRendererExtension {
         return this.target.framebuffer().height;
     }
 
+    @ModifyExpressionValue(method = "enableScissor", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/state/WindowRenderState;width:I", opcode = Opcodes.GETFIELD))
+    private int injectSurfaceWidthForScissor(int original) {
+        if (this.target == null) return original;
+        return this.target.framebuffer().width;
+    }
+
     @ModifyExpressionValue(method = "enableScissor", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/state/WindowRenderState;guiScale:I", opcode = Opcodes.GETFIELD))
     private int injectSurfaceScaleForScissor(int original) {
         if (this.target == null) return original;
         return (int) this.target.surface().scaleFactor();
+    }
+
+    @WrapOperation(
+        method = "enableScissor",
+        at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderPass;enableScissor(IIII)V")
+    )
+    private void owo$skipZeroSizeScissor(RenderPass renderPass, int x, int y, int width, int height, Operation<Void> original) {
+        if (this.target != null && (width <= 0 || height <= 0)) {
+            renderPass.disableScissor();
+            return;
+        }
+        original.call(renderPass, x, y, width, height);
     }
 
     @ModifyExpressionValue(method = "preparePictureInPicture", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/state/WindowRenderState;guiScale:I", opcode = Opcodes.GETFIELD))

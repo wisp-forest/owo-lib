@@ -66,12 +66,16 @@ public class BraidDisplay {
         try {
             this.app.draw(this.surface.guiRenderer.newGraphics(this.app.cursorPosition().x(), this.app.cursorPosition().y()));
         } catch (Exception e) {
-            LOGGER.error("BraidDisplay draw failed, disabling display", e);
+            LOGGER.error("BraidDisplay draw failed, disabling display (surface={}x{})", this.surface.width(), this.surface.height(), e);
             this.failed = true;
         }
     }
 
     public void render(PoseStack matrices, SubmitNodeCollector queue, int light) {
+        this.surface.syncTexture();
+
+        var texture = this.surface.texture();
+        if (texture == null || texture.isClosed()) return;
         var layer = RENDER_TYPE.apply(this.surface);
         queue.submitCustomGeometry(matrices, layer, (matricesEntry, buffer) -> {
             var normal = this.quad.normal.toVector3f();
