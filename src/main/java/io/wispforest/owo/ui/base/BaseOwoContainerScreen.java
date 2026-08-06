@@ -44,6 +44,11 @@ public abstract class BaseOwoContainerScreen<R extends ParentUIComponent, S exte
      */
     protected boolean invalid = false;
 
+
+    protected BaseOwoContainerScreen(S menu, Inventory inventory, Component title, int imageWidth, int imageHeight) {
+        super(menu, inventory, title, imageWidth, imageHeight);
+    }
+
     protected BaseOwoContainerScreen(S menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
     }
