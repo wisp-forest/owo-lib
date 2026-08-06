@@ -266,7 +266,7 @@ public class ConfigAP extends AbstractProcessor {
         @Override
         public void appendAccessors(Writer accessors, Writer optionInstances, Writer keyConstants) {
             var nestClassName = capitalize(nestName);
-            if (nestClassName.equals(typeName)) nestClassName += "_";
+            if (nestClassName.equalsIgnoreCase(typeName)) nestClassName += "_";
 
             accessors.beginLine("public final ").write(nestClassName).write(" ").write(nestName).write(" = new ").write(nestClassName).endLine("();");
             accessors.beginLine("public class ").write(nestClassName).write(" implements ").write(typeName).endLine(" {");
