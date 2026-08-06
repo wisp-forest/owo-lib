@@ -125,13 +125,15 @@ loom {
 }
 
 dependencies {
-//    modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
-//    compileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${project.rei_version}") {
-//        exclude "group": "net.fabricmc.fabric-api"
-//    }
-//    compileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}") {
-//        exclude "group": "net.fabricmc.fabric-api"
-//    }
+    localRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
+    compileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${project.rei_version}") {
+        exclude "group": "net.fabricmc.fabric-api"
+    }
+    compileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}") {
+        exclude "group": "net.fabricmc.fabric-api"
+    }
+    compileOnly("me.shedaniel.cloth:basic-math:0.6.1")
+    compileOnly("dev.architectury:architectury-fabric:20.0.12")
 
     compileOnly("dev.emi:emi-fabric:${project.emi_version}") {
         exclude "group": "net.fabricmc.fabric-api"

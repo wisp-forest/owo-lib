@@ -1,60 +1,75 @@
 package io.wispforest.owo.compat.rei;
 
-public class OwoReiPlugin /*implements REIClientPlugin*/ {
+import io.wispforest.owo.braid.core.BraidScreen;
+import io.wispforest.owo.braid.framework.instance.WidgetInstance;
+import io.wispforest.owo.braid.widgets.recipeviewer.RecipeViewerExclusionZone;
+import io.wispforest.owo.itemgroup.OwoItemGroup;
+import io.wispforest.owo.mixin.itemgroup.CreativeModeInventoryScreenAccessor;
+import io.wispforest.owo.ui.base.BaseOwoContainerScreen;
+import io.wispforest.owo.util.pond.OwoCreativeInventoryScreenExtensions;
+import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+
+import java.util.ArrayList;
+import java.util.Collections;
+
+public class OwoReiPlugin implements REIClientPlugin {
 
 //    @SuppressWarnings("UnstableApiUsage")
-//    private static @Nullable OverlayRendererProvider.Sink renderSink = null;
-//
-//    @Override
-//    public void registerExclusionZones(ExclusionZones zones) {
-//        zones.register(CreativeModeInventoryScreen.class, screen -> {
-//            var group = CreativeModeInventoryScreenAccessor.owo$getSelectedTab();
-//            if (!(group instanceof OwoItemGroup owoGroup)) return Collections.emptySet();
-//            if (owoGroup.getButtons().isEmpty()) return Collections.emptySet();
-//
-//            int x = ((OwoCreativeInventoryScreenExtensions) screen).owo$getRootX();
-//            int y = ((OwoCreativeInventoryScreenExtensions) screen).owo$getRootY();
-//
-//            int stackHeight = owoGroup.getButtonStackHeight();
-//            y -= 13 * (stackHeight - 4);
-//
-//            final var rectangles = new ArrayList<Rectangle>();
-//            for (int i = 0; i < owoGroup.getButtons().size(); i++) {
-//                int xOffset = x + 198 + (i / stackHeight) * 26;
-//                int yOffset = y + 10 + (i % stackHeight) * 30;
-//                rectangles.add(new Rectangle(xOffset, yOffset, 24, 24));
-//            }
-//
-//            return rectangles;
-//        });
-//
-//        zones.register(BaseOwoContainerScreen.class, screen -> {
-//            return ((BaseOwoContainerScreen<?, ?>) screen).componentsForExclusionAreas()
-//                .map(rect -> new Rectangle(rect.x(), rect.y(), rect.width(), rect.height()))
-//                .toList();
-//        });
-//
-//        zones.register(BraidScreen.class, screen -> {
-//            List<Rectangle> rectangles = new ArrayList<>();
-//
-//            var visitor = new WidgetInstance.Visitor() {
-//                @Override
-//                public void visit(WidgetInstance<?> child) {
-//                    if (child instanceof RecipeViewerExclusionZone.Instance area) {
-//                        var bounds = area.computeGlobalBounds();
-//
-//                        rectangles.add(new Rectangle(bounds.minX, bounds.minY, bounds.maxX - bounds.minX, bounds.maxY - bounds.minY));
-//                    }
-//
-//                    child.visitChildren(this);
-//                }
-//            };
-//
-//            screen.state.rootInstance().visitChildren(visitor);
-//
-//            return rectangles;
-//        });
-//    }
+//    private static OverlayRendererProvider.@Nullable Sink renderSink = null;
+
+    @Override
+    public void registerExclusionZones(ExclusionZones zones) {
+        zones.register(CreativeModeInventoryScreen.class, screen -> {
+            var group = CreativeModeInventoryScreenAccessor.owo$getSelectedTab();
+            if (!(group instanceof OwoItemGroup owoGroup)) return Collections.emptySet();
+            if (owoGroup.getButtons().isEmpty()) return Collections.emptySet();
+
+            int x = ((OwoCreativeInventoryScreenExtensions) screen).owo$getRootX();
+            int y = ((OwoCreativeInventoryScreenExtensions) screen).owo$getRootY();
+
+            int stackHeight = owoGroup.getButtonStackHeight();
+            y -= 13 * (stackHeight - 4);
+
+            final var rectangles = new ArrayList<Rectangle>();
+            for (int i = 0; i < owoGroup.getButtons().size(); i++) {
+                int xOffset = x + 198 + (i / stackHeight) * 26;
+                int yOffset = y + 10 + (i % stackHeight) * 30;
+                rectangles.add(new Rectangle(xOffset, yOffset, 24, 24));
+            }
+
+            return rectangles;
+        });
+
+        zones.register(BaseOwoContainerScreen.class, screen -> {
+            return ((BaseOwoContainerScreen<?, ?>) screen).componentsForExclusionAreas()
+                .map(rect -> new Rectangle(rect.x(), rect.y(), rect.width(), rect.height()))
+                .toList();
+        });
+
+        zones.register(BraidScreen.class, screen -> {
+            var rectangles = new ArrayList<Rectangle>();
+
+            var visitor = new WidgetInstance.Visitor() {
+                @Override
+                public void visit(WidgetInstance<?> child) {
+                    if (child instanceof RecipeViewerExclusionZone.Instance area) {
+                        var bounds = area.computeGlobalBounds();
+
+                        rectangles.add(new Rectangle(bounds.minX, bounds.minY, bounds.maxX - bounds.minX, bounds.maxY - bounds.minY));
+                    }
+
+                    child.visitChildren(this);
+                }
+            };
+
+            screen.state.rootInstance().visitChildren(visitor);
+
+            return rectangles;
+        });
+    }
 //
 //    @Override
 //    public void registerScreens(ScreenRegistry registry) {
