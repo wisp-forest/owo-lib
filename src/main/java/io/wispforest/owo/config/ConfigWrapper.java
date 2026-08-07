@@ -111,11 +111,19 @@ public abstract class ConfigWrapper<C> {
 
         try {
             this.initializeOptions(configAnnotation.saveOnModification());
+            var registered = false;
             for (var option : this.options.values()) {
-                if (option.syncMode().isNone()) continue;
+                var mode = option.syncMode();
+                if (mode.isNone()) continue;
 
-                ConfigSynchronizer.register(this);
-                break;
+                if (registered) {
+                    ConfigSynchronizer.register(this, mode.isRequired());
+                    registered = true;
+                }
+
+                if (mode == Option.SyncMode.INFORM_SERVER) {
+                    option.observe(_ -> ConfigSynchronizer.syncClientOption(this, option));
+                }
             }
         } catch (IllegalAccessException | NoSuchMethodException e) {
             throw new RuntimeException("Failed to initialize config " + this.name, e);

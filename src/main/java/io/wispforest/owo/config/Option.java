@@ -302,6 +302,10 @@ public final class Option<T> {
         public boolean isNone() {
             return this == NONE;
         }
+
+        public boolean isRequired() {
+            return this == OVERRIDE_CLIENT;
+        }
     }
 
     /**

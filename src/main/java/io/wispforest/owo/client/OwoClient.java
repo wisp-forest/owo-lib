@@ -12,11 +12,14 @@ import io.wispforest.owo.ui.core.OwoUIPipelines;
 import io.wispforest.owo.ui.parsing.UIModelLoader;
 import io.wispforest.owo.ui.renderstate.OwoSpecialGuiElementRenderers;
 import io.wispforest.owo.ui.util.NinePatchTexture;
+import io.wispforest.owo.util.pond.OwoAbstractContainerMenuExtension;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Util;
@@ -70,7 +73,9 @@ public class OwoClient implements ClientModInitializer {
             }
         }
 
-        MenuNetworkingInternals.Client.init();
+        ScreenEvents.AFTER_INIT.register((client, screen, _, _) -> {
+            if (screen instanceof MenuAccess<?> handled) ((OwoAbstractContainerMenuExtension) handled.getMenu()).owo$attachToPlayer(client.player);
+        });
 
         ClientCommandRegistrationCallback.EVENT.register(OwoConfigCommand::register);
 
