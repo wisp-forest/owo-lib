@@ -76,8 +76,6 @@ public class VanillaWidgetWrapper<T extends Renderable & GuiEventListener> exten
         @Override
         public void draw(BraidGraphics graphics) {
             widget.wrapped.extractRenderState(graphics, (int) x, (int) y, host().client().getDeltaTracker().getGameTimeDeltaPartialTick(false));
-
-            GlStateManager._enableScissorTest();
         }
 
         public boolean onKeyDown(int keyCode, KeyModifiers modifiers) {

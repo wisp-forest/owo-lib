@@ -52,13 +52,13 @@ public class GuiRendererMixin implements BraidGuiRendererExtension {
     @ModifyExpressionValue(method = "draw", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;mainRenderTarget()Lcom/mojang/blaze3d/pipeline/RenderTarget;"))
     private RenderTarget injectFramebuffer(RenderTarget original) {
         if (this.target == null) return original;
-        return this.target.framebuffer();
+        return this.target.renderTarget();
     }
 
     @ModifyExpressionValue(method = "enableScissor", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/state/WindowRenderState;height:I", opcode = Opcodes.GETFIELD))
     private int injectSurfaceHeightForScissor(int original) {
         if (this.target == null) return original;
-        return this.target.framebuffer().height;
+        return this.target.renderTarget().height;
     }
 
     @ModifyExpressionValue(method = "enableScissor", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/state/WindowRenderState;guiScale:I", opcode = Opcodes.GETFIELD))

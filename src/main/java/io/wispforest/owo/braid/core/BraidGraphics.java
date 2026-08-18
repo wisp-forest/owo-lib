@@ -21,8 +21,8 @@ public class BraidGraphics extends OwoUIGraphics {
     private final Surface surface;
 
     protected BraidGraphics(Minecraft client, GuiRenderState renderState, int mouseX, int mouseY, Consumer<Runnable> setTooltipDrawer, Surface surface) {
-        super(client, renderState, mouseX, mouseY, setTooltipDrawer);
         this.surface = surface;
+        super(client, renderState, mouseX, mouseY, setTooltipDrawer);
     }
 
     public static BraidGraphics create(GuiGraphicsExtractor graphics, Surface surface) {
@@ -42,12 +42,12 @@ public class BraidGraphics extends OwoUIGraphics {
 
     @Override
     public int guiWidth() {
-        return this.surface == null ? super.guiWidth() : this.surface.width();
+        return this.surface.width();
     }
 
     @Override
     public int guiHeight() {
-        return this.surface == null ? super.guiHeight() : this.surface.height();
+        return this.surface.height();
     }
 
     public void buildRectOutline(double x, double y, double width, double height, RectEdgeBuilder builder) {

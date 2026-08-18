@@ -1,6 +1,7 @@
 package io.wispforest.owo.mixin.ui;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import io.wispforest.owo.ui.base.BaseOwoContainerScreen;
 import io.wispforest.owo.util.pond.OwoSlotExtension;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -44,8 +45,7 @@ public abstract class AbstractContainerScreenMixin extends Screen {
         var scissorArea = ((OwoSlotExtension) slot).owo$getScissorArea();
         if (scissorArea == null) return;
 
-        GlStateManager._enableScissorTest();
-        GlStateManager._scissorBox(scissorArea.x(), scissorArea.y(), scissorArea.width(), scissorArea.height());
+        context.scissorStack.push(scissorArea);
     }
 
     @Inject(method = "extractSlot", at = @At("RETURN"))
@@ -55,7 +55,12 @@ public abstract class AbstractContainerScreenMixin extends Screen {
         var scissorArea = ((OwoSlotExtension) slot).owo$getScissorArea();
         if (scissorArea == null) return;
 
-        GlStateManager._disableScissorTest();
+        context.scissorStack.pop();
+    }
+
+    @ModifyExpressionValue(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;hasClickedOutside(DDII)Z"))
+    private boolean doNoThrow(boolean original, @Local(name = "slot") Slot slot) {
+        return (((Object) this instanceof BaseOwoContainerScreen<?, ?>) && slot != null) ? false : original;
     }
 
     @Inject(method = "keyPressed", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;checkHotbarKeyPressed(Lnet/minecraft/client/input/KeyEvent;)Z"), cancellable = true)

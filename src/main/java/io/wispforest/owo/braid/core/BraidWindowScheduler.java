@@ -33,7 +33,7 @@ public class BraidWindowScheduler {
     }
 
     static {
-        ClientRenderCallback.BEFORE_SWAP.register(client -> frame());
+        ClientRenderCallback.AFTER.register(client -> frame());
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
             APPS.forEach(app -> app.state().dispose());
             APPS.clear();

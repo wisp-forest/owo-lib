@@ -21,7 +21,6 @@ import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -298,12 +297,7 @@ public abstract class BaseOwoContainerScreen<R extends ParentUIComponent, S exte
         public void draw(OwoUIGraphics graphics, int mouseX, int mouseY, float partialTicks, float delta) {
             this.didDraw = true;
 
-            int[] scissor = new int[4];
-            GL11.glGetIntegerv(GL11.GL_SCISSOR_BOX, scissor);
-
-            ((OwoSlotExtension) this.slot).owo$setScissorArea(PositionedRectangle.of(
-                scissor[0], scissor[1], scissor[2], scissor[3]
-            ));
+            ((OwoSlotExtension) this.slot).owo$setScissorArea(graphics.scissorStack.peek());
         }
 
         @Override

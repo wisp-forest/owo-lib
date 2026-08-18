@@ -56,7 +56,11 @@ public class SpinnyGhastTest extends StatefulWidget {
                 BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("bamboo_raft")),
                 BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("item_frame"))
             ).<Entity>map(
-                entityType -> entityType.create(Minecraft.getInstance().level, EntitySpawnReason.MOB_SUMMONED)
+                entityType -> {
+                    var entity = entityType.create(Minecraft.getInstance().level, EntitySpawnReason.MOB_SUMMONED);
+                    entity.setId(1_000_000 + (int) (Math.random() * 10000));
+                    return entity;
+                }
             ).toList();
         }
 

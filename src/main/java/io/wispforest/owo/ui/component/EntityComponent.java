@@ -269,6 +269,8 @@ public class EntityComponent<E extends Entity> extends BaseUIComponent {
                 ChatAbilities.NO_RESTRICTIONS
             );
 
+            this.setId(1_000_000 + (int) (Math.random() * 10000));
+
             this.skinTextures = DefaultPlayerSkin.get(profile);
             Util.backgroundExecutor().execute(() -> {
                 var completeProfile = Minecraft.getInstance().services().profileResolver().fetchById(profile.id()).orElse(profile);

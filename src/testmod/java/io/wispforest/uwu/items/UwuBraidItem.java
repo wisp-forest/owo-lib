@@ -30,6 +30,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.cow.Cow;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -234,6 +235,7 @@ public class UwuBraidItem extends Item {
             @Override
             public void init() {
                 this.cow = new net.minecraft.world.entity.animal.cow.Cow((EntityType<? extends net.minecraft.world.entity.animal.cow.Cow>) BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("cow")), Minecraft.getInstance().level);
+                this.cow.setId(1_000_000 + (int) (Math.random() * 10000));
             }
 
             @Override

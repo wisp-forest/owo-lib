@@ -176,9 +176,6 @@ public class OwoUIWidgetWrapper extends LeafInstanceWidget {
             );
 
             // TODO: tooltips.
-
-            // this mitigates the vanilla scissor stack disabling the scissor stack if it's empty
-            GlStateManager._enableScissorTest();
         }
     }
 }

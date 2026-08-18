@@ -142,7 +142,7 @@ public class InspectorWidget extends StatefulWidget {
                                                                             () -> this.setState(() -> {
                                                                                 this.alwaysOnTop = !this.alwaysOnTop;
                                                                                 GLFW.glfwSetWindowAttrib(
-                                                                                    this.widget().inspector.currentWindow.handle,
+                                                                                    this.widget().inspector.currentWindow.backendWindow.handle(),
                                                                                     GLFW.GLFW_FLOATING,
                                                                                     this.alwaysOnTop ? GLFW.GLFW_TRUE : GLFW.GLFW_FALSE
                                                                                 );

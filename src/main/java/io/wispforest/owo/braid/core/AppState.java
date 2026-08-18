@@ -153,9 +153,7 @@ public class AppState implements InstanceHost, ProxyHost {
 
         var braidContext = BraidGraphics.create(graphics, this.surface);
 
-        GlStateManager._enableScissorTest();
         this.rootInstance().draw(braidContext);
-        GlStateManager._disableScissorTest();
 
         if (this.activeTooltip != null) {
             if (this.activeTooltip.components() != null) {

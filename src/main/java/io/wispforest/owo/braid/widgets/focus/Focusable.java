@@ -201,7 +201,7 @@ public class Focusable extends StatefulWidget {
         public int debugDepth() {
             return this.debugDepth;
         }
-        
+
         public State<?> primaryFocus() {
             return this.scope != null ? this.scope.primaryFocus() : this;
         }
