@@ -31,7 +31,7 @@ public class ReiUIAdapter<T extends ParentUIComponent> extends Widget {
         this.adapter = OwoUIAdapter.createWithoutScreen(bounds.x, bounds.y, bounds.width, bounds.height, rootComponentMaker);
         this.adapter.inspectorZOffset = 900;
 
-        var screenWithREI = Minecraft.getInstance().screen;
+        var screenWithREI = Minecraft.getInstance().gui.screen();
 
         if (screenWithREI != null) {
             ScreenEvents.remove(screenWithREI).register(screen -> this.adapter.dispose());
