@@ -2,12 +2,12 @@ package io.wispforest.owo.braid.widgets.sharedstate;
 
 import blue.endless.jankson.Jankson;
 import blue.endless.jankson.JsonGrammar;
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.Timeout;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.format.jankson.JanksonDeserializer;
 import io.wispforest.endec.format.jankson.JanksonSerializer;
 import io.wispforest.owo.Owo;
-import io.netty.util.HashedWheelTimer;
-import io.netty.util.Timeout;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.Identifier;
@@ -26,7 +26,11 @@ import java.util.function.Supplier;
 public class SharedStateStorage {
 
     private static final Jankson JANKSON = Jankson.builder().build();
-    private static final HashedWheelTimer TIMER = new HashedWheelTimer();
+    private static final HashedWheelTimer TIMER = new HashedWheelTimer(r -> {
+        var thread = new Thread(r);
+        thread.setDaemon(true);
+        return thread;
+    });
     private static final Map<ShareableState, Entry<?>> ENTRIES = new HashMap<>();
 
     static {

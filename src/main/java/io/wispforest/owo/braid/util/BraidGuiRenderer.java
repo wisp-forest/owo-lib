@@ -45,11 +45,6 @@ public class BraidGuiRenderer extends GuiRenderer {
             var initField = GuiRenderer.class.getDeclaredField("hasFabricInitialized");
             initField.setAccessible(true);
             initField.set(this, true);
-
-            // TODO: seems unneeded now
-//            var nodeStorageField = GuiRenderer.class.getDeclaredField("submitNodeStorage");
-//            nodeStorageField.setAccessible(true);
-//            nodeStorageField.set(this, new SubmitNodeStorage());
         } catch (IllegalAccessException | NoSuchFieldException e) {
             Owo.LOGGER.warn("Failed to apply braid's Fabric API GuiRendererMixin workaround, there might be crashes with texture and window surfaces");
         } finally {

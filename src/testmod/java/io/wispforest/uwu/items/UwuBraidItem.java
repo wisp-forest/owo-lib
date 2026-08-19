@@ -1,7 +1,5 @@
 package io.wispforest.uwu.items;
 
-import net.minecraft.resources.Identifier;
-import net.minecraft.core.registries.BuiltInRegistries;
 import io.wispforest.owo.braid.core.*;
 import io.wispforest.owo.braid.display.BraidDisplay;
 import io.wispforest.owo.braid.display.BraidDisplayBinding;
@@ -11,9 +9,6 @@ import io.wispforest.owo.braid.framework.proxy.WidgetState;
 import io.wispforest.owo.braid.framework.widget.StatefulWidget;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
 import io.wispforest.owo.braid.framework.widget.Widget;
-import io.wispforest.owo.braid.widgets.object.entity.EntityDisplayMode;
-import io.wispforest.owo.braid.widgets.object.entity.EntityRenderStateWidget;
-import io.wispforest.owo.braid.widgets.object.ItemStackWidget;
 import io.wispforest.owo.braid.widgets.Navigator;
 import io.wispforest.owo.braid.widgets.basic.*;
 import io.wispforest.owo.braid.widgets.button.Button;
@@ -21,6 +16,8 @@ import io.wispforest.owo.braid.widgets.button.MessageButton;
 import io.wispforest.owo.braid.widgets.flex.*;
 import io.wispforest.owo.braid.widgets.label.Label;
 import io.wispforest.owo.braid.widgets.label.LabelStyle;
+import io.wispforest.owo.braid.widgets.object.ItemStackWidget;
+import io.wispforest.owo.braid.widgets.object.entity.EntityDisplayMode;
 import io.wispforest.owo.braid.widgets.object.entity.EntityWidget;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
@@ -28,20 +25,19 @@ import io.wispforest.uwu.client.braid.TestSelector;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.cow.Cow;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.util.CommonColors;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 import java.util.Optional;
@@ -234,7 +230,7 @@ public class UwuBraidItem extends Item {
 
             @Override
             public void init() {
-                this.cow = new net.minecraft.world.entity.animal.cow.Cow((EntityType<? extends net.minecraft.world.entity.animal.cow.Cow>) BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("cow")), Minecraft.getInstance().level);
+                this.cow = new net.minecraft.world.entity.animal.cow.Cow(EntityTypes.COW, Minecraft.getInstance().level);
                 this.cow.setId(1_000_000 + (int) (Math.random() * 10000));
             }
 

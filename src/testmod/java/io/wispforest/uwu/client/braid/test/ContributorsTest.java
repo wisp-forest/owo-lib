@@ -43,7 +43,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.CommonColors;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -130,7 +130,7 @@ public class ContributorsTest extends StatefulWidget {
                                                                             .copy()
                                                                             .getStyle()
                                                                             .withHoverEvent(new HoverEvent.ShowEntity(new HoverEvent.EntityTooltipInfo(
-                                                                                BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("player")),
+                                                                                EntityTypes.PLAYER,
                                                                                 contributor.uuid,
                                                                                 contributor.displayName
                                                                             ))))

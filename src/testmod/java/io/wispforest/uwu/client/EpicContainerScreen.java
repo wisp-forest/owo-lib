@@ -1,21 +1,20 @@
 package io.wispforest.uwu.client;
 
-import net.minecraft.core.registries.BuiltInRegistries;
 import io.wispforest.owo.mixin.ui.SlotAccessor;
 import io.wispforest.owo.ui.base.BaseOwoContainerScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
-import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.component.LabelComponent;
-import io.wispforest.owo.ui.container.UIContainers;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.uwu.EpicMenu;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
@@ -50,7 +49,7 @@ public class EpicContainerScreen extends BaseOwoContainerScreen<FlowLayout, Epic
                                         .horizontalTextAlignment(HorizontalAlignment.CENTER)
                                         .positioning(Positioning.absolute(0, -9))
                                         .horizontalSizing(Sizing.fixed(100)))
-                                .child(UIComponents.entity(Sizing.fixed(100), BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("frog")), frogeNbt).scale(.75f).allowMouseRotation(true).tooltip(Component.literal(":)")))
+                                .child(UIComponents.entity(Sizing.fixed(100), EntityTypes.FROG, frogeNbt).scale(.75f).allowMouseRotation(true).tooltip(Component.literal(":)")))
                                 .child(UIContainers.horizontalFlow(Sizing.fixed(100), Sizing.content())
                                         .child(UIComponents.button(Component.nullToEmpty("✔"), (ButtonComponent button) -> {
                                             var text = selectBox.getValue();

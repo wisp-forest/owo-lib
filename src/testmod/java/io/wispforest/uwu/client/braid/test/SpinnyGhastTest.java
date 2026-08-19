@@ -1,7 +1,5 @@
 package io.wispforest.uwu.client.braid.test;
 
-import net.minecraft.resources.Identifier;
-import net.minecraft.core.registries.BuiltInRegistries;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.core.Size;
@@ -25,7 +23,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import org.joml.Matrix3x2f;
 
 import java.util.ArrayList;
@@ -47,14 +45,14 @@ public class SpinnyGhastTest extends StatefulWidget {
         @Override
         public void init() {
             this.entities = Stream.of(
-                BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("happy_ghast")),
-                BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("allay")),
-                BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("cow")),
-                BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("creaking")),
-                BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("breeze")),
-                BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("copper_golem")),
-                BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("bamboo_raft")),
-                BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("item_frame"))
+                EntityTypes.HAPPY_GHAST,
+                EntityTypes.ALLAY,
+                EntityTypes.COW,
+                EntityTypes.CREAKING,
+                EntityTypes.BREEZE,
+                EntityTypes.COPPER_GOLEM,
+                EntityTypes.BAMBOO_RAFT,
+                EntityTypes.ITEM_FRAME
             ).<Entity>map(
                 entityType -> {
                     var entity = entityType.create(Minecraft.getInstance().level, EntitySpawnReason.MOB_SUMMONED);

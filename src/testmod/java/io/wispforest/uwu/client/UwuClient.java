@@ -1,10 +1,9 @@
 package io.wispforest.uwu.client;
 
-import net.minecraft.core.registries.BuiltInRegistries;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.util.BraidHudElement;
-import io.wispforest.owo.braid.util.layers.BraidLayersBinding;
 import io.wispforest.owo.braid.util.BraidTooltipComponent;
+import io.wispforest.owo.braid.util.layers.BraidLayersBinding;
 import io.wispforest.owo.braid.widgets.basic.Box;
 import io.wispforest.owo.braid.widgets.basic.Clip;
 import io.wispforest.owo.braid.widgets.basic.Sized;
@@ -15,10 +14,10 @@ import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.particles.ClientParticles;
 import io.wispforest.owo.particles.systems.ParticleSystemController;
 import io.wispforest.owo.ui.component.ButtonComponent;
-import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.component.EntityComponent;
-import io.wispforest.owo.ui.container.UIContainers;
+import io.wispforest.owo.ui.component.UIComponents;
 import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.container.UIContainers;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.hud.Hud;
 import io.wispforest.owo.ui.layers.Layer;
@@ -35,21 +34,21 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.ClientTooltipComponentCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.PauseScreen;
-import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.KeyMapping;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.gui.screens.PauseScreen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.allay.Allay;
-import net.minecraft.world.item.Items;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.animal.allay.Allay;
+import net.minecraft.world.item.Items;
 import org.joml.Matrix3x2f;
 import org.lwjgl.glfw.GLFW;
 
@@ -80,7 +79,7 @@ public class UwuClient implements ClientModInitializer {
             UIContainers.verticalFlow(Sizing.content(), Sizing.content())
                 .child(UIComponents.item(Items.DIAMOND.getDefaultInstance()).margins(Insets.of(3)))
                 .child(UIComponents.label(Component.literal("epic stuff in hud")))
-                .child(UIComponents.entity(Sizing.fixed(50), BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("allay")), null))
+                .child(UIComponents.entity(Sizing.fixed(50), EntityTypes.ALLAY, null))
                 .alignment(HorizontalAlignment.CENTER, VerticalAlignment.CENTER)
                 .padding(Insets.of(5))
                 .surface(Surface.PANEL)
@@ -170,7 +169,7 @@ public class UwuClient implements ClientModInitializer {
 
             instance.adapter.rootComponent.child(
                 UIContainers.horizontalFlow(Sizing.content(), Sizing.content())
-                    .child(UIComponents.entity(Sizing.fixed(20), BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("allay")), null).<EntityComponent<Allay>>configure(component -> {
+                    .child(UIComponents.entity(Sizing.fixed(20), EntityTypes.ALLAY, null).<EntityComponent<Allay>>configure(component -> {
                         component.allowMouseRotation(true)
                             .scale(.75f);
 
