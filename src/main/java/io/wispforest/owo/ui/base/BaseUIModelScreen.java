@@ -132,6 +132,20 @@ public abstract class BaseUIModelScreen<R extends ParentUIComponent> extends Bas
             return new AssetDataSource(assetPath);
         }
 
+        static DataSource preloaded(Identifier assetPath) {
+            return new DataSource() {
+                @Override
+                public @Nullable UIModel get() {
+                    return UIModelLoader.getPreloaded(assetPath);
+                }
+
+                @Override
+                public void reportError() {
+                    UIErrorToast.report("No UI model with id " + assetPath + " was found");
+                }
+            };
+        }
+
         record AssetDataSource(Identifier assetPath) implements DataSource {
             @Override
             public @Nullable UIModel get() {

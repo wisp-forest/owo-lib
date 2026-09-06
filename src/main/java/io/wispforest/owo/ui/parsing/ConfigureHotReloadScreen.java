@@ -27,7 +27,7 @@ public class ConfigureHotReloadScreen extends BaseUIModelScreen<FlowLayout> impl
     private LabelComponent fileNameLabel;
 
     public ConfigureHotReloadScreen(Identifier modelId, @Nullable Screen parent) {
-        super(FlowLayout.class, DataSource.asset(Owo.id("configure_hot_reload")));
+        super(FlowLayout.class, DataSource.preloaded(Owo.id("configure_hot_reload")));
         this.parent = parent;
 
         this.modelId = modelId;
