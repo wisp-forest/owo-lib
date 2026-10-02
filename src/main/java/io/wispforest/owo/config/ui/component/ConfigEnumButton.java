@@ -1,5 +1,6 @@
 package io.wispforest.owo.config.ui.component;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.locale.Language;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.ui.component.ButtonComponent;
@@ -12,7 +13,6 @@ import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.Locale;
 
@@ -33,7 +33,7 @@ public class ConfigEnumButton extends ButtonComponent implements OptionValueProv
 
     @Override
     public boolean onMouseDown(MouseButtonEvent click, boolean doubled) {
-        this.wasRightClicked = click.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT;
+        this.wasRightClicked = click.button() == InputConstants.MOUSE_BUTTON_RIGHT;
         return super.onMouseDown(click, doubled);
     }
 
@@ -54,7 +54,7 @@ public class ConfigEnumButton extends ButtonComponent implements OptionValueProv
 
     @Override
     protected boolean isValidClickButton(MouseButtonInfo input) {
-        return input.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT || super.isValidClickButton(input);
+        return input.button() == InputConstants.MOUSE_BUTTON_RIGHT || super.isValidClickButton(input);
     }
 
     protected void updateMessage() {

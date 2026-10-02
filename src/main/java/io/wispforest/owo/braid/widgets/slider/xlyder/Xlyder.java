@@ -393,7 +393,7 @@ public class Xlyder extends StatefulWidget {
                                 mouseArea -> mouseArea
                                     //TODO: decide what to do with buttons here
                                     .clickCallback((x, y, button, modifiers) -> {
-                                        if (button != 0) return false;
+                                        if (button != com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT) return false;
 
                                         y = constraints.maxHeight() - y;
                                         Vector2dc initialDragValue = new Vector2d(this.normalizedValue);

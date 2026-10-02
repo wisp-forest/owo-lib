@@ -1,5 +1,6 @@
 package io.wispforest.owo.renderdoc;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.ptr.IntByReference;
@@ -11,8 +12,8 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 import org.lwjgl.system.linux.DynamicLinkLoader;
+import org.lwjgl.sdl.SDLScancode;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -350,78 +351,78 @@ public final class RenderDoc {
 
     public enum Key {
         // '0' - '9' matches ASCII values
-        ZERO(0x30, GLFW.GLFW_KEY_0),
-        ONE(0x31, GLFW.GLFW_KEY_1),
-        TWO(0x32, GLFW.GLFW_KEY_2),
-        THREE(0x33, GLFW.GLFW_KEY_2),
-        FOUR(0x34, GLFW.GLFW_KEY_4),
-        FIVE(0x35, GLFW.GLFW_KEY_5),
-        SIX(0x36, GLFW.GLFW_KEY_6),
-        SEVEN(0x37, GLFW.GLFW_KEY_7),
-        EIGHT(0x38, GLFW.GLFW_KEY_8),
-        NINE(0x39, GLFW.GLFW_KEY_9),
+        ZERO(0x30, InputConstants.KEY_0),
+        ONE(0x31, InputConstants.KEY_1),
+        TWO(0x32, InputConstants.KEY_2),
+        THREE(0x33, InputConstants.KEY_2),
+        FOUR(0x34, InputConstants.KEY_4),
+        FIVE(0x35, InputConstants.KEY_5),
+        SIX(0x36, InputConstants.KEY_6),
+        SEVEN(0x37, InputConstants.KEY_7),
+        EIGHT(0x38, InputConstants.KEY_8),
+        NINE(0x39, InputConstants.KEY_9),
 
         // 'A' - 'Z' matches ASCII values
-        A(0x41, GLFW.GLFW_KEY_A),
-        B(0x42, GLFW.GLFW_KEY_B),
-        C(0x43, GLFW.GLFW_KEY_C),
-        D(0x44, GLFW.GLFW_KEY_D),
-        E(0x45, GLFW.GLFW_KEY_E),
-        F(0x46, GLFW.GLFW_KEY_F),
-        G(0x47, GLFW.GLFW_KEY_G),
-        H(0x48, GLFW.GLFW_KEY_H),
-        I(0x49, GLFW.GLFW_KEY_I),
-        J(0x4A, GLFW.GLFW_KEY_J),
-        K(0x4B, GLFW.GLFW_KEY_K),
-        L(0x4C, GLFW.GLFW_KEY_L),
-        M(0x4D, GLFW.GLFW_KEY_M),
-        N(0x4E, GLFW.GLFW_KEY_N),
-        O(0x4F, GLFW.GLFW_KEY_O),
-        P(0x50, GLFW.GLFW_KEY_P),
-        Q(0x51, GLFW.GLFW_KEY_Q),
-        R(0x52, GLFW.GLFW_KEY_R),
-        S(0x53, GLFW.GLFW_KEY_S),
-        T(0x54, GLFW.GLFW_KEY_T),
-        U(0x55, GLFW.GLFW_KEY_U),
-        V(0x56, GLFW.GLFW_KEY_V),
-        W(0x57, GLFW.GLFW_KEY_W),
-        X(0x58, GLFW.GLFW_KEY_X),
-        Y(0x59, GLFW.GLFW_KEY_Y),
-        Z(0x5A, GLFW.GLFW_KEY_Z),
+        A(0x41, InputConstants.KEY_A),
+        B(0x42, InputConstants.KEY_B),
+        C(0x43, InputConstants.KEY_C),
+        D(0x44, InputConstants.KEY_D),
+        E(0x45, InputConstants.KEY_E),
+        F(0x46, InputConstants.KEY_F),
+        G(0x47, InputConstants.KEY_G),
+        H(0x48, InputConstants.KEY_H),
+        I(0x49, InputConstants.KEY_I),
+        J(0x4A, InputConstants.KEY_J),
+        K(0x4B, InputConstants.KEY_K),
+        L(0x4C, InputConstants.KEY_L),
+        M(0x4D, InputConstants.KEY_M),
+        N(0x4E, InputConstants.KEY_N),
+        O(0x4F, InputConstants.KEY_O),
+        P(0x50, InputConstants.KEY_P),
+        Q(0x51, InputConstants.KEY_Q),
+        R(0x52, InputConstants.KEY_R),
+        S(0x53, InputConstants.KEY_S),
+        T(0x54, InputConstants.KEY_T),
+        U(0x55, InputConstants.KEY_U),
+        V(0x56, InputConstants.KEY_V),
+        W(0x57, InputConstants.KEY_W),
+        X(0x58, InputConstants.KEY_X),
+        Y(0x59, InputConstants.KEY_Y),
+        Z(0x5A, InputConstants.KEY_Z),
 
         // leave the rest of the ASCII range free
         // in case we want to use it later
         NON_PRINTABLE(0x100, -1),
 
-        DIVIDE(0x101, GLFW.GLFW_KEY_KP_DIVIDE),
-        MULTIPLY(0x102, GLFW.GLFW_KEY_KP_MULTIPLY),
-        SUBTRACT(0x103, GLFW.GLFW_KEY_KP_SUBTRACT),
-        PLUS(0x104, GLFW.GLFW_KEY_KP_ADD),
+        DIVIDE(0x101, SDLScancode.SDL_SCANCODE_KP_DIVIDE),
+        MULTIPLY(0x102, InputConstants.KEY_MULTIPLY),
+        SUBTRACT(0x103, SDLScancode.SDL_SCANCODE_KP_MINUS),
+        PLUS(0x104, InputConstants.KEY_ADD),
 
-        F1(0x105, GLFW.GLFW_KEY_F1),
-        F2(0x106, GLFW.GLFW_KEY_F2),
-        F3(0x107, GLFW.GLFW_KEY_F3),
-        F4(0x108, GLFW.GLFW_KEY_F4),
-        F5(0x109, GLFW.GLFW_KEY_F5),
-        F6(0x10a, GLFW.GLFW_KEY_F6),
-        F7(0x10b, GLFW.GLFW_KEY_F7),
-        F8(0x10c, GLFW.GLFW_KEY_F8),
-        F9(0x10d, GLFW.GLFW_KEY_F9),
-        F10(0x10e, GLFW.GLFW_KEY_F10),
-        F11(0x10f, GLFW.GLFW_KEY_F11),
-        F12(0x110, GLFW.GLFW_KEY_F12),
+        F1(0x105, InputConstants.KEY_F1),
+        F2(0x106, InputConstants.KEY_F2),
+        F3(0x107, InputConstants.KEY_F3),
+        F4(0x108, InputConstants.KEY_F4),
+        F5(0x109, InputConstants.KEY_F5),
+        F6(0x10a, InputConstants.KEY_F6),
+        F7(0x10b, InputConstants.KEY_F7),
+        F8(0x10c, InputConstants.KEY_F8),
+        F9(0x10d, InputConstants.KEY_F9),
+        F10(0x10e, InputConstants.KEY_F10),
+        F11(0x10f, InputConstants.KEY_F11),
+        F12(0x110, InputConstants.KEY_F12),
 
-        HOME(0x111, GLFW.GLFW_KEY_HOME),
-        END(0x112, GLFW.GLFW_KEY_END),
-        INSERT(0x113, GLFW.GLFW_KEY_INSERT),
-        DELETE(0x114, GLFW.GLFW_KEY_DELETE),
-        PAGE_UP(0x115, GLFW.GLFW_KEY_PAGE_UP),
-        PAGE_DOWN(0x116, GLFW.GLFW_KEY_PAGE_DOWN),
+        HOME(0x111, InputConstants.KEY_HOME),
+        END(0x112, InputConstants.KEY_END),
+        INSERT(0x113, InputConstants.KEY_INSERT),
+        DELETE(0x114, InputConstants.KEY_DELETE),
+        PAGE_UP(0x115, InputConstants.KEY_PAGEUP),
+        PAGE_DOWN(0x116, InputConstants.KEY_PAGEDOWN),
 
-        BACKSPACE(0x117, GLFW.GLFW_KEY_BACKSPACE),
-        TAB(0x118, GLFW.GLFW_KEY_TAB),
-        PRINT_SCREEN(0x119, GLFW.GLFW_KEY_PRINT_SCREEN),
-        PAUSE(0x11a, GLFW.GLFW_KEY_PAUSE);
+        BACKSPACE(0x117, InputConstants.KEY_BACKSPACE),
+        TAB(0x118, InputConstants.KEY_TAB),
+        PRINT_SCREEN(0x119, InputConstants.KEY_PRINTSCREEN),
+        PAUSE(0x11a, InputConstants.KEY_PAUSE);
 
         private final int keycode;
         private final int glfw;

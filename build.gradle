@@ -1,6 +1,6 @@
 //file:noinspection GradlePackageVersionRange
 plugins {
-    id 'net.fabricmc.fabric-loom' version '1.15-SNAPSHOT'
+    id 'net.fabricmc.fabric-loom' version '1.16.3'
     id 'maven-publish'
 }
 
@@ -27,10 +27,11 @@ allprojects {
 
     processResources {
         inputs.property "version", project.version
+        inputs.property "minecraft_version", rootProject.minecraft_version
         filteringCharset "UTF-8"
 
         filesMatching("fabric.mod.json") {
-            expand "version": project.version
+            expand "version": project.version, "minecraft_version": rootProject.minecraft_version
         }
     }
 
@@ -73,6 +74,12 @@ allprojects {
         }
 
         repositories {
+            if (project.hasProperty('portDependencyRepository')) {
+                maven {
+                    name = 'portDependencies'
+                    url = uri(project.portDependencyRepository)
+                }
+            }
             maven {
                 url ENV.MAVEN_URL
                 credentials {
@@ -155,6 +162,13 @@ dependencies {
 
     testmodImplementation sourceSets.main.output
     testmodAnnotationProcessor sourceSets.main.output
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.13.4'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.13.4'
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
 }
 
 javadoc {

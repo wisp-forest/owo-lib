@@ -1,5 +1,6 @@
 package io.wispforest.owo.config.ui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.locale.Language;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.config.ConfigWrapper;
@@ -34,7 +35,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -365,7 +365,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
 
     @Override
     public boolean keyPressed(KeyEvent input) {
-        if (input.key() == GLFW.GLFW_KEY_F && input.hasControlDown()) {
+        if (input.key() == InputConstants.KEY_F && input.hasControlDown()) {
             this.uiAdapter.rootComponent.focusHandler().focus(
                 this.uiAdapter.rootComponent.childById(UIComponent.class, "search-field"),
                 UIComponent.FocusSource.MOUSE_CLICK

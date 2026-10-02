@@ -1,40 +1,28 @@
 package io.wispforest.owo.mixin.tweaks;
 
+import com.mojang.blaze3d.Blaze3D;
 import com.mojang.logging.LogUtils;
 import net.minecraft.util.Util;
+import org.lwjgl.sdl.SDLError;
+import org.lwjgl.sdl.SDLMisc;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-
-import java.io.IOException;
 import java.net.URI;
-import java.util.concurrent.CompletableFuture;
 
-@Mixin(value = Util.OS.class)
+@Mixin(Blaze3D.class)
 public abstract class OperatingSystemMixin {
-
-    @Shadow protected abstract String[] getOpenUriArguments(URI uri);
-
     /**
      * @author glisco
-     * @reason By not properly consuming the stdout stream of the started process,
-     * Minecraft's implementation of this method causes xdg-open on linux to fail at actually
-     * opening the target program about 80% of the time. This overwrite uses a more modern approach
-     * to starting processes and properly voids both stdout and stderr, making xdg-open succeed
-     * at opening the user's desired application 100% of the time
+     * @reason Keep URI opening asynchronous and avoid unconsumed subprocess
+     * streams. Minecraft 26.3 delegates platform launching to SDL instead of
+     * constructing xdg-open processes in Util.OS.
      */
-    @Overwrite()
-    public void openUri(URI uri) {
-        CompletableFuture.runAsync(() -> {
-            try {
-                final var command = getOpenUriArguments(uri);
-                new ProcessBuilder(command)
-                        .redirectError(ProcessBuilder.Redirect.DISCARD)
-                        .redirectOutput(ProcessBuilder.Redirect.DISCARD)
-                        .start();
-            } catch (IOException e) {
-                LogUtils.getLogger().error("Couldn't open uri '{}'", uri, e);
+    @Overwrite
+    public static void openUri(URI uri) {
+        Util.nonCriticalIoPool().execute(() -> {
+            if (!SDLMisc.SDL_OpenURL(uri.toString())) {
+                LogUtils.getLogger().error("Couldn't open uri '{}': {}", uri, SDLError.SDL_GetError());
             }
-        }, Util.backgroundExecutor());
+        });
     }
 }

@@ -26,3 +26,6 @@ accessible class net/minecraft/core/component/DataComponentMap$Builder$SimpleMap
 
 accessible class net/minecraft/server/packs/resources/FallbackResourceManager$PackEntry
 accessible field net/minecraft/server/packs/resources/FallbackResourceManager$PackEntry resources Lnet/minecraft/server/packs/PackResources;
+
+accessible field net/minecraft/client/gui/render/pip/PictureInPictureRenderer textureView Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+accessible field net/minecraft/client/gui/render/pip/PictureInPictureRenderer depthTextureView Lcom/mojang/renderpearl/api/textures/GpuTextureView;

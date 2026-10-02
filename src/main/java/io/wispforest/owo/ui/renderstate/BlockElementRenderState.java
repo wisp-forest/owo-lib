@@ -78,8 +78,8 @@ public record BlockElementRenderState(
             matrices.translate(0, -height / 2f, 100);
             matrices.scale(40 * width / 64f, -40 * height / 64f, -40);
 
-            matrices.mulPose(Axis.XP.rotationDegrees(30));
-            matrices.mulPose(Axis.YP.rotationDegrees(45 + 180));
+            matrices.rotate(Axis.XP.rotationDegrees(30));
+            matrices.rotate(Axis.YP.rotationDegrees(45 + 180));
 
             matrices.translate(-.5, -.5, -.5);
 

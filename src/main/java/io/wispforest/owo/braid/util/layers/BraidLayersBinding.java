@@ -162,11 +162,11 @@ public class BraidLayersBinding {
             });
 
             ScreenKeyboardEvents.allowKeyPress(screeen).register((screen, keyInput) -> {
-                return !tryHandleEvent(screen, new KeyPressEvent(keyInput.key(), keyInput.scancode(), keyInput.modifiers()));
+                return !tryHandleEvent(screen, new KeyPressEvent(keyInput.key(), keyInput.keycode(), keyInput.modifiers()));
             });
 
             ScreenKeyboardEvents.allowKeyRelease(screeen).register((screen, keyInput) -> {
-                return !tryHandleEvent(screen, new KeyReleaseEvent(keyInput.key(), keyInput.scancode(), keyInput.modifiers()));
+                return !tryHandleEvent(screen, new KeyReleaseEvent(keyInput.key(), keyInput.keycode(), keyInput.modifiers()));
             });
         });
     }

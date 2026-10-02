@@ -63,9 +63,9 @@ public final class ItemGroupButton implements OwoItemGroup.ButtonDefinition {
             final var client = Minecraft.getInstance();
             var screen = client.gui.screen();
             client.setScreenAndShow(new ConfirmLinkScreen(confirmed -> {
-                if (confirmed) Util.getPlatform().openUri(url);
+                if (confirmed) com.mojang.blaze3d.Blaze3D.openUri(java.net.URI.create(url));
                 client.setScreenAndShow(screen);
-            }, url, true));
+            }, java.net.URI.create(url), true));
         });
     }
 

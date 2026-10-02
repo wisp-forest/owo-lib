@@ -1,15 +1,15 @@
 package io.wispforest.owo.ui.renderstate;
 
-import com.mojang.blaze3d.GpuFormat;
+import com.mojang.renderpearl.api.GpuFormat;
 import com.google.common.collect.MapMaker;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.wispforest.owo.ui.core.OwoUIPipelines;
 import io.wispforest.owo.ui.event.ClientRenderCallback;
@@ -19,7 +19,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.TextureSetup;
-import net.minecraft.client.renderer.DynamicUniformStorage;
+import net.minecraft.client.renderer.DynamicGpuDataStorage;
+import net.minecraft.client.renderer.DynamicGpuDataStorageMapped;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
 import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -47,7 +49,7 @@ public record BlurQuadElementRenderState(
 
         var window = client.getWindow();
 
-        input = new TextureTarget("owo_blur_input", window.getWidth(), window.getHeight(), false, GpuFormat.RGBA8_UNORM);
+        input = new TextureTarget("owo_blur_input", window.getWidth(), window.getHeight(), GpuFormat.RGBA8_UNORM, null);
         inputView = RenderSystem.getDevice().createTextureView(input.getColorTexture());
 
         WindowResizeCallback.EVENT.register((innerClient, innerWindow) -> {
@@ -122,18 +124,18 @@ public record BlurQuadElementRenderState(
 
     public static class Uniforms {
         public static final int SIZE = new Std140SizeCalculator().putVec2().putFloat().putFloat().putFloat().get();
-        private final DynamicUniformStorage<Value> storage = new DynamicUniformStorage<>("Blur Settings UBO", SIZE, 4);
+        private final DynamicGpuDataStorage<Value> storage = new DynamicGpuDataStorageMapped<>("Blur Settings UBO", SIZE, 4, GpuBuffer.USAGE_UNIFORM);
 
         public void clear() {
             this.storage.endFrame();
         }
 
         public GpuBufferSlice write(Vector2i inputResolution, int directions, float quality, float size) {
-            return this.storage.writeUniform(new Value(inputResolution, directions, quality, size));
+            return this.storage.writeData(new Value(inputResolution, directions, quality, size));
         }
 
         @Environment(EnvType.CLIENT)
-        public record Value(Vector2i inputResolution, int directions, float quality, float size) implements DynamicUniformStorage.DynamicUniform {
+        public record Value(Vector2i inputResolution, int directions, float quality, float size) implements DynamicGpuDataStorage.DynamicGpuData {
             @Override
             public void write(ByteBuffer buffer) {
                 Std140Builder.intoBuffer(buffer)

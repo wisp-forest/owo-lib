@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.base;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.ParentUIComponent;
@@ -12,7 +13,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 public abstract class BaseUIModelContainerScreen<R extends ParentUIComponent, S extends AbstractContainerMenu> extends BaseOwoContainerScreen<R, S> {
 
@@ -53,7 +53,7 @@ public abstract class BaseUIModelContainerScreen<R extends ParentUIComponent, S 
 
     @Override
     public boolean keyPressed(KeyEvent input) {
-        if (Owo.DEBUG && this.modelId != null && input.key() == GLFW.GLFW_KEY_F5 && input.hasControlDown()) {
+        if (Owo.DEBUG && this.modelId != null && input.key() == InputConstants.KEY_F5 && input.hasControlDown()) {
             this.minecraft.setScreenAndShow(new ConfigureHotReloadScreen(this.modelId, this));
             return true;
         }

@@ -75,6 +75,7 @@
     "itemgroup.CreativeModeInventoryScreenMixin",
     "itemgroup.EffectsInInventoryMixin",
     "itemgroup.MixinCreativeModeInventoryScreenMixin",
+    "shader.GlProgramMixin",
     "shader.GlProgramAccessor",
     "text.ClientLanguageMixin",
     "tweaks.EditBoxMixin",

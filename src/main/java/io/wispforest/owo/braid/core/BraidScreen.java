@@ -95,13 +95,13 @@ public class BraidScreen extends Screen implements DisposableScreen {
 
     @Override
     public boolean keyPressed(KeyEvent input) {
-        this.eventBinding.add(new KeyPressEvent(input.key(), input.scancode(), input.modifiers()));
+        this.eventBinding.add(new KeyPressEvent(input.key(), input.keycode(), input.modifiers()));
         return super.keyPressed(input);
     }
 
     @Override
     public boolean keyReleased(KeyEvent input) {
-        this.eventBinding.add(new KeyReleaseEvent(input.key(), input.scancode(), input.modifiers()));
+        this.eventBinding.add(new KeyReleaseEvent(input.key(), input.keycode(), input.modifiers()));
         return true;
     }
 

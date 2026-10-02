@@ -1,6 +1,6 @@
 package io.wispforest.owo.braid.core;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import io.wispforest.owo.Owo;
 import net.minecraft.client.renderer.RenderPipelines;
 import org.jetbrains.annotations.ApiStatus;

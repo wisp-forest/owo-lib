@@ -1,6 +1,6 @@
 package io.wispforest.owo.braid.core.cursor;
 
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLMouse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,24 +25,30 @@ public class CursorController {
         if (this.disposed || this.lastCursorStyle == style) return;
 
         if (style == CursorStyle.NONE) {
-            GLFW.glfwSetCursor(this.windowHandle, 0);
+            if (SDLMouse.SDL_GetMouseFocus() == this.windowHandle) SDLMouse.SDL_SetCursor(SDLMouse.SDL_GetDefaultCursor());
         } else {
             if (!this.cursors.containsKey(style)) {
                 this.cursors.put(style, style.allocate());
             }
 
-            GLFW.glfwSetCursor(this.windowHandle, this.cursors.get(style));
+            if (SDLMouse.SDL_GetMouseFocus() == this.windowHandle) SDLMouse.SDL_SetCursor(this.cursors.get(style));
         }
 
         this.lastCursorStyle = style;
     }
 
+    public void apply() {
+        if (this.disposed) return;
+        SDLMouse.SDL_SetCursor(this.cursors.getOrDefault(this.lastCursorStyle, SDLMouse.SDL_GetDefaultCursor()));
+    }
+
     public void dispose() {
         if (this.disposed) return;
 
+        SDLMouse.SDL_SetCursor(SDLMouse.SDL_GetDefaultCursor());
         for (var ptr : this.cursors.values()) {
-            if (ptr == 0) return;
-            GLFW.glfwDestroyCursor(ptr);
+            if (ptr == 0) continue;
+            SDLMouse.SDL_DestroyCursor(ptr);
         }
 
         this.disposed = true;

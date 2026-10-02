@@ -1,6 +1,7 @@
-#version 150
+#version 330
+#extension GL_ARB_separate_shader_objects : require
 
-#moj_import <minecraft:dynamictransforms.glsl>
+#include <minecraft:dynamictransforms.glsl>
 
 uniform sampler2D InputSampler;
 layout(std140) uniform BlurSettings {
@@ -10,7 +11,7 @@ layout(std140) uniform BlurSettings {
     float Size;
 };
 
-out vec4 fragColor;
+layout(location = 0) out vec4 fragColor;
 
 // shader adapted from https://www.shadertoy.com/view/Xltfzj
 

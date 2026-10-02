@@ -1,7 +1,8 @@
 package io.wispforest.owo.braid.core;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.google.common.collect.Iterables;
-import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.core.events.*;
 import io.wispforest.owo.braid.framework.BuildContext;
@@ -29,7 +30,6 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 import org.joml.Vector2dc;
 import org.joml.Vector2f;
-import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
 import java.time.Duration;
@@ -379,14 +379,14 @@ public class AppState implements InstanceHost, ProxyHost {
                     }
                 }
                 case KeyPressEvent(int keyCode, int scancode, KeyModifiers modifiers) -> {
-                    if (keyCode == GLFW.GLFW_KEY_R && modifiers.shift() && modifiers.alt()) {
+                    if (keyCode == InputConstants.KEY_R && modifiers.shift() && modifiers.alt()) {
                         this.rebuildRoot();
                         slot.markHandled();
 
                         break;
                     }
 
-                    if (keyCode == GLFW.GLFW_KEY_I && modifiers.ctrl() && modifiers.shift()) {
+                    if (keyCode == InputConstants.KEY_I && modifiers.ctrl() && modifiers.shift()) {
                         this.inspector.activate();
                         slot.markHandled();
 

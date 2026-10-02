@@ -1,12 +1,12 @@
 package io.wispforest.owo.ui.core;
 
-import com.mojang.blaze3d.pipeline.BindGroupLayout;
-import com.mojang.blaze3d.pipeline.BlendFunction;
-import com.mojang.blaze3d.pipeline.ColorTargetState;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.shaders.UniformType;
+import com.mojang.renderpearl.api.pipeline.BindGroupLayout;
+import com.mojang.renderpearl.api.pipeline.BlendFunction;
+import com.mojang.renderpearl.api.pipeline.ColorTargetState;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.UniformType;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.PrimitiveTopology;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
@@ -34,7 +34,7 @@ public final class OwoUIPipelines {
         .withVertexShader(Identifier.fromNamespaceAndPath("owo", "core/blur"))
         .withFragmentShader(Identifier.fromNamespaceAndPath("owo", "core/blur"))
         .withBindGroupLayout(BindGroupLayout.builder()
-            .withSampler("InputSampler")
+            .withUniform("InputSampler", com.mojang.renderpearl.api.pipeline.UniformType.COMBINED_IMAGE_SAMPLER)
             .withUniform("BlurSettings", UniformType.UNIFORM_BUFFER)
             .build())
         .build();

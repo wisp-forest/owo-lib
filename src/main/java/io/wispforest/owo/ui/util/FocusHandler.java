@@ -1,10 +1,10 @@
 package io.wispforest.owo.ui.util;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import io.wispforest.owo.ui.core.ParentUIComponent;
 import io.wispforest.owo.ui.core.UIComponent;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 
@@ -60,7 +60,7 @@ public class FocusHandler {
 
         var closest = this.focused;
         switch (keyCode) {
-            case GLFW.GLFW_KEY_RIGHT -> {
+            case InputConstants.KEY_RIGHT -> {
                 int closestX = Integer.MAX_VALUE, closestY = Integer.MAX_VALUE;
 
                 for (var child : allChildren) {
@@ -73,7 +73,7 @@ public class FocusHandler {
                     closestY = Math.abs(child.y() - this.focused.y());
                 }
             }
-            case GLFW.GLFW_KEY_LEFT -> {
+            case InputConstants.KEY_LEFT -> {
                 int closestX = 0, closestY = Integer.MAX_VALUE;
 
                 for (var child : allChildren) {
@@ -86,7 +86,7 @@ public class FocusHandler {
                     closestY = Math.abs(child.y() - this.focused.y());
                 }
             }
-            case GLFW.GLFW_KEY_UP -> {
+            case InputConstants.KEY_UP -> {
                 int closestX = Integer.MAX_VALUE, closestY = 0;
 
                 for (var child : allChildren) {
@@ -99,7 +99,7 @@ public class FocusHandler {
                     closestY = child.y() + child.height();
                 }
             }
-            case GLFW.GLFW_KEY_DOWN -> {
+            case InputConstants.KEY_DOWN -> {
                 int closestX = Integer.MAX_VALUE, closestY = Integer.MAX_VALUE;
 
                 for (var child : allChildren) {

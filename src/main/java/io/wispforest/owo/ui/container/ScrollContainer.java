@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.container;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.parsing.UIModel;
@@ -13,7 +14,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
-import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -231,10 +231,10 @@ public class ScrollContainer<C extends UIComponent> extends WrappingParentUIComp
             this.scrollBy(-10, false, true);
         } else if (input.key() == this.direction.moreKeycode) {
             this.scrollBy(10, false, true);
-        } else if (input.key() == GLFW.GLFW_KEY_PAGE_DOWN) {
+        } else if (input.key() == InputConstants.KEY_PAGEDOWN) {
             this.scrollBy(this.direction.choose(this.width, this.height) * .8, false, true);
             this.lastScrollbarInteractTime = System.currentTimeMillis() + 1250;
-        } else if (input.key() == GLFW.GLFW_KEY_PAGE_UP) {
+        } else if (input.key() == InputConstants.KEY_PAGEUP) {
             this.scrollBy(this.direction.choose(this.width, this.height) * -.8, false, true);
         }
 
@@ -438,8 +438,8 @@ public class ScrollContainer<C extends UIComponent> extends WrappingParentUIComp
     }
 
     public enum ScrollDirection {
-        VERTICAL(UIComponent::height, UIComponent::updateY, UIComponent::y, Insets::vertical, GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_DOWN),
-        HORIZONTAL(UIComponent::width, UIComponent::updateX, UIComponent::x, Insets::horizontal, GLFW.GLFW_KEY_LEFT, GLFW.GLFW_KEY_RIGHT);
+        VERTICAL(UIComponent::height, UIComponent::updateY, UIComponent::y, Insets::vertical, InputConstants.KEY_UP, InputConstants.KEY_DOWN),
+        HORIZONTAL(UIComponent::width, UIComponent::updateX, UIComponent::x, Insets::horizontal, InputConstants.KEY_LEFT, InputConstants.KEY_RIGHT);
 
         public final Function<UIComponent, Integer> sizeGetter;
         public final BiConsumer<UIComponent, Integer> coordinateSetter;

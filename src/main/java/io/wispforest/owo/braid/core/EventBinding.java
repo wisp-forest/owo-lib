@@ -3,7 +3,6 @@ package io.wispforest.owo.braid.core;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.wispforest.owo.braid.core.events.UserEvent;
 import net.minecraft.client.Minecraft;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,12 +29,12 @@ public abstract class EventBinding {
 
     public KeyModifiers activeModifiers() {
         return new KeyModifiers(
-            (this.isKeyPressed(GLFW.GLFW_KEY_LEFT_SHIFT) || this.isKeyPressed(GLFW.GLFW_KEY_RIGHT_SHIFT) ? GLFW.GLFW_MOD_SHIFT : 0)
-            | (this.isKeyPressed(GLFW.GLFW_KEY_LEFT_CONTROL) || this.isKeyPressed(GLFW.GLFW_KEY_RIGHT_CONTROL) ? GLFW.GLFW_MOD_CONTROL : 0)
-            | (this.isKeyPressed(GLFW.GLFW_KEY_LEFT_ALT) || this.isKeyPressed(GLFW.GLFW_KEY_RIGHT_ALT) ? GLFW.GLFW_MOD_ALT : 0)
-            | (this.isKeyPressed(GLFW.GLFW_KEY_RIGHT_SUPER) || this.isKeyPressed(GLFW.GLFW_KEY_RIGHT_SUPER) ? GLFW.GLFW_MOD_SUPER : 0)
-            | (this.isKeyPressed(GLFW.GLFW_KEY_NUM_LOCK) ? GLFW.GLFW_MOD_NUM_LOCK : 0)
-            | (this.isKeyPressed(GLFW.GLFW_KEY_CAPS_LOCK) ? GLFW.GLFW_MOD_CAPS_LOCK : 0)
+            (this.isKeyPressed(InputConstants.KEY_LSHIFT) || this.isKeyPressed(InputConstants.KEY_RSHIFT) ? InputConstants.MOD_SHIFT : 0)
+            | (this.isKeyPressed(InputConstants.KEY_LCONTROL) || this.isKeyPressed(InputConstants.KEY_RCONTROL) ? InputConstants.MOD_CONTROL : 0)
+            | (this.isKeyPressed(InputConstants.KEY_LALT) || this.isKeyPressed(InputConstants.KEY_RALT) ? InputConstants.MOD_ALT : 0)
+            | (this.isKeyPressed(InputConstants.KEY_LGUI) || this.isKeyPressed(InputConstants.KEY_RGUI) ? InputConstants.MOD_SUPER : 0)
+            | (this.isKeyPressed(InputConstants.KEY_NUMLOCK) ? InputConstants.MOD_NUM_LOCK : 0)
+            | (this.isKeyPressed(InputConstants.KEY_CAPSLOCK) ? InputConstants.MOD_CAPS_LOCK : 0)
         );
     }
 
@@ -68,7 +67,7 @@ public abstract class EventBinding {
     public static class Default extends EventBinding {
         @Override
         public boolean isKeyPressed(int keyCode) {
-            return InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), keyCode);
+            return InputConstants.isKeyDown(keyCode);
         }
     }
 }

@@ -1,7 +1,7 @@
 package io.wispforest.owo.ui.core;
 
 import com.google.common.base.Preconditions;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import io.wispforest.owo.mixin.ui.access.GuiGraphicsExtractorAccessor;
 import io.wispforest.owo.ui.event.WindowResizeCallback;
 import io.wispforest.owo.ui.renderstate.CircleElementRenderState;
@@ -249,7 +249,7 @@ public class OwoUIGraphics extends GuiGraphicsExtractor {
     }
 
     public void drawTooltip(Font textRenderer, int x, int y, List<ClientTooltipComponent> components, @Nullable Identifier texture) {
-        ((GuiGraphicsExtractorAccessor) this).owo$tooltip(textRenderer, components, x, y, DefaultTooltipPositioner.INSTANCE, texture);
+        this.tooltip(textRenderer, components, x, y, DefaultTooltipPositioner.INSTANCE, texture, true);
     }
 
     @Override

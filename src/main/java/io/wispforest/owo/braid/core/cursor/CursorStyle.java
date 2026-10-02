@@ -1,22 +1,22 @@
 package io.wispforest.owo.braid.core.cursor;
 
+import org.lwjgl.sdl.SDLMouse;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import net.minecraft.util.Mth;
 import org.joml.Matrix3x2f;
-import org.lwjgl.glfw.GLFW;
 
 public sealed interface CursorStyle permits SystemCursorStyle {
     CursorStyle NONE = new SystemCursorStyle(0);
-    CursorStyle POINTER = new SystemCursorStyle(GLFW.GLFW_ARROW_CURSOR);
-    CursorStyle TEXT = new SystemCursorStyle(GLFW.GLFW_IBEAM_CURSOR);
-    CursorStyle HAND = new SystemCursorStyle(GLFW.GLFW_HAND_CURSOR);
-    CursorStyle MOVE = new SystemCursorStyle(GLFW.GLFW_RESIZE_ALL_CURSOR);
-    CursorStyle CROSSHAIR = new SystemCursorStyle(GLFW.GLFW_CROSSHAIR_CURSOR);
-    CursorStyle HORIZONTAL_RESIZE = new SystemCursorStyle(GLFW.GLFW_HRESIZE_CURSOR);
-    CursorStyle VERTICAL_RESIZE = new SystemCursorStyle(GLFW.GLFW_VRESIZE_CURSOR);
-    CursorStyle NWSE_RESIZE = new SystemCursorStyle(GLFW.GLFW_RESIZE_NWSE_CURSOR);
-    CursorStyle NESW_RESIZE = new SystemCursorStyle(GLFW.GLFW_RESIZE_NESW_CURSOR);
-    CursorStyle NOT_ALLOWED = new SystemCursorStyle(GLFW.GLFW_NOT_ALLOWED_CURSOR);
+    CursorStyle POINTER = new SystemCursorStyle(SDLMouse.SDL_SYSTEM_CURSOR_DEFAULT);
+    CursorStyle TEXT = new SystemCursorStyle(SDLMouse.SDL_SYSTEM_CURSOR_TEXT);
+    CursorStyle HAND = new SystemCursorStyle(SDLMouse.SDL_SYSTEM_CURSOR_POINTER);
+    CursorStyle MOVE = new SystemCursorStyle(SDLMouse.SDL_SYSTEM_CURSOR_MOVE);
+    CursorStyle CROSSHAIR = new SystemCursorStyle(SDLMouse.SDL_SYSTEM_CURSOR_CROSSHAIR);
+    CursorStyle HORIZONTAL_RESIZE = new SystemCursorStyle(SDLMouse.SDL_SYSTEM_CURSOR_EW_RESIZE);
+    CursorStyle VERTICAL_RESIZE = new SystemCursorStyle(SDLMouse.SDL_SYSTEM_CURSOR_NS_RESIZE);
+    CursorStyle NWSE_RESIZE = new SystemCursorStyle(SDLMouse.SDL_SYSTEM_CURSOR_NWSE_RESIZE);
+    CursorStyle NESW_RESIZE = new SystemCursorStyle(SDLMouse.SDL_SYSTEM_CURSOR_NESW_RESIZE);
+    CursorStyle NOT_ALLOWED = new SystemCursorStyle(SDLMouse.SDL_SYSTEM_CURSOR_NOT_ALLOWED);
 
     long allocate();
 

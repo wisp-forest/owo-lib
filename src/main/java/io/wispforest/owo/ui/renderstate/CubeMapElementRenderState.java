@@ -1,7 +1,7 @@
 package io.wispforest.owo.ui.renderstate;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -78,8 +78,8 @@ public record CubeMapElementRenderState(
 
             try {
                 CubeMapElementRenderState.outputOverride = new OutputOverride(
-                    RenderSystem.outputColorTextureOverride,
-                    RenderSystem.outputDepthTextureOverride,
+                    this.textureView,
+                    this.depthTextureView,
                     0xFF000000
                 );
 

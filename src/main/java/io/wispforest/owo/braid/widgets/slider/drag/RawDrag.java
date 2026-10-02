@@ -203,7 +203,7 @@ public class RawDrag extends StatefulWidget {
                             new MouseArea(
                                 mouseArea -> mouseArea
                                     .clickCallback((x, y, button, modifiers) -> {
-                                        if (button != 0) return false;
+                                        if (button != com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT) return false;
                                         this.dragValue = this.normalizedValue;
                                         this.dragging = true;
                                         return true;

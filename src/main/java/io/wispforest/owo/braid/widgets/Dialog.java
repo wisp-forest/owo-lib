@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import io.wispforest.owo.braid.core.Color;
 import io.wispforest.owo.braid.framework.BuildContext;
 import io.wispforest.owo.braid.framework.widget.StatelessWidget;
@@ -8,7 +9,6 @@ import io.wispforest.owo.braid.widgets.basic.Box;
 import io.wispforest.owo.braid.widgets.basic.Center;
 import io.wispforest.owo.braid.widgets.basic.HitTestTrap;
 import io.wispforest.owo.braid.widgets.basic.MouseArea;
-import org.lwjgl.glfw.GLFW;
 
 public class Dialog extends StatelessWidget {
 
@@ -40,7 +40,7 @@ public class Dialog extends StatelessWidget {
             new MouseArea(
                 widget -> widget
                     .clickCallback((x, y, button, modifiers) -> {
-                        if (!this.barrierCanDismiss || button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
+                        if (!this.barrierCanDismiss || button != InputConstants.MOUSE_BUTTON_LEFT) return false;
 
                         Navigator.pop(context);
                         return true;

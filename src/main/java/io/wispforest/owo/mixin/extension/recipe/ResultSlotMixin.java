@@ -47,7 +47,7 @@ public abstract class ResultSlotMixin {
             int excess = remainderStack.getCount() - remainderStack.getMaxStackSize();
             remainderStack.shrink(excess);
 
-            this.player.getInventory().placeItemBackInInventory(remainderStack.copyWithCount(excess));
+            this.player.getInventory().placeItemBackInInventory(remainderStack.copyWithCount(excess), net.minecraft.util.Prediction.PREDICTED);
         }
     }
 

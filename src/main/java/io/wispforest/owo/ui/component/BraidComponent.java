@@ -1,5 +1,6 @@
 package io.wispforest.owo.ui.component;
 
+import org.lwjgl.sdl.SDLMouse;
 import io.wispforest.owo.braid.core.AppState;
 import io.wispforest.owo.braid.core.EventBinding;
 import io.wispforest.owo.braid.core.KeyModifiers;
@@ -21,7 +22,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import org.lwjgl.glfw.GLFW;
 
 import java.lang.ref.Cleaner;
 import java.lang.ref.WeakReference;
@@ -111,8 +111,8 @@ public class BraidComponent extends BaseUIComponent {
 
     @Override
     public boolean onKeyPress(KeyEvent input) {
-        this.eventBinding.add(new KeyPressEvent(input.key(), input.scancode(), input.modifiers()));
-        this.eventBinding.add(new KeyReleaseEvent(input.key(), input.scancode(), input.modifiers()));
+        this.eventBinding.add(new KeyPressEvent(input.key(), input.keycode(), input.modifiers()));
+        this.eventBinding.add(new KeyReleaseEvent(input.key(), input.keycode(), input.modifiers()));
         return true;
     }
 
@@ -125,19 +125,20 @@ public class BraidComponent extends BaseUIComponent {
 
     @Override
     public io.wispforest.owo.ui.core.CursorStyle cursorStyle() {
+        if (cursorStyle == CursorStyle.NONE) return io.wispforest.owo.ui.core.CursorStyle.NONE;
         if (!(cursorStyle instanceof SystemCursorStyle system)) return io.wispforest.owo.ui.core.CursorStyle.NONE;
 
         return switch (system.glfwId) {
-            case GLFW.GLFW_ARROW_CURSOR -> io.wispforest.owo.ui.core.CursorStyle.POINTER;
-            case GLFW.GLFW_IBEAM_CURSOR -> io.wispforest.owo.ui.core.CursorStyle.TEXT;
-            case GLFW.GLFW_HAND_CURSOR -> io.wispforest.owo.ui.core.CursorStyle.HAND;
-            case GLFW.GLFW_RESIZE_ALL_CURSOR -> io.wispforest.owo.ui.core.CursorStyle.MOVE;
-            case GLFW.GLFW_CROSSHAIR_CURSOR -> io.wispforest.owo.ui.core.CursorStyle.CROSSHAIR;
-            case GLFW.GLFW_HRESIZE_CURSOR -> io.wispforest.owo.ui.core.CursorStyle.HORIZONTAL_RESIZE;
-            case GLFW.GLFW_VRESIZE_CURSOR -> io.wispforest.owo.ui.core.CursorStyle.VERTICAL_RESIZE;
-            case GLFW.GLFW_RESIZE_NWSE_CURSOR -> io.wispforest.owo.ui.core.CursorStyle.NWSE_RESIZE;
-            case GLFW.GLFW_RESIZE_NESW_CURSOR -> io.wispforest.owo.ui.core.CursorStyle.NESW_RESIZE;
-            case GLFW.GLFW_NOT_ALLOWED_CURSOR -> io.wispforest.owo.ui.core.CursorStyle.NOT_ALLOWED;
+            case SDLMouse.SDL_SYSTEM_CURSOR_DEFAULT -> io.wispforest.owo.ui.core.CursorStyle.POINTER;
+            case SDLMouse.SDL_SYSTEM_CURSOR_TEXT -> io.wispforest.owo.ui.core.CursorStyle.TEXT;
+            case SDLMouse.SDL_SYSTEM_CURSOR_POINTER -> io.wispforest.owo.ui.core.CursorStyle.HAND;
+            case SDLMouse.SDL_SYSTEM_CURSOR_MOVE -> io.wispforest.owo.ui.core.CursorStyle.MOVE;
+            case SDLMouse.SDL_SYSTEM_CURSOR_CROSSHAIR -> io.wispforest.owo.ui.core.CursorStyle.CROSSHAIR;
+            case SDLMouse.SDL_SYSTEM_CURSOR_EW_RESIZE -> io.wispforest.owo.ui.core.CursorStyle.HORIZONTAL_RESIZE;
+            case SDLMouse.SDL_SYSTEM_CURSOR_NS_RESIZE -> io.wispforest.owo.ui.core.CursorStyle.VERTICAL_RESIZE;
+            case SDLMouse.SDL_SYSTEM_CURSOR_NWSE_RESIZE -> io.wispforest.owo.ui.core.CursorStyle.NWSE_RESIZE;
+            case SDLMouse.SDL_SYSTEM_CURSOR_NESW_RESIZE -> io.wispforest.owo.ui.core.CursorStyle.NESW_RESIZE;
+            case SDLMouse.SDL_SYSTEM_CURSOR_NOT_ALLOWED -> io.wispforest.owo.ui.core.CursorStyle.NOT_ALLOWED;
 
             default -> io.wispforest.owo.ui.core.CursorStyle.NONE;
         };

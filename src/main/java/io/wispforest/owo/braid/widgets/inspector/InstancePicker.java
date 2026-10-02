@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.inspector;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.google.common.collect.Streams;
 import io.wispforest.owo.braid.core.Insets;
 import io.wispforest.owo.braid.framework.BuildContext;
@@ -17,7 +18,6 @@ import io.wispforest.owo.braid.widgets.inspector.BraidInspector.PickEvent;
 import io.wispforest.owo.braid.widgets.stack.Stack;
 import io.wispforest.owo.braid.widgets.stack.StackBase;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -86,10 +86,10 @@ public class InstancePicker extends StatefulWidget {
                             if (this.pickedInstance != null) this.pickedInstance.debugHighlighted = true;
                         })
                         .clickCallback((x, y, button, modifiers) -> {
-                            if (button <= 1) {
+                            if (button == com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT || button == com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_RIGHT) {
                                 if (this.pickedInstance != null) {
                                     this.pickedInstance.debugHighlighted = false;
-                                    if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) this.widget().pickCallback.onPick(this.pickedInstance);
+                                    if (button == InputConstants.MOUSE_BUTTON_LEFT) this.widget().pickCallback.onPick(this.pickedInstance);
                                 }
 
                                 this.setState(() -> this.picking = false);

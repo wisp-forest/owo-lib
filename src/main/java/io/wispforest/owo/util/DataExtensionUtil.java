@@ -43,7 +43,9 @@ public class DataExtensionUtil {
         }
     }
 
-    public interface OptInIdentifierPredicate extends Predicate<Identifier> {
+    public interface OptInIdentifierPredicate extends Predicate<Identifier>, net.minecraft.server.packs.resources.ResourceManager.Selector {
+        @Override
+        default boolean isIncluded(Identifier identifier) { return this.test(identifier); }
         static OptInIdentifierPredicate of(Predicate<Identifier> delegate) {
             return delegate instanceof OptInIdentifierPredicate optIn ? optIn : delegate::test;
         }

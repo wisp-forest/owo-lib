@@ -191,7 +191,7 @@ public class RawSplitPane extends StatefulWidget {
                             divider = new MouseArea(
                                 w -> w
                                     .dragStartCallback((button, modifiers) -> setState(() -> {
-                                        if (button != 0) return;
+                                        if (button != com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT) return;
                                         this.draggingIndex = dividerIndex;
                                         this.dragRatio = this.controller.getRatio(dividerIndex);
                                         this.firstDrag = true;

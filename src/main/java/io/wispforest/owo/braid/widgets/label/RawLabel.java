@@ -196,7 +196,7 @@ public class RawLabel extends LeafInstanceWidget {
 
         @Override
         public boolean onMouseDown(double x, double y, int button, KeyModifiers modifiers) {
-            if (button != 0) return MouseListener.super.onMouseDown(x, y, button, modifiers);
+            if (button != com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT) return MouseListener.super.onMouseDown(x, y, button, modifiers);
             return this.textClickHandler.apply(this.getStyleAt(x, y));
         }
 

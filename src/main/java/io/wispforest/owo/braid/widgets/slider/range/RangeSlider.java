@@ -281,7 +281,7 @@ public class RangeSlider extends StatefulWidget {
                             new MouseArea(
                                 mousearea -> mousearea
                                     .clickCallback((x, y, button, modifiers) -> {
-                                        if (button != 0) return false;
+                                        if (button != com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT) return false;
 
                                         if (widget.axis == LayoutAxis.VERTICAL) y = constraints.maxFiniteOrMinOnAxis(widget.axis) - y;
                                         this.grabbedHandle = this.handleAt(constraints, x, y);

@@ -1,6 +1,6 @@
 package io.wispforest.owo.ui.core;
 
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLMouse;
 
 public enum CursorStyle {
     /**
@@ -11,40 +11,40 @@ public enum CursorStyle {
     /**
      * The default arrow-style pointing cursor
      */
-    POINTER(GLFW.GLFW_ARROW_CURSOR),
+    POINTER(SDLMouse.SDL_SYSTEM_CURSOR_DEFAULT),
 
     /**
      * The text selection, usually I-beam, cursor
      */
-    TEXT(GLFW.GLFW_IBEAM_CURSOR),
+    TEXT(SDLMouse.SDL_SYSTEM_CURSOR_TEXT),
 
     /**
      * The hand cursor which signals clickable areas
      */
-    HAND(GLFW.GLFW_HAND_CURSOR),
+    HAND(SDLMouse.SDL_SYSTEM_CURSOR_POINTER),
 
     /**
      * the Crosshair cursor
      */
-    CROSSHAIR(GLFW.GLFW_CROSSHAIR_CURSOR),
+    CROSSHAIR(SDLMouse.SDL_SYSTEM_CURSOR_CROSSHAIR),
 
     /**
      * The cross-shaped cursor which signals
      * draggable/movable areas
      */
-    MOVE(GLFW.GLFW_RESIZE_ALL_CURSOR),
+    MOVE(SDLMouse.SDL_SYSTEM_CURSOR_MOVE),
 
     /**
      * The horizontal resize cursor
      * @see #VERTICAL_RESIZE
      */
-    HORIZONTAL_RESIZE(GLFW.GLFW_HRESIZE_CURSOR),
+    HORIZONTAL_RESIZE(SDLMouse.SDL_SYSTEM_CURSOR_EW_RESIZE),
 
     /**
      * The vertical resize cursor
      * @see #HORIZONTAL_RESIZE
      */
-    VERTICAL_RESIZE(GLFW.GLFW_VRESIZE_CURSOR),
+    VERTICAL_RESIZE(SDLMouse.SDL_SYSTEM_CURSOR_NS_RESIZE),
 
     /**
      * The NorthWest-SouthEast resize cursor
@@ -52,7 +52,7 @@ public enum CursorStyle {
      *
      * @implNote This cursor style is not necessarily supported by all cursor themes
      */
-    NWSE_RESIZE(GLFW.GLFW_RESIZE_NWSE_CURSOR),
+    NWSE_RESIZE(SDLMouse.SDL_SYSTEM_CURSOR_NWSE_RESIZE),
 
     /**
      * The NorthEast-SouthWest resize cursor
@@ -60,7 +60,7 @@ public enum CursorStyle {
      *
      * @implNote This cursor style is not necessarily supported by all cursor themes
      */
-    NESW_RESIZE(GLFW.GLFW_RESIZE_NESW_CURSOR),
+    NESW_RESIZE(SDLMouse.SDL_SYSTEM_CURSOR_NESW_RESIZE),
 
 
     /**
@@ -68,7 +68,7 @@ public enum CursorStyle {
      *
      * @implNote This cursor style is not necessarily supported by all cursor themes
      */
-    NOT_ALLOWED(GLFW.GLFW_NOT_ALLOWED_CURSOR);
+    NOT_ALLOWED(SDLMouse.SDL_SYSTEM_CURSOR_NOT_ALLOWED);
 
 
     public final int glfw;

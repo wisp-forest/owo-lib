@@ -1,68 +1,50 @@
 package io.wispforest.owo.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import io.wispforest.owo.util.Maldenhagen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.BulkSectionAccess;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.feature.OreFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-
-import java.util.BitSet;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
-// welcome to maldenhagen, it moved
-// it originally lived in things, but it was malding too hard there
-// see Maldenhagen for how this is used
 @Mixin(OreFeature.class)
 public class Copenhagen {
-
-    // this map contains the seethe'd orr blocks. its quite important
     @Unique private final ThreadLocal<Map<BlockPos, BlockState>> COPING = ThreadLocal.withInitial(HashMap::new);
 
-    // this target method is just so damn complex that not even mixin can correctly guess the injector signature.
-    // i just kinda gave up and deleted some of them until it worked. very epic
-    //
-    // oh also the method caches all the spots that gleaming ore was placed at, so we can later update them for it to glow.
-    // of course that needs to be done later, because mojang decided it should. the actual reason is that ChunkSectionCache
-    // locks its chunk sections.
-    //
-    // now you would think this throws an error when you then try to modify those sections. but no.
-    // it just silently deadlocks the entire game
-    @SuppressWarnings("InvalidInjectorMethodSignature")
-    @Inject(method = "doPlace", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunkSection;setBlockState(IIILnet/minecraft/world/level/block/state/BlockState;Z)Lnet/minecraft/world/level/block/state/BlockState;"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void malding(WorldGenLevel world, RandomSource random, OreConfiguration config, double startX, double endX, double startZ, double endZ,
-                         double startY, double endY, int p_x, int p_y, int p_z, int p_horizontalSize, int p_verticalSize, CallbackInfoReturnable<Boolean> cir,
-                         int i, BitSet bitSet, BlockPos.MutableBlockPos mutable, int j, double[] ds, BulkSectionAccess chunkSectionCache, int m, double d, double e,
-                         double g, double h, int n, int o, int p, int q, int r, int s, int t, double u, int v, double w, int aa, double x, int ab, LevelChunkSection chunkSection,
-                         int ad, int ae, int af, BlockState blockState, Iterator<OreConfiguration.TargetBlockState> var57, OreConfiguration.TargetBlockState target) {
-
-        if (!Maldenhagen.isOnCopium(target.state.getBlock())) return;
-        COPING.get().put(new BlockPos(t, v, aa), target.state);
+    // Record the actual placed state and world position. Updating light while
+    // BulkSectionAccess still holds its section locks would deadlock worldgen.
+    @WrapOperation(method = "doPlace", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunkSection;setBlockState(IIILnet/minecraft/world/level/block/state/BlockState;Z)Lnet/minecraft/world/level/block/state/BlockState;"))
+    private BlockState malding(LevelChunkSection section, int x, int y, int z, BlockState state, boolean lock,
+                              Operation<BlockState> original, @Local BlockPos.MutableBlockPos position) {
+        var result = original.call(section, x, y, z, state, lock);
+        if (Maldenhagen.isOnCopium(state.getBlock())) COPING.get().put(position.immutable(), state);
+        return result;
     }
 
-    // now in here we read all the gleaming ore spots from our cache and actually cause a block update so that the
-    // lighting calculations happen. all of this just so that some dumb orr block can glow.
-    @Inject(method = "doPlace", at = @At("TAIL"))
-    private void coping(WorldGenLevel world, net.minecraft.util.RandomSource random, OreConfiguration config, double startX, double endX,
-                        double startZ, double endZ, double startY, double endY, int x, int y, int z, int horizontalSize,
-                        int verticalSize, CallbackInfoReturnable<Boolean> cir) {
-
-        COPING.get().forEach((blockPos, state) -> {
-            world.setBlock(blockPos, state, Block.UPDATE_ALL);
-        });
-        COPING.get().clear();
+    @WrapMethod(method = "doPlace")
+    private boolean coping(WorldGenLevel world, RandomSource random, double startX, double endX,
+                           double startZ, double endZ, double startY, double endY,
+                           int x, int y, int z, int horizontalSize, int verticalSize, Operation<Boolean> original) {
+        var positions = COPING.get();
+        positions.clear();
+        try {
+            boolean result = original.call(world, random, startX, endX, startZ, endZ, startY, endY,
+                x, y, z, horizontalSize, verticalSize);
+            positions.forEach((position, state) -> world.setBlock(position, state, Block.UPDATE_ALL));
+            return result;
+        } finally {
+            positions.clear();
+        }
     }
-
 }

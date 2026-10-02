@@ -31,7 +31,7 @@ public class MinecraftMixin {
         ClientRenderCallback.BEFORE.invoker().onRender((Minecraft) (Object) this);
     }
 
-    @Inject(method = "renderFrame", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/GpuSurface;present()V", shift = At.Shift.AFTER))
+    @Inject(method = "renderFrame", at = @At(value = "INVOKE", target = "Lcom/mojang/renderpearl/api/device/GpuSurface;present()V", shift = At.Shift.AFTER))
     private void afterRender(boolean tick, CallbackInfo ci) {
         ClientRenderCallback.AFTER.invoker().onRender((Minecraft) (Object) this);
     }
