@@ -1,6 +1,6 @@
 package io.wispforest.owo.braid.widgets.vanilla;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.blaze3d.platform.InputConstants;
 import io.wispforest.owo.braid.core.BraidGraphics;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.KeyModifiers;
@@ -15,6 +15,7 @@ import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
+import org.lwjgl.sdl.SDLKeyboard;
 
 import java.util.OptionalDouble;
 
@@ -32,7 +33,7 @@ public class VanillaWidgetWrapper<T extends Renderable & GuiEventListener> exten
     }
 
     public static class Instance extends LeafWidgetInstance<VanillaWidgetWrapper<?>> implements MouseListener {
-        private int draggingMouseButton = 0;
+        private int draggingMouseButton = InputConstants.MOUSE_BUTTON_LEFT;
 
         private double x, y;
 
@@ -79,11 +80,11 @@ public class VanillaWidgetWrapper<T extends Renderable & GuiEventListener> exten
         }
 
         public boolean onKeyDown(int keyCode, KeyModifiers modifiers) {
-            return widget.wrapped.keyPressed(new KeyEvent(keyCode, 0, modifiers.bitMask()));
+            return widget.wrapped.keyPressed(new KeyEvent(keyCode, SDLKeyboard.SDL_GetKeyFromScancode(keyCode, (short) modifiers.bitMask(), true), modifiers.bitMask()));
         }
 
         public boolean onKeyUp(int keyCode, KeyModifiers modifiers) {
-            return widget.wrapped.keyReleased(new KeyEvent(keyCode, 0, modifiers.bitMask()));
+            return widget.wrapped.keyReleased(new KeyEvent(keyCode, SDLKeyboard.SDL_GetKeyFromScancode(keyCode, (short) modifiers.bitMask(), true), modifiers.bitMask()));
         }
 
         public boolean onChar(int charCode, KeyModifiers modifiers) {

@@ -1,6 +1,5 @@
 package io.wispforest.owo.braid.widgets.owoui;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
 import io.wispforest.owo.braid.core.BraidGraphics;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.KeyModifiers;
@@ -16,7 +15,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLKeyboard;
 
 import java.util.OptionalDouble;
 
@@ -150,7 +149,7 @@ public class OwoUIWidgetWrapper extends LeafInstanceWidget {
         }
 
         public boolean onKeyDown(int keyCode, KeyModifiers modifiers) {
-            return this.widget.rootComponent.onKeyPress(new KeyEvent(keyCode, GLFW.glfwGetKeyScancode(keyCode), modifiers.bitMask()));
+            return this.widget.rootComponent.onKeyPress(new KeyEvent(keyCode, SDLKeyboard.SDL_GetKeyFromScancode(keyCode, (short) modifiers.bitMask(), true), modifiers.bitMask()));
         }
 
         public boolean onChar(int charCode, KeyModifiers modifiers) {

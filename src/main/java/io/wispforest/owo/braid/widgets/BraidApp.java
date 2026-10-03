@@ -13,7 +13,7 @@ import net.minecraft.util.Util;
 import java.util.List;
 import java.util.Map;
 
-import static org.lwjgl.glfw.GLFW.*;
+import static com.mojang.blaze3d.platform.InputConstants.*;
 
 public class BraidApp extends StatelessWidget {
 
@@ -44,8 +44,8 @@ public class BraidApp extends StatelessWidget {
 
     // ---
 
-    private static final KeyModifiers SHIFT = new KeyModifiers(GLFW_MOD_SHIFT);
-    private static final KeyModifiers CTRL = new KeyModifiers(GLFW_MOD_CONTROL);
+    private static final KeyModifiers SHIFT = new KeyModifiers(MOD_SHIFT);
+    private static final KeyModifiers CTRL = new KeyModifiers(MOD_CONTROL);
     private static final KeyModifiers SHIFT_AND_CTRL = KeyModifiers.both(SHIFT, CTRL);
 
     public static final Map<Class<? extends Intent>, Action<?>> DEFAULT_ACTIONS = Map.of(
@@ -54,36 +54,36 @@ public class BraidApp extends StatelessWidget {
 
     public static final Map<List<ShortcutTrigger>, Intent> DEFAULT_SHORTCUTS = Map.of(
         List.of(new ShortcutTrigger(
-            Trigger.ofKey(GLFW_KEY_ENTER),
-            Trigger.ofKey(GLFW_KEY_KP_ENTER),
-            Trigger.ofKey(GLFW_KEY_SPACE)
+            Trigger.ofKey(KEY_RETURN),
+            Trigger.ofKey(KEY_NUMPADENTER),
+            Trigger.ofKey(KEY_SPACE)
         )), PrimaryActionIntent.INSTANCE,
         List.of(new ShortcutTrigger(
-            Trigger.ofKey(GLFW_KEY_ENTER, SHIFT),
-            Trigger.ofKey(GLFW_KEY_KP_ENTER, SHIFT),
-            Trigger.ofKey(GLFW_KEY_SPACE, SHIFT)
+            Trigger.ofKey(KEY_RETURN, SHIFT),
+            Trigger.ofKey(KEY_NUMPADENTER, SHIFT),
+            Trigger.ofKey(KEY_SPACE, SHIFT)
         )), SecondaryActionIntent.INSTANCE,
         List.of(ShortcutTrigger.UP.withModifiers(null)), new TraverseFocusIntent(FocusTraversalDirection.UP),
         List.of(ShortcutTrigger.DOWN.withModifiers(null)), new TraverseFocusIntent(FocusTraversalDirection.DOWN),
         List.of(ShortcutTrigger.LEFT.withModifiers(null)), new TraverseFocusIntent(FocusTraversalDirection.LEFT),
         List.of(ShortcutTrigger.RIGHT.withModifiers(null)), new TraverseFocusIntent(FocusTraversalDirection.RIGHT),
-        List.of(new ShortcutTrigger(Trigger.ofKey(GLFW_KEY_TAB))), new TraverseFocusIntent(FocusTraversalDirection.NEXT),
-        List.of(new ShortcutTrigger(Trigger.ofKey(GLFW_KEY_TAB, SHIFT))), new TraverseFocusIntent(FocusTraversalDirection.PREVIOUS)
+        List.of(new ShortcutTrigger(Trigger.ofKey(KEY_TAB))), new TraverseFocusIntent(FocusTraversalDirection.NEXT),
+        List.of(new ShortcutTrigger(Trigger.ofKey(KEY_TAB, SHIFT))), new TraverseFocusIntent(FocusTraversalDirection.PREVIOUS)
     );
 
     public static final Map<List<ShortcutTrigger>, Intent> DEFAULT_TEXT_SHORTCUTS = Util.make(() -> {
         var builder = new ImmutableMap.Builder<List<ShortcutTrigger>, Intent>();
 
         builder.put(List.of(new ShortcutTrigger(
-            Trigger.ofKey(GLFW_KEY_ENTER),
-            Trigger.ofKey(GLFW_KEY_KP_ENTER)
+            Trigger.ofKey(KEY_RETURN),
+            Trigger.ofKey(KEY_NUMPADENTER)
         ).withModifiers(null)), InsertNewlineIntent.INSTANCE);
-        builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(GLFW_KEY_TAB))), InsertTabIntent.INSTANCE);
-        builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(GLFW_KEY_BACKSPACE))), new DeleteTextIntent(false, false));
-        builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(GLFW_KEY_BACKSPACE)).withModifiers(CTRL)), new DeleteTextIntent(false, true));
-        builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(GLFW_KEY_DELETE))), new DeleteTextIntent(true, false));
-        builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(GLFW_KEY_DELETE)).withModifiers(CTRL)), new DeleteTextIntent(true, true));
-        builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(GLFW_KEY_DELETE)).withModifiers(SHIFT)), DeleteLineIntent.INSTANCE);
+        builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(KEY_TAB))), InsertTabIntent.INSTANCE);
+        builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(KEY_BACKSPACE))), new DeleteTextIntent(false, false));
+        builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(KEY_BACKSPACE)).withModifiers(CTRL)), new DeleteTextIntent(false, true));
+        builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(KEY_DELETE))), new DeleteTextIntent(true, false));
+        builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(KEY_DELETE)).withModifiers(CTRL)), new DeleteTextIntent(true, true));
+        builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(KEY_DELETE)).withModifiers(SHIFT)), DeleteLineIntent.INSTANCE);
         builder.put(List.of(ShortcutTrigger.UP), new MoveCursorIntent(MoveCursorIntent.Direction.UP, false, false));
         builder.put(List.of(ShortcutTrigger.DOWN), new MoveCursorIntent(MoveCursorIntent.Direction.DOWN, false, false));
         builder.put(List.of(ShortcutTrigger.LEFT), new MoveCursorIntent(MoveCursorIntent.Direction.LEFT, false, false));
@@ -104,10 +104,10 @@ public class BraidApp extends StatelessWidget {
         builder.put(List.of(ShortcutTrigger.HOME.withModifiers(SHIFT)), new TeleportCursorIntent(true, true));
         builder.put(List.of(ShortcutTrigger.END), new TeleportCursorIntent(false, false));
         builder.put(List.of(ShortcutTrigger.END.withModifiers(SHIFT)), new TeleportCursorIntent(false, true));
-        builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(GLFW_KEY_A)).withModifiers(CTRL)), SelectAllIntent.INSTANCE);
-        builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(GLFW_KEY_C)).withModifiers(CTRL)), new CopyTextIntent(false));
-        builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(GLFW_KEY_X)).withModifiers(CTRL)), new CopyTextIntent(true));
-        builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(GLFW_KEY_V)).withModifiers(CTRL)), PasteTextIntent.INSTANCE);
+        builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(KEY_A)).withModifiers(CTRL)), SelectAllIntent.INSTANCE);
+        builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(KEY_C)).withModifiers(CTRL)), new CopyTextIntent(false));
+        builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(KEY_X)).withModifiers(CTRL)), new CopyTextIntent(true));
+        builder.put(List.of(new ShortcutTrigger(Trigger.ofKey(KEY_V)).withModifiers(CTRL)), PasteTextIntent.INSTANCE);
 
         return builder.build();
     });
