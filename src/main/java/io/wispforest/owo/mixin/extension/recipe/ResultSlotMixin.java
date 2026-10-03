@@ -7,6 +7,7 @@ import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import io.wispforest.owo.util.RecipeRemainderStorage;
 import net.minecraft.core.NonNullList;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.item.ItemStack;
@@ -47,7 +48,7 @@ public abstract class ResultSlotMixin {
             int excess = remainderStack.getCount() - remainderStack.getMaxStackSize();
             remainderStack.shrink(excess);
 
-            this.player.getInventory().placeItemBackInInventory(remainderStack.copyWithCount(excess));
+            this.player.getInventory().placeItemBackInInventory(remainderStack.copyWithCount(excess), Prediction.PREDICTED);
         }
     }
 
