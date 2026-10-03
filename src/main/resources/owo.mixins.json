@@ -75,7 +75,6 @@
     "itemgroup.MixinCreativeModeInventoryScreenMixin",
     "text.ClientLanguageMixin",
     "tweaks.EditBoxMixin",
-    "tweaks.OperatingSystemMixin",
     "ui.AbstractContainerScreenMixin",
     "ui.AbstractSliderButtonMixin",
     "ui.AbstractWidgetMixin",
