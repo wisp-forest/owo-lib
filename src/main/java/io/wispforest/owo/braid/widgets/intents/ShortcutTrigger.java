@@ -9,43 +9,43 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.lwjgl.glfw.GLFW.*;
+import static com.mojang.blaze3d.platform.InputConstants.*;
 
 public record ShortcutTrigger(Set<Trigger> triggers) {
 
-    public static final ShortcutTrigger LEFT_CLICK = new ShortcutTrigger(Trigger.ofMouse(GLFW_MOUSE_BUTTON_LEFT));
-    public static final ShortcutTrigger RIGHT_CLICK = new ShortcutTrigger(Trigger.ofMouse(GLFW_MOUSE_BUTTON_RIGHT));
+    public static final ShortcutTrigger LEFT_CLICK = new ShortcutTrigger(Trigger.ofMouse(MOUSE_BUTTON_LEFT));
+    public static final ShortcutTrigger RIGHT_CLICK = new ShortcutTrigger(Trigger.ofMouse(MOUSE_BUTTON_RIGHT));
 
     public static final ShortcutTrigger UP = new ShortcutTrigger(
-        Trigger.ofKey(GLFW_KEY_UP)
+        Trigger.ofKey(KEY_UP)
     );
 
     public static final ShortcutTrigger DOWN = new ShortcutTrigger(
-        Trigger.ofKey(GLFW_KEY_DOWN)
+        Trigger.ofKey(KEY_DOWN)
     );
 
     public static final ShortcutTrigger RIGHT = new ShortcutTrigger(
-        Trigger.ofKey(GLFW_KEY_RIGHT)
+        Trigger.ofKey(KEY_RIGHT)
     );
 
     public static final ShortcutTrigger LEFT = new ShortcutTrigger(
-        Trigger.ofKey(GLFW_KEY_LEFT)
+        Trigger.ofKey(KEY_LEFT)
     );
 
     public static final ShortcutTrigger PAGE_UP = new ShortcutTrigger(
-        Trigger.ofKey(GLFW_KEY_PAGE_UP)
+        Trigger.ofKey(KEY_PAGEUP)
     );
 
     public static final ShortcutTrigger PAGE_DOWN = new ShortcutTrigger(
-        Trigger.ofKey(GLFW_KEY_PAGE_DOWN)
+        Trigger.ofKey(KEY_PAGEDOWN)
     );
 
     public static final ShortcutTrigger HOME = new ShortcutTrigger(
-        Trigger.ofKey(GLFW_KEY_HOME)
+        Trigger.ofKey(KEY_HOME)
     );
 
     public static final ShortcutTrigger END = new ShortcutTrigger(
-        Trigger.ofKey(GLFW_KEY_END)
+        Trigger.ofKey(KEY_END)
     );
 
     public static ShortcutTrigger of(ShortcutTrigger... triggers) {

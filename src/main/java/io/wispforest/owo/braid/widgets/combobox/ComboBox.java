@@ -28,7 +28,7 @@ import io.wispforest.owo.braid.widgets.textinput.TextSelection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.List;
 import java.util.Map;
@@ -275,7 +275,7 @@ public class ComboBox<T> extends StatefulWidget {
     private static final Map<List<ShortcutTrigger>, Intent> SHORTCUTS = Map.of(
         List.of(ShortcutTrigger.UP), new CycleIntent(true),
         List.of(ShortcutTrigger.DOWN), new CycleIntent(false),
-        List.of(new ShortcutTrigger(Trigger.ofKey(GLFW.GLFW_KEY_ENTER), Trigger.ofKey(GLFW.GLFW_KEY_KP_ENTER))), new SelectIntent(),
+        List.of(new ShortcutTrigger(Trigger.ofKey(InputConstants.KEY_RETURN), Trigger.ofKey(InputConstants.KEY_NUMPADENTER))), new SelectIntent(),
         List.of(ShortcutTrigger.LEFT_CLICK), PrimaryActionIntent.INSTANCE
     );
 }
