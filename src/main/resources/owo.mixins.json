@@ -102,6 +102,7 @@
     "ui.access.RenderSystemAccessor",
     "ui.access.StagedVertexBufferDrawAccessor",
     "ui.access.TextBoxComponentAccessor",
+    "ui.access.PictureInPictureRendererAccessor",
     "ui.display.GameRendererMixin",
     "ui.display.GuiMixin",
     "ui.display.MinecraftMixin",
