@@ -7,9 +7,8 @@ import io.wispforest.owo.braid.framework.instance.LeafWidgetInstance;
 import io.wispforest.owo.braid.framework.widget.LeafInstanceWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.resources.Identifier;
 
@@ -54,7 +53,7 @@ public class SpriteWidget extends LeafInstanceWidget {
             try {
                 this.sprite = Minecraft.getInstance().getAtlasManager().get(this.widget.spriteIdentifier);
             } catch (IllegalArgumentException ignored) {
-                this.sprite = Minecraft.getInstance().getAtlasManager().get(new SpriteId(GUI_ATLAS_ID, TextureManager.INTENTIONAL_MISSING_TEXTURE));
+                this.sprite = Minecraft.getInstance().getAtlasManager().get(new SpriteId(GUI_ATLAS_ID, MissingTextureAtlasSprite.getLocation()));
             }
 
             return this.sprite;
