@@ -10,12 +10,12 @@ import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.FallbackResourceManager;
 import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 
 import static io.wispforest.owo.util.DataExtensionUtil.coerceJson;
 
@@ -48,7 +48,7 @@ public abstract class FallbackResourceManagerMixin {
         String namespace,
         String startingPath,
         PackResources.ResourceOutput resultConsumer,
-        @Local(argsOnly = true) Predicate<Identifier> predicate
+        @Local(argsOnly = true) ResourceManager.Selector predicate
     ) {
         return !(predicate instanceof DataExtensionUtil.OptInIdentifierPredicate)
                || DataExtensionUtil.JSON5_ENABLED_PACKS.contains(instance.packId());
@@ -58,16 +58,16 @@ public abstract class FallbackResourceManagerMixin {
         method = "listResourceStacks",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/server/packs/resources/FallbackResourceManager;listPackResources(Lnet/minecraft/server/packs/resources/FallbackResourceManager$PackEntry;Ljava/lang/String;Ljava/util/function/Predicate;Ljava/util/Map;)V"
+            target = "Lnet/minecraft/server/packs/resources/FallbackResourceManager;listPackResources(Lnet/minecraft/server/packs/resources/FallbackResourceManager$PackEntry;Ljava/lang/String;Lnet/minecraft/server/packs/resources/ResourceManager$Selector;Ljava/util/Map;)V"
         )
     )
     private boolean json5$findAllResources(
         FallbackResourceManager instance,
         FallbackResourceManager.PackEntry pack,
         String startingPath,
-        Predicate<Identifier> allowedPathPredicate,
+        ResourceManager.Selector allowedPathPredicate,
         Map<?, ?> idToEntryList,
-        @Local(argsOnly = true) Predicate<Identifier> predicate
+        @Local(argsOnly = true) ResourceManager.Selector predicate
     ) {
         return !(predicate instanceof DataExtensionUtil.OptInIdentifierPredicate)
                || pack.resources != null && DataExtensionUtil.JSON5_ENABLED_PACKS.contains(pack.resources.packId());

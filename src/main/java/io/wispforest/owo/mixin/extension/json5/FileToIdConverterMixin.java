@@ -15,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 
 import static io.wispforest.owo.util.DataExtensionUtil.OptInIdentifierPredicate;
 import static io.wispforest.owo.util.DataExtensionUtil.coerceJson;
@@ -29,13 +28,13 @@ public abstract class FileToIdConverterMixin {
         method = "listMatchingResources",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/server/packs/resources/ResourceManager;listResources(Ljava/lang/String;Ljava/util/function/Predicate;)Ljava/util/Map;"
+            target = "Lnet/minecraft/server/packs/resources/ResourceManager;listResources(Ljava/lang/String;Lnet/minecraft/server/packs/resources/ResourceManager$Selector;)Ljava/util/Map;"
         )
     )
     private Map<Identifier, Resource> json5$findResources(
         ResourceManager instance,
         String directoryName,
-        Predicate<Identifier> identifierPredicate,
+        ResourceManager.Selector identifierPredicate,
         Operation<Map<Identifier, Resource>> original
     ) {
         var base = original.call(instance, directoryName, identifierPredicate);
@@ -54,13 +53,13 @@ public abstract class FileToIdConverterMixin {
         method = "listMatchingResourceStacks",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/server/packs/resources/ResourceManager;listResourceStacks(Ljava/lang/String;Ljava/util/function/Predicate;)Ljava/util/Map;"
+            target = "Lnet/minecraft/server/packs/resources/ResourceManager;listResourceStacks(Ljava/lang/String;Lnet/minecraft/server/packs/resources/ResourceManager$Selector;)Ljava/util/Map;"
         )
     )
     private Map<Identifier, List<Resource>> json5$findAllResources(
         ResourceManager instance,
         String directoryName,
-        Predicate<Identifier> identifierPredicate,
+        ResourceManager.Selector identifierPredicate,
         Operation<Map<Identifier, List<Resource>>> original
     ) {
         var base = original.call(instance, directoryName, identifierPredicate);
