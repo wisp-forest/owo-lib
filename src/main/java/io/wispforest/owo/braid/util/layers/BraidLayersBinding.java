@@ -143,10 +143,11 @@ public class BraidLayersBinding {
             }
 
             ScreenEvents.remove(screeen).register(screen -> {
-                var app = ((OwoScreenExtension) screen).owo$getBraidLayersApp();
-                if (app != null) {
-                    app.dispose();
-                }
+                var state = ((OwoScreenExtension) screen).owo$getBraidLayersState();
+                if (state == null) return;
+
+                ((OwoScreenExtension) screen).owo$setBraidLayersState(null);
+                state.app().dispose();
             });
 
             ScreenMouseEvents.allowMouseClick(screeen).register((screen, click) -> {
