@@ -35,7 +35,7 @@ public sealed interface Trigger {
 
         @Override
         public boolean isTriggered(int button, KeyModifiers modifiers) {
-            return this.keyCode == button && (this.modifiers == null || this.modifiers.equals(modifiers));
+            return this.keyCode == button && (this.modifiers == null || (modifiers != null && this.modifiers.sameHeldModifiers(modifiers)));
         }
 
         @Override
@@ -54,7 +54,7 @@ public sealed interface Trigger {
 
         @Override
         public boolean isTriggered(int button, KeyModifiers modifiers) {
-            return this.button == button && (this.modifiers == null || this.modifiers.equals(modifiers));
+            return this.button == button && (this.modifiers == null || (modifiers != null && this.modifiers.sameHeldModifiers(modifiers)));
         }
 
         @Override

@@ -42,6 +42,13 @@ public record KeyModifiers(int bitMask) {
         return (this.bitMask & MOD_NUM_LOCK) != 0;
     }
 
+    public boolean sameHeldModifiers(KeyModifiers other) {
+        return this.shift() == other.shift()
+            && this.ctrl() == other.ctrl()
+            && this.alt() == other.alt()
+            && this.meta() == other.meta();
+    }
+
     /// Checks if the given key code is a modifier key
     ///
     /// **Note:** Does not include Caps Lock or Num Lock because they do not need to be held down to be active
