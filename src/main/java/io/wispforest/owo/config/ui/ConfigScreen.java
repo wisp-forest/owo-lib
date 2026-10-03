@@ -387,7 +387,7 @@ public class ConfigScreen extends BaseUIModelScreen<FlowLayout> {
             shouldRestart.setTrue();
         });
 
-        this.minecraft.setScreenAndShow(shouldRestart.booleanValue() ? new RestartRequiredScreen(this.parent) : this.parent);
+        this.minecraft.gui.setScreen(shouldRestart.booleanValue() ? new RestartRequiredScreen(this.parent) : this.parent);
     }
 
     @Override

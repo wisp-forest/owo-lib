@@ -54,7 +54,7 @@ public abstract class BaseUIModelContainerScreen<R extends ParentUIComponent, S 
     @Override
     public boolean keyPressed(KeyEvent input) {
         if (Owo.DEBUG && this.modelId != null && input.key() == InputConstants.KEY_F5 && input.hasControlDown()) {
-            this.minecraft.setScreenAndShow(new ConfigureHotReloadScreen(this.modelId, this));
+            this.minecraft.gui.setScreen(new ConfigureHotReloadScreen(this.modelId, this));
             return true;
         }
 

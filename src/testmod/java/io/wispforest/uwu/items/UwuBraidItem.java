@@ -98,7 +98,7 @@ public class UwuBraidItem extends Item {
         var settings = new BraidScreen.Settings();
         settings.shouldPause = false;
 
-        Minecraft.getInstance().setScreenAndShow(new BraidScreen(settings, new TestSelector()));
+        Minecraft.getInstance().gui.setScreen(new BraidScreen(settings, new TestSelector()));
     }
 
     public record Tooltip() implements TooltipComponent {}

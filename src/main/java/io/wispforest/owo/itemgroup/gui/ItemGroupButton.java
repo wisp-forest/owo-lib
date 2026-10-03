@@ -66,9 +66,9 @@ public final class ItemGroupButton implements OwoItemGroup.ButtonDefinition {
             var screen = client.gui.screen();
             var uri = URI.create(url);
 
-            client.setScreenAndShow(new ConfirmLinkScreen(confirmed -> {
+            client.gui.setScreen(new ConfirmLinkScreen(confirmed -> {
                 if (confirmed) Blaze3D.openUri(uri);
-                client.setScreenAndShow(screen);
+                client.gui.setScreen(screen);
             }, uri, true));
         });
     }

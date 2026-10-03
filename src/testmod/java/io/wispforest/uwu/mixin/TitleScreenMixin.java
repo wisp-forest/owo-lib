@@ -24,7 +24,7 @@ public abstract class TitleScreenMixin extends Screen {
         var alt = Minecraft.getInstance().hasAltDown();
         if (!alt) return;
 
-        Minecraft.getInstance().setScreenAndShow(ConfigScreen.create(Uwu.BRUHHHHH, this));
+        Minecraft.getInstance().gui.setScreen(ConfigScreen.create(Uwu.BRUHHHHH, this));
         ci.cancel();
     }
 

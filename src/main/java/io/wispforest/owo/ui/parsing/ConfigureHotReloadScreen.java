@@ -86,7 +86,7 @@ public class ConfigureHotReloadScreen extends BaseUIModelScreen<FlowLayout> impl
 
     @Override
     public void onClose() {
-        this.minecraft.setScreenAndShow(this.parent);
+        this.minecraft.gui.setScreen(this.parent);
     }
 
     private void updateFileNameLabel() {
