@@ -1,6 +1,6 @@
 package io.wispforest.owo.braid.core.element;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.wispforest.owo.braid.core.Color;
 import net.minecraft.client.gui.navigation.ScreenRectangle;

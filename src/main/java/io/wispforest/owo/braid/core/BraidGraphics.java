@@ -1,6 +1,6 @@
 package io.wispforest.owo.braid.core;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import io.wispforest.owo.braid.core.element.BraidDashedLineElement;
 import io.wispforest.owo.mixin.braid.Matrix3x2fStackAccessor;
 import io.wispforest.owo.mixin.ui.access.GuiGraphicsExtractorAccessor;
