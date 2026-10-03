@@ -23,11 +23,13 @@ import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class OwoUIGraphics extends GuiGraphicsExtractor {
@@ -249,12 +251,18 @@ public class OwoUIGraphics extends GuiGraphicsExtractor {
     }
 
     public void drawTooltip(Font textRenderer, int x, int y, List<ClientTooltipComponent> components, @Nullable Identifier texture) {
-        ((GuiGraphicsExtractorAccessor) this).owo$tooltip(textRenderer, components, x, y, DefaultTooltipPositioner.INSTANCE, texture);
+        this.tooltip(textRenderer, components, x, y, DefaultTooltipPositioner.INSTANCE, texture, false);
     }
 
     @Override
     protected void setTooltipForNextFrameInternal(Font textRenderer, List<ClientTooltipComponent> components, int x, int y, ClientTooltipPositioner positioner, @Nullable Identifier texture, boolean replaceExisting) {
         super.setTooltipForNextFrameInternal(textRenderer, components, x, y, positioner, texture, replaceExisting);
+        this.setTooltipDrawer.accept(((GuiGraphicsExtractorAccessor) this).owo$getDeferredTooltip());
+    }
+
+    @Override
+    public void setTooltipForNextFrame(Font textRenderer, List<Component> texts, Optional<TooltipComponent> optionalImage, int x, int y, @Nullable Identifier texture, boolean extraSpaceAfterFirstLine) {
+        super.setTooltipForNextFrame(textRenderer, texts, optionalImage, x, y, texture, extraSpaceAfterFirstLine);
         this.setTooltipDrawer.accept(((GuiGraphicsExtractorAccessor) this).owo$getDeferredTooltip());
     }
 

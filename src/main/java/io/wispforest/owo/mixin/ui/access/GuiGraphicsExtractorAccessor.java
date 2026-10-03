@@ -17,9 +17,6 @@ import java.util.List;
 @Mixin(GuiGraphicsExtractor.class)
 public interface GuiGraphicsExtractorAccessor {
 
-    @Invoker("tooltip")
-    void owo$tooltip(Font textRenderer, List<ClientTooltipComponent> components, int x, int y, ClientTooltipPositioner positioner, @Nullable Identifier texture);
-
     @Accessor("pose")
     Matrix3x2fStack owo$getPose();
 
