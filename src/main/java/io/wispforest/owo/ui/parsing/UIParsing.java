@@ -29,6 +29,7 @@ public class UIParsing {
      * mods, use {@link #registerFactory(Identifier, Function)}, which takes an
      * identifier instead
      */
+    @Deprecated
     @ApiStatus.Internal
     public static void registerFactory(String componentTagName, Function<Element, UIComponent> factory) {
         if (COMPONENT_FACTORIES.containsKey(componentTagName)) {

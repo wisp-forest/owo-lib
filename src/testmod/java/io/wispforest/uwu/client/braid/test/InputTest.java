@@ -102,7 +102,7 @@ public class InputTest extends StatefulWidget {
         }
 
         private MutableComponent getKeyName(int key) {
-            return Component.empty().append(InputConstants.Type.KEYSYM.getOrCreate(key).getDisplayName());
+            return Component.empty().append(InputConstants.Type.KEYBOARD.getOrCreate(key).getDisplayName());
         }
 
         private MutableComponent getMouseButtonName(int button) {

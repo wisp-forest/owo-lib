@@ -28,7 +28,7 @@ import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FurnaceBlock;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -218,7 +218,7 @@ public class ComponentTestScreen extends Screen {
 //        );
 
         rootComponent.mouseDown().subscribe((click, doubled) -> {
-            if (click.button() != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return false;
+            if (click.button() != InputConstants.MOUSE_BUTTON_RIGHT) return false;
             DropdownComponent.openContextMenu(this, rootComponent, FlowLayout::child, click.x(), click.y(), contextMenu -> {
                 contextMenu.text(Component.literal("That's a context menu"));
                 contextMenu.checkbox(Component.literal("Yup"), true, aBoolean -> {});
@@ -402,7 +402,7 @@ public class ComponentTestScreen extends Screen {
             return true;
         }
 
-        if (input.key() == GLFW.GLFW_KEY_F12) {
+        if (input.key() == InputConstants.KEY_F12) {
             try (var out = Files.newOutputStream(Path.of("component_tree.dot")); var writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
                 writer.write("digraph D {\n");
 

@@ -50,7 +50,7 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.item.Items;
 import org.joml.Matrix3x2f;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.nio.file.Path;
 import java.util.Map;
@@ -68,10 +68,10 @@ public class UwuClient implements ClientModInitializer {
         MenuScreens.register(Uwu.EPIC_SCREEN_HANDLER_TYPE, EpicContainerScreen::new);
 //        HandledScreens.register(EPIC_SCREEN_HANDLER_TYPE, EpicHandledModelScreen::new);
 
-        final var binding = new KeyMapping("key.uwu.hud_test", GLFW.GLFW_KEY_J, KeyMapping.Category.MISC);
+        final var binding = new KeyMapping("key.uwu.hud_test", InputConstants.KEY_J, KeyMapping.Category.MISC);
         KeyMappingHelper.registerKeyMapping(binding);
 
-        final var bindingButCooler = new KeyMapping("key.uwu.hud_test_two", GLFW.GLFW_KEY_K, KeyMapping.Category.MISC);
+        final var bindingButCooler = new KeyMapping("key.uwu.hud_test_two", InputConstants.KEY_K, KeyMapping.Category.MISC);
         KeyMappingHelper.registerKeyMapping(bindingButCooler);
 
         final var hudComponentId = Identifier.fromNamespaceAndPath("uwu", "test_element");

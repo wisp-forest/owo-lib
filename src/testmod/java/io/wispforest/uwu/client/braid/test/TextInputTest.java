@@ -34,7 +34,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.List;
 import java.util.UUID;
@@ -94,7 +94,7 @@ public class TextInputTest extends StatefulWidget {
                                 widget -> widget
                                     .skipTraversal(true)
                                     .keyDownCallback((keyCode, modifiers) -> {
-                                        if (keyCode != GLFW.GLFW_KEY_ENTER || !modifiers.equals(KeyModifiers.NONE)) {
+                                        if (keyCode != InputConstants.KEY_RETURN || !modifiers.sameHeldModifiers(KeyModifiers.NONE)) {
                                             return false;
                                         }
 

@@ -16,7 +16,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 public class EpicContainerScreen extends BaseOwoContainerScreen<FlowLayout, EpicMenu> {
     private LabelComponent numberLabel;
@@ -95,7 +95,7 @@ public class EpicContainerScreen extends BaseOwoContainerScreen<FlowLayout, Epic
             return false;
         }
 
-        if (click.button() == GLFW.GLFW_MOUSE_BUTTON_MIDDLE) {
+        if (click.button() == InputConstants.MOUSE_BUTTON_MIDDLE) {
             this.uiAdapter.rootComponent.child(UIContainers.overlay(UIComponents.label(Component.literal("a"))));
             return true;
         }

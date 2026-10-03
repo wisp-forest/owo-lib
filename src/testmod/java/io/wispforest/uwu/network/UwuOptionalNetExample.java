@@ -11,7 +11,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import static net.minecraft.commands.Commands.literal;
 
@@ -51,7 +51,7 @@ public class UwuOptionalNetExample {
 
     @Environment(EnvType.CLIENT)
     public static final class Client {
-        public static final KeyMapping NETWORK_TEST = new KeyMapping("key.uwu.network_opt_test", GLFW.GLFW_KEY_M, KeyMapping.Category.MISC);
+        public static final KeyMapping NETWORK_TEST = new KeyMapping("key.uwu.network_opt_test", InputConstants.KEY_M, KeyMapping.Category.MISC);
 
         public static void init() {
             var clientChannel = OwoNetChannel.createOptional(Identifier.fromNamespaceAndPath("uwu", "optional_client"));
