@@ -51,7 +51,6 @@
     "text.stapi.SystemDelegatedLanguageFixin",
     "tweaks.EulaMixin",
     "tweaks.LevelSettingsMixin",
-    "ui.CommandEncoderAccessor",
     "ui.SlotAccessor",
     "ui.SlotMixin",
     "ui.access.BlockEntityAccessor"
@@ -70,7 +69,8 @@
     "braid.Matrix3x2fStackAccessor",
     "braid.ScreenMixin",
     "braid.ToastManagerMixin",
-    "braid.WindowMixin",
+    "braid.SDLEventHandlerMixin",
+    "braid.RenderSystemAccessor",
     "itemgroup.CreativeModeInventoryScreenAccessor",
     "itemgroup.CreativeModeInventoryScreenMixin",
     "itemgroup.EffectsInInventoryMixin",
