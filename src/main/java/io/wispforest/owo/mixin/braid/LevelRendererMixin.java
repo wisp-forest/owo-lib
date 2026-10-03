@@ -1,7 +1,7 @@
 package io.wispforest.owo.mixin.braid;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.resource.ResourceHandle;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.wispforest.owo.braid.display.BraidDisplayBinding;
