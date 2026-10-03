@@ -106,7 +106,7 @@ public class RenderdocScreen extends BaseOwoScreen<FlowLayout> implements Comman
 
             this.setCaptureKey = false;
 
-            var key = RenderDoc.Key.fromGLFW(input.key());
+            var key = RenderDoc.Key.fromInputKey(input.key());
             if (key != null) {
                 this.ticks = 0;
                 this.scheduledKey = key;
