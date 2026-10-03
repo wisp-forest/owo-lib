@@ -8,10 +8,8 @@ import io.wispforest.owo.braid.widgets.eventstream.BraidEventSource;
 import io.wispforest.owo.braid.widgets.eventstream.BraidEventStream;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLVideo;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class BraidInspector {
 
@@ -37,7 +35,7 @@ public class BraidInspector {
 
     public void pick(PickEvent event) {
         this.pickEvents.sink().onEvent(event);
-        if (currentWindow != null && event == PickEvent.START) GLFW.glfwIconifyWindow(currentWindow.backendWindow.handle());
+        if (currentWindow != null && event == PickEvent.START) SDLVideo.SDL_MinimizeWindow(currentWindow.backendWindow.handle());
     }
 
     public BraidEventSource<Unit> onRefresh() {
@@ -54,7 +52,7 @@ public class BraidInspector {
         }
 
         if (this.currentApp != null) {
-            GLFW.glfwShowWindow(this.currentWindow.backendWindow.handle());
+            this.bringToFront();
             return;
         }
 
@@ -68,7 +66,7 @@ public class BraidInspector {
             new InspectorWidget(this.rootProxy, this.rootInstance, this)
         );
 
-        GLFW.glfwSetWindowAttrib(result.window().backendWindow.handle(), GLFW.GLFW_FLOATING, GLFW.GLFW_TRUE);
+        SDLVideo.SDL_SetWindowAlwaysOnTop(result.window().backendWindow.handle(), true);
 
         this.currentApp = result.state();
         this.currentWindow = result.window();
@@ -84,7 +82,15 @@ public class BraidInspector {
     public void revealInstance(WidgetInstance<?> instance) {
         if (!this.active) return;
         this.revealEvents.sink().onEvent(new RevealEvent(instance));
-        if (currentWindow != null) GLFW.glfwShowWindow(currentWindow.backendWindow.handle());
+        this.bringToFront();
+    }
+
+    private void bringToFront() {
+        if (this.currentWindow == null) return;
+
+        var handle = this.currentWindow.backendWindow.handle();
+        SDLVideo.SDL_RestoreWindow(handle);
+        SDLVideo.SDL_RaiseWindow(handle);
     }
 
     public void refresh() {
