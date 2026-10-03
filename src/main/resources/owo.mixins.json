@@ -11,7 +11,6 @@
     "ServerCommonPacketListenerImplAccessor",
     "ServerPlayerGameModeMixin",
     "ServerPlayerMixin",
-    "SetComponentsFunctionAccessor",
     "TagLoaderMixin",
     "braid.ClickableStyleFinderAccessor",
     "braid.MinecraftAccessor",
