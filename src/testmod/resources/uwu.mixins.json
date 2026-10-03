@@ -6,7 +6,7 @@
   "mixins": [],
   "client": [
     "TitleScreenMixin",
-    "GlRenderPassMixin"
+    "FrontendGpuDeviceMixin"
   ],
   "injectors": {
     "defaultRequire": 1
