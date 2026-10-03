@@ -20,6 +20,7 @@ import net.minecraft.client.multiplayer.CommonListenerCookie;
 import net.minecraft.client.multiplayer.LevelLoadTracker;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.multiplayer.chat.ChatAbilities;
+import net.minecraft.client.player.ItemActivation;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.resources.DefaultPlayerSkin;
@@ -39,7 +40,7 @@ import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.level.storage.TagValueInput;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 import org.w3c.dom.Element;
 
 import java.time.Duration;
@@ -132,7 +133,7 @@ public class EntityComponent<E extends Entity> extends BaseUIComponent {
 
     @Override
     public boolean onMouseDrag(MouseButtonEvent click, double deltaX, double deltaY) {
-        if (this.allowMouseRotation && click.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+        if (this.allowMouseRotation && click.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             this.mouseRotation += deltaX;
 
             super.onMouseDrag(click, deltaX, deltaY);
@@ -266,7 +267,8 @@ public class EntityComponent<E extends Entity> extends BaseUIComponent {
                 null,
                 Input.EMPTY,
                 false,
-                ChatAbilities.NO_RESTRICTIONS
+                ChatAbilities.NO_RESTRICTIONS,
+                new ItemActivation()
             );
 
             this.setId(1_000_000 + (int) (Math.random() * 10000));
