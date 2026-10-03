@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.window;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import io.wispforest.owo.braid.core.Alignment;
 import io.wispforest.owo.braid.core.Color;
 import io.wispforest.owo.braid.core.Insets;
@@ -119,7 +120,7 @@ public class Window extends StatefulWidget {
                             widget -> widget
                                 //TODO: decide what to do with buttons here
                                 .clickCallback((x, y, button, modifiers) -> {
-                                    if (button != 0) return false;
+                                    if (button != InputConstants.MOUSE_BUTTON_LEFT) return false;
                                     this.draggingEdges = this.edgesAt(x, y);
                                     this.draggingSize = this.controller.size();
                                     return true;

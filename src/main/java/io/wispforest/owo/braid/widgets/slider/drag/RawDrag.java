@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.slider.drag;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
@@ -203,7 +204,7 @@ public class RawDrag extends StatefulWidget {
                             new MouseArea(
                                 mouseArea -> mouseArea
                                     .clickCallback((x, y, button, modifiers) -> {
-                                        if (button != 0) return false;
+                                        if (button != InputConstants.MOUSE_BUTTON_LEFT) return false;
                                         this.dragValue = this.normalizedValue;
                                         this.dragging = true;
                                         return true;

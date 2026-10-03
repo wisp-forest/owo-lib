@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.slider.xlyder;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import io.wispforest.owo.braid.core.Alignment;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.Insets;
@@ -393,7 +394,7 @@ public class Xlyder extends StatefulWidget {
                                 mouseArea -> mouseArea
                                     //TODO: decide what to do with buttons here
                                     .clickCallback((x, y, button, modifiers) -> {
-                                        if (button != 0) return false;
+                                        if (button != InputConstants.MOUSE_BUTTON_LEFT) return false;
 
                                         y = constraints.maxHeight() - y;
                                         Vector2dc initialDragValue = new Vector2d(this.normalizedValue);

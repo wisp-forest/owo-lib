@@ -1,5 +1,6 @@
 package io.wispforest.owo.braid.widgets.slider.range;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import io.wispforest.owo.braid.core.*;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
 import io.wispforest.owo.braid.framework.BuildContext;
@@ -281,7 +282,7 @@ public class RangeSlider extends StatefulWidget {
                             new MouseArea(
                                 mousearea -> mousearea
                                     .clickCallback((x, y, button, modifiers) -> {
-                                        if (button != 0) return false;
+                                        if (button != InputConstants.MOUSE_BUTTON_LEFT) return false;
 
                                         if (widget.axis == LayoutAxis.VERTICAL) y = constraints.maxFiniteOrMinOnAxis(widget.axis) - y;
                                         this.grabbedHandle = this.handleAt(constraints, x, y);

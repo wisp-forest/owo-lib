@@ -1,6 +1,7 @@
 package io.wispforest.owo.braid.widgets.splitpane;
 
 import com.google.common.base.Preconditions;
+import com.mojang.blaze3d.platform.InputConstants;
 import io.wispforest.owo.braid.core.Constraints;
 import io.wispforest.owo.braid.core.LayoutAxis;
 import io.wispforest.owo.braid.core.cursor.CursorStyle;
@@ -191,7 +192,7 @@ public class RawSplitPane extends StatefulWidget {
                             divider = new MouseArea(
                                 w -> w
                                     .dragStartCallback((button, modifiers) -> setState(() -> {
-                                        if (button != 0) return;
+                                        if (button != InputConstants.MOUSE_BUTTON_LEFT) return;
                                         this.draggingIndex = dividerIndex;
                                         this.dragRatio = this.controller.getRatio(dividerIndex);
                                         this.firstDrag = true;
