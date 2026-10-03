@@ -13,7 +13,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.function.BiFunction;
 
@@ -200,7 +200,7 @@ public class OwoUIAdapter<R extends ParentUIComponent> implements GuiEventListen
 
     /**
      * Draw the current tooltip of the UI managed by this adapter. This method
-     * must not be called without a previous, corresponding call to {@link #render(GuiGraphics, int, int, float)}
+     * must not be called without a previous, corresponding call to {@link #extractRenderState(GuiGraphicsExtractor, int, int, float)}
      *
      * @since 0.12.19
      */
@@ -249,7 +249,7 @@ public class OwoUIAdapter<R extends ParentUIComponent> implements GuiEventListen
 
     @Override
     public boolean keyPressed(KeyEvent input) {
-        if (Owo.DEBUG && input.key() == GLFW.GLFW_KEY_LEFT_SHIFT) {
+        if (Owo.DEBUG && input.key() == InputConstants.KEY_LSHIFT) {
             if (input.hasControlDown()) {
                 this.toggleInspector();
             } else if (input.hasAltDown()) {
@@ -257,7 +257,7 @@ public class OwoUIAdapter<R extends ParentUIComponent> implements GuiEventListen
             }
         }
 
-        if (Owo.DEBUG && input.key() == GLFW.GLFW_KEY_R && RenderDoc.isAvailable()) {
+        if (Owo.DEBUG && input.key() == InputConstants.KEY_R && RenderDoc.isAvailable()) {
             if (input.hasAltDown() && input.hasControlDown()) {
                 this.captureFrame = true;
             }
