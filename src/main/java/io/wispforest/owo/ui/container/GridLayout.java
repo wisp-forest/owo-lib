@@ -8,6 +8,9 @@ import io.wispforest.owo.ui.core.UIComponent;
 import io.wispforest.owo.ui.parsing.UIModel;
 import io.wispforest.owo.ui.parsing.UIModelParsingException;
 import io.wispforest.owo.ui.parsing.UIParsing;
+import io.wispforest.owo.util.Observable;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
@@ -24,6 +27,9 @@ public class GridLayout extends BaseParentUIComponent {
     protected final List<UIComponent> nonNullChildrenView = Collections.unmodifiableList(this.nonNullChildren);
 
     protected Size contentSize = Size.zero();
+    protected Observable<Integer>
+            columnGap = Observable.of(0),
+            rowGap = Observable.of(0);
 
     protected GridLayout(Sizing horizontalSizing, Sizing verticalSizing, int rows, int columns) {
         super(horizontalSizing, verticalSizing);
@@ -32,6 +38,9 @@ public class GridLayout extends BaseParentUIComponent {
         this.columns = columns;
 
         this.children = new UIComponent[rows * columns];
+
+        this.columnGap.observe(i -> updateLayout());
+        this.rowGap.observe(i -> updateLayout());
     }
 
     @Override
@@ -42,6 +51,40 @@ public class GridLayout extends BaseParentUIComponent {
     @Override
     protected int determineVerticalContentSize(Sizing sizing) {
         return this.contentSize.height() + this.padding.get().bottom();
+    }
+
+    /**
+     * Set the gap, in logical pixels, this layout
+     * should insert between all columns
+     */
+    public GridLayout columnGap(int gap) {
+        this.columnGap.set(gap);
+        return this;
+    }
+
+    /**
+     * @return The gap, in logical pixels, this layout
+     * inserts between all columns
+     */
+    public int columnGap() {
+        return this.columnGap.get();
+    }
+
+    /**
+     * Set the gap, in logical pixels, this layout
+     * should insert between all rows
+     */
+    public GridLayout rowGap(int gap) {
+        this.rowGap.set(gap);
+        return this;
+    }
+
+    /**
+     * @return The gap, in logical pixels, this layout
+     * inserts between all rows
+     */
+    public int rowGap() {
+        return this.rowGap.get();
     }
 
     @Override
@@ -100,7 +143,10 @@ public class GridLayout extends BaseParentUIComponent {
 
     protected void determineSizes(int[] sizes, boolean rows) {
         if (!(rows ? this.verticalSizing : this.horizontalSizing).get().isContent()) {
-            Arrays.fill(sizes, (rows ? this.height - this.padding().get().vertical() : this.width - this.padding().get().horizontal()) / (rows ? this.rows : this.columns));
+            var value = rows
+                    ? (this.height - this.padding().get().vertical()) / this.rows
+                    : (this.width - this.padding().get().horizontal()) / this.columns;
+            Arrays.fill(sizes, value);
         } else {
             for (int row = 0; row < this.rows; row++) {
                 for (int column = 0; column < this.columns; column++) {
@@ -115,6 +161,10 @@ public class GridLayout extends BaseParentUIComponent {
                 }
             }
         }
+
+        var gap = rows ? rowGap() : columnGap();
+        var to = sizes.length - 1;
+        for (var i = 0; i < to; i++) sizes[i] += gap;
     }
 
     public GridLayout child(UIComponent child, int row, int column) {
@@ -167,6 +217,12 @@ public class GridLayout extends BaseParentUIComponent {
     public void parseProperties(UIModel model, Element element, Map<String, Element> children) {
         super.parseProperties(model, element, children);
 
+        if (children.containsKey("gap")) {
+            var sizingValues = UIParsing.childElements(children.get("gap"));
+            UIParsing.apply(sizingValues, "column", UIParsing::parseUnsignedInt, this::columnGap);
+            UIParsing.apply(sizingValues, "row", UIParsing::parseUnsignedInt, this::rowGap);
+        }
+
         final var components = UIParsing
                 .get(children, "children", e -> UIParsing.<Element>allChildrenOfType(e, Node.ELEMENT_NODE))
                 .orElse(Collections.emptyList());
@@ -186,6 +242,13 @@ public class GridLayout extends BaseParentUIComponent {
             this.child(model.parseComponent(UIComponent.class, child), row, column);
         }
     }
+
+    @Override
+    public MutableComponent inspectorDescriptor() {
+        final var descriptor = super.inspectorDescriptor();
+        return descriptor.append(Component.literal(String.format("[%s, %s]", columnGap.get(), rowGap.get())));
+    }
+
 
     public static GridLayout parse(Element element) {
         UIParsing.expectAttributes(element, "rows", "columns");
