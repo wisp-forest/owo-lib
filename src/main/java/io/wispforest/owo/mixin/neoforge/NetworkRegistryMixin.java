@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(value = NetworkRegistry.class)
 public class NetworkRegistryMixin {
 
-    @ModifyReturnValue(method = "getCodec", at = @At(value = "RETURN", ordinal = 3))
+    @ModifyReturnValue(method = "getCodec", at = @At("RETURN"))
     private static PacketCodec<? super PacketByteBuf, ? extends CustomPayload> owo$unpackSidedCodec(PacketCodec<? super PacketByteBuf, ? extends CustomPayload> original, @Local(argsOnly = true) NetworkSide flow) {
         if (original instanceof SidedPacketCodec<?> sidedPacketCodec) {
             original = (PacketCodec<? super PacketByteBuf, ? extends CustomPayload>) sidedPacketCodec.getCodec(flow);
