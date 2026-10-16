@@ -7,9 +7,11 @@ import com.mojang.serialization.DynamicOps;
 import io.wispforest.endec.SerializationContext;
 import io.wispforest.endec.format.edm.EdmElement;
 import io.wispforest.owo.serialization.format.ContextHolder;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -97,13 +99,13 @@ public class EdmOps implements DynamicOps<EdmElement<?>>, ContextHolder {
     public DataResult<EdmElement<?>> mergeToList(EdmElement<?> list, EdmElement<?> value) {
         if (list == empty()) {
             return DataResult.success(EdmElement.wrapSequence(List.of(value)));
-        } else if (list.value() instanceof List<?> properList) {
+        } else if (list != null && list.value() instanceof List<?> properList) {
             var newList = new ArrayList<EdmElement<?>>((Collection<? extends EdmElement<?>>) properList);
             newList.add(value);
 
             return DataResult.success(EdmElement.wrapSequence(newList));
         } else {
-            return DataResult.error(() -> "Not a sequence: " + list);
+            return DataResult.error(() -> "mergeToList called with not a list: " + list);
         }
     }
 
@@ -114,7 +116,7 @@ public class EdmOps implements DynamicOps<EdmElement<?>>, ContextHolder {
 
     @Override
     public DataResult<EdmElement<?>> mergeToMap(EdmElement<?> map, EdmElement<?> key, EdmElement<?> value) {
-        if (!(key.value() instanceof String)) {
+        if (key == null || !(key.value() instanceof String)) {
             return DataResult.error(() -> "Key is not a string: " + key);
         }
 
@@ -126,79 +128,80 @@ public class EdmOps implements DynamicOps<EdmElement<?>>, ContextHolder {
 
             return DataResult.success(EdmElement.wrapMap(newMap));
         } else {
-            return DataResult.error(() -> "Not a map: " + map);
+            return DataResult.error(() -> "mergeToMap called with not a map: " + map);
         }
     }
 
     // --- Deserialization ---
 
+    private static <T> DataResult<T> unpack(EdmElement<?> input,
+                                            Function<Object, @Nullable DataResult<T>> checkFunc,
+                                            Function<@Nullable EdmElement<?>, String> func) {
+        return unpack(input, checkFunc, null, func);
+    }
+
+    private static <T> DataResult<T> unpack(EdmElement<?> input,
+                                            Function<Object, @Nullable DataResult<T>> checkFunc1,
+                                            Function<Object, @Nullable DataResult<T>> checkFunc2,
+                                            Function<@Nullable EdmElement<?>, String> func) {
+        if (input != null) {
+            var value = input.value();
+            var result = checkFunc1.apply(value);
+            if (result == null && checkFunc2 != null) result = checkFunc2.apply(value);
+            if (result != null) return result;
+        }
+        return DataResult.error(() -> func.apply(input));
+    }
+
     @Override
     public DataResult<Number> getNumberValue(EdmElement<?> input) {
-        if (input.value() instanceof Number number) {
-            return DataResult.success(number);
-        } else {
-            return DataResult.error(() -> "Not a number: " + input);
-        }
+        return unpack(input, o -> o instanceof Number number ? DataResult.success(number) : null, element -> "Not a number: " + element);
     }
 
     @Override
     public DataResult<Boolean> getBooleanValue(EdmElement<?> input) {
-        if (input.value() instanceof Boolean bl) {
-            return DataResult.success(bl);
-        } else if(input.value() instanceof Byte b) {
-            return DataResult.success(b == 1);
-        } else {
-            return DataResult.error(() -> "Not a boolean: " + input);
-        }
+        return unpack(input,
+            o -> o instanceof Boolean bl ? DataResult.success(bl) : null,
+            o -> o instanceof Byte b ? DataResult.success(b == 1) : null,
+            (element) -> "Not a boolean: " + element
+        );
     }
 
     @Override
     public DataResult<String> getStringValue(EdmElement<?> input) {
-        if (input.value() instanceof String string) {
-            return DataResult.success(string);
-        } else {
-            return DataResult.error(() -> "Not a string: " + input);
-        }
+        return unpack(input, o -> o instanceof String string ? DataResult.success(string) : null, element -> "Not a string: " + element);
     }
 
     @Override
     public DataResult<ByteBuffer> getByteBuffer(EdmElement<?> input) {
-        if (input.value() instanceof byte[] bytes) {
-            return DataResult.success(ByteBuffer.wrap(bytes));
-        } else {
-            return DataResult.error(() -> "Not bytes: " + input);
-        }
+        return unpack(input, o -> o instanceof byte[] bytes ? DataResult.success(ByteBuffer.wrap(bytes)) : null, element -> "Not bytes: " + element);
     }
 
     // ---
 
     @Override
     public DataResult<Stream<EdmElement<?>>> getStream(EdmElement<?> input) {
-        if (input == this.empty()) {
-            return DataResult.success(Stream.of());
-        } else if (input.value() instanceof List<?> list) {
-            return DataResult.success(list.stream().map(o -> (EdmElement<?>) o));
-        } else {
-            return DataResult.error(() -> "Not a sequence: " + input);
-        }
+        return unpack(input,
+            o -> input == this.empty() ? DataResult.success(Stream.of()) : null,
+            o -> o instanceof List<?> list ? DataResult.success(list.stream().map(v -> (EdmElement<?>) v)) : null,
+            (element) -> "Not a sequence: " + element
+        );
     }
 
     @Override
     public DataResult<Stream<Pair<EdmElement<?>, EdmElement<?>>>> getMapValues(EdmElement<?> input) {
-        if (input == this.empty()) {
-            return DataResult.success(Stream.of());
-        } else if (input.value() instanceof Map<?, ?> map) {
-            //noinspection rawtypes
-            return DataResult.success(map.entrySet().stream().map(entry -> new Pair(EdmElement.wrapString((String) entry.getKey()), entry.getValue())));
-        } else {
-            return DataResult.error(() -> "Not a map: " + input);
-        }
+        return unpack(input,
+            o -> input == this.empty() ? DataResult.success(Stream.of()) : null,
+            o -> o instanceof Map<?, ?> map ? DataResult.success(map.entrySet().stream().map(entry -> new Pair(EdmElement.wrapString((String) entry.getKey()), entry.getValue()))) : null,
+            (element) -> "Not a map:: " + element
+        );
     }
 
     // ---
 
     @Override
     public <U> U convertTo(DynamicOps<U> outOps, EdmElement<?> input) {
+        if (input == null) throw new NullPointerException("EdmOps.convertTo was passed a null value to convert!");
         if (input == this.empty()) return outOps.empty();
         return switch (input.type()) {
             case BYTE -> outOps.createByte(input.cast());
@@ -219,7 +222,7 @@ public class EdmOps implements DynamicOps<EdmElement<?>>, ContextHolder {
 
     @Override
     public EdmElement<?> remove(EdmElement<?> input, String key) {
-        if (input.value() instanceof Map<?, ?> map) {
+        if (input != null && input.value() instanceof Map<?, ?> map) {
             var newMap = new HashMap<String, EdmElement<?>>((Map<? extends String, ? extends EdmElement<?>>) map);
             newMap.remove(key);
 
