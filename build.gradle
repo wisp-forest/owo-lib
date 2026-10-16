@@ -62,13 +62,13 @@ allprojects {
         if (JavaVersion.current() < javaVersion) {
             toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
         }
-        archivesBaseName = project.archives_base_name
+        base.archivesName = project.archives_base_name
         withSourcesJar()
     }
 
     jar {
         from("LICENSE") {
-            rename { "${it}_${project.archivesBaseName}" }
+            rename { "${it}_${project.base.archivesName.get()}" }
         }
     }
 
