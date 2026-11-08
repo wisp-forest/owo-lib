@@ -55,6 +55,12 @@ public class GuiRendererMixin implements BraidGuiRendererExtension {
         return this.target.renderTarget();
     }
 
+    @ModifyExpressionValue(method = "enableScissor", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/state/WindowRenderState;width:I", opcode = Opcodes.GETFIELD))
+    private int injectSurfaceWidthForScissor(int original) {
+        if (this.target == null) return original;
+        return this.target.renderTarget().width;
+    }
+
     @ModifyExpressionValue(method = "enableScissor", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/state/WindowRenderState;height:I", opcode = Opcodes.GETFIELD))
     private int injectSurfaceHeightForScissor(int original) {
         if (this.target == null) return original;
