@@ -2,6 +2,7 @@ package io.wispforest.owo.ui.util;
 
 import com.mojang.blaze3d.platform.Window;
 import io.wispforest.owo.ui.core.CursorStyle;
+import io.wispforest.owo.util.CursorUtil;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.glfw.GLFW;
 
@@ -20,7 +21,7 @@ public class CursorAdapter {
     protected CursorAdapter(long windowHandle) {
         this.windowHandle = windowHandle;
         for (var style : ACTIVE_STYLES) {
-            var pointer = GLFW.glfwCreateStandardCursor(style.glfw);
+            var pointer = CursorUtil.allocateCursor(style.glfw);
             if (pointer == 0) continue;
 
             this.cursors.put(style, pointer);

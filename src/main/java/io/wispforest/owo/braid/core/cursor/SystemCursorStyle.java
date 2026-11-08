@@ -1,6 +1,6 @@
 package io.wispforest.owo.braid.core.cursor;
 
-import org.lwjgl.glfw.GLFW;
+import io.wispforest.owo.util.CursorUtil;
 
 public final class SystemCursorStyle implements CursorStyle {
     public final int glfwId;
@@ -11,6 +11,6 @@ public final class SystemCursorStyle implements CursorStyle {
 
     @Override
     public long allocate() {
-        return GLFW.glfwCreateStandardCursor(this.glfwId);
+        return CursorUtil.allocateCursor(this.glfwId);
     }
 }
